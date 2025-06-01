@@ -1,0 +1,115 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/budimanjojo/talhelper/master/pkg/config/schemas/talconfig.json
+---
+clusterName: kubernetes
+
+talosVersion: "${talosVersion}"
+kubernetesVersion: "${kubernetesVersion}"
+
+endpoint: https://192.168.100.5:6443
+additionalApiServerCertSans: &sans
+  - "127.0.0.1"
+  - "192.168.100.5"
+  - "vidar.tylerhundley.dev"
+additionalMachineCertSans: *sans
+
+clusterPodNets: ["10.42.0.0/16"]
+clusterSvcNets: ["10.43.0.0/16"]
+
+# Disable built-in CNI to use Cilium
+cniConfig:
+  name: none
+
+nodes:
+  - hostname: "dvergar-00"
+    ipAddress: "192.168.100.20"
+    installDiskSelector:
+      serial: "IB25ZD0256P00073"
+    machineSpec:
+      secureboot: false
+    talosImageURL: factory.talos.dev/installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
+    controlPlane: true
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "c0:25:a5:98:c0:f6"
+        dhcp: false
+        addresses:
+          - "192.168.100.20/24"
+        routes:
+          - network: "0.0.0.0/0"
+            gateway: "192.168.100.1"
+        mtu: 1500
+        vip:
+          ip: "192.168.100.5"
+  - hostname: "dvergar-01"
+    ipAddress: "192.168.100.21"
+    installDiskSelector:
+      serial: "IB25ZD0256P00323"
+    machineSpec:
+      secureboot: false
+    talosImageURL: factory.talos.dev/installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
+    controlPlane: true
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "14:b3:1f:2a:ec:95"
+        dhcp: false
+        addresses:
+          - "192.168.100.21/24"
+        routes:
+          - network: "0.0.0.0/0"
+            gateway: "192.168.100.1"
+        mtu: 1500
+        vip:
+          ip: "192.168.100.5"
+  - hostname: "dvergar-02"
+    ipAddress: "192.168.100.22"
+    installDiskSelector:
+      serial: "IB25ZD0256P00322"
+    machineSpec:
+      secureboot: false
+    talosImageURL: factory.talos.dev/installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
+    controlPlane: true
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "14:b3:1f:21:56:9c"
+        dhcp: false
+        addresses:
+          - "192.168.100.22/24"
+        routes:
+          - network: "0.0.0.0/0"
+            gateway: "192.168.100.1"
+        mtu: 1500
+        vip:
+          ip: "192.168.100.5"
+  - hostname: "dvergar-03"
+    ipAddress: "192.168.100.23"
+    installDiskSelector:
+      serial: "IB25ZD0256P00351"
+    machineSpec:
+      secureboot: false
+    talosImageURL: factory.talos.dev/installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
+    controlPlane: false
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "d8:9e:f3:9a:f8:4d"
+        dhcp: false
+        addresses:
+          - "192.168.100.23/24"
+        routes:
+          - network: "0.0.0.0/0"
+            gateway: "192.168.100.1"
+        mtu: 1500
+
+# Global patches
+patches:
+  - "@./patches/global/machine-files.yaml"
+  - "@./patches/global/machine-kubelet.yaml"
+  - "@./patches/global/machine-network.yaml"
+  - "@./patches/global/machine-sysctls.yaml"
+  - "@./patches/global/machine-time.yaml"
+
+# Controller patches
+controlPlane:
+  patches:
+    - "@./patches/controller/admission-controller-patch.yaml"
+    - "@./patches/controller/cluster.yaml"
+
