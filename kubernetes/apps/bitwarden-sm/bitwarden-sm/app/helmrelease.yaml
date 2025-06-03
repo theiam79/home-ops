@@ -3,8 +3,7 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
-  name: bitwarden-sm
-  namespace: bitwarden-sm
+  name: bitwarden
 spec:
   interval: 1m0s
   url: https://charts.bitwarden.com/
@@ -18,11 +17,11 @@ spec:
   interval: 1h
   chart:
     spec:
-      chart: bitwarden-sm
+      chart: sm-operator
       reconcileStrategy: ChartVersion
       sourceRef:
         kind: HelmRepository
-        name: bitwarden-sm
+        name: bitwarden
       version: ">=0.1.0 <1.0.0"
   install:
     remediation:
