@@ -18,7 +18,7 @@ spec:
   interval: 1h
   chart:
     spec:
-      chart: bitwarden
+      chart: bitwarden-sm
       reconcileStrategy: ChartVersion
       sourceRef:
         kind: HelmRepository
