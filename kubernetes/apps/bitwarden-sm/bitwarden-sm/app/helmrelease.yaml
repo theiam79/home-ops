@@ -8,28 +8,28 @@ spec:
   interval: 10m
   url: https://charts.bitwarden.com/
 ---
-# # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
-# apiVersion: helm.toolkit.fluxcd.io/v2
-# kind: HelmRelease
-# metadata:
-#   name: bitwarden-sm
-# spec:
-#   interval: 1h
-#   chart:
-#     spec:
-#       chart: sm-operator
-#       reconcileStrategy: ChartVersion
-#       sourceRef:
-#         kind: HelmRepository
-#         name: bitwarden
-#       version: '>=0.1.0 <1.0.0'
-#   install:
-#     remediation:
-#       retries: -1
-#   upgrade:
-#     cleanupOnFail: true
-#     remediation:
-#       retries: 3
-#   valuesFrom:
-#     - kind: ConfigMap
-#       name: bitwarden-sm-values
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: bitwarden-sm
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: sm-operator
+      reconcileStrategy: ChartVersion
+      sourceRef:
+        kind: HelmRepository
+        name: bitwarden
+      version: '>=0.1.0 <1.0.0'
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  valuesFrom:
+    - kind: ConfigMap
+      name: bitwarden-sm-values
