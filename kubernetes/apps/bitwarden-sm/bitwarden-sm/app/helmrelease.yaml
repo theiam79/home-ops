@@ -16,9 +16,14 @@ metadata:
   name: bitwarden-sm
 spec:
   interval: 1h
-  chartRef:
-    kind: HelmRepository
-    name: bitwarden-sm
+  chart:
+    spec:
+      chart: bitwarden
+      reconcileStrategy: ChartVersion
+      sourceRef:
+        kind: HelmRepository
+        name: bitwarden
+      version: ">=0.1.0 <1.0.0"
   install:
     remediation:
       retries: -1
