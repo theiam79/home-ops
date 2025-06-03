@@ -26,7 +26,6 @@ spec:
     cleanupOnFail: true
     remediation:
       retries: 3
-  version: ">=0.1.0 <1.0.0"
   valuesFrom:
     - kind: ConfigMap
       name: bitwarden-sm-values
