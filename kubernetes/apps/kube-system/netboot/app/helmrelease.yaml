@@ -46,8 +46,10 @@ spec:
         type: LoadBalancer
         loadBalancerIP: 192.168.100.19
         ports:
-          tftp:
+          - name: tftp
+            protocol: udp
             port: 69
+            targetPort: 69
     serviceMonitor:
       app:
         serviceName: netboot
