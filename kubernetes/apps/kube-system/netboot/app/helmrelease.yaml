@@ -48,7 +48,7 @@ spec:
         ports:
           tftp:
             port: 69
-            protocol: udp
+            protocol: UDP
     serviceMonitor:
       app:
         serviceName: netboot
