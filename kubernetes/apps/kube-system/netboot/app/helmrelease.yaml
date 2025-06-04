@@ -22,8 +22,6 @@ spec:
         type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
-        initContainers:
-
         containers:
           app:
             image:
