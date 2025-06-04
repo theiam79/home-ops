@@ -22,6 +22,7 @@ spec:
         type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
+        initContainers:
         containers:
           app:
             image:
@@ -38,10 +39,15 @@ spec:
     service:
       app:
         controller: netboot
-        type: LoadBalancer
         ports:
           menu:
             port: *port
+      tftp:
+        controller: netboot
+        type: LoadBalancer
+        ports:
+          tftp:
+            port: 69
     serviceMonitor:
       app:
         serviceName: netboot
@@ -58,10 +64,3 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
-    persistence:
-      config:
-        type: emptyDir
-        advancedMounts:
-          netboot:
-            app:
-              - path: /config
