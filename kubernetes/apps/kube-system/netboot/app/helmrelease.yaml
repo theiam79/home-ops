@@ -18,12 +18,12 @@ spec:
       retries: 3
   values:
     controllers:
-      main:
+      netboot:
         type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/netbootxyz/netbootxyz
               tag: latest
@@ -42,7 +42,7 @@ spec:
         runAsGroup: 65534
     service:
       app:
-        controller: main
+        controller: netboot
         ports:
           menu:
             port: *port
@@ -60,5 +60,5 @@ spec:
             sectionName: https
         rules:
           - backendRefs:
-              - identifier: main
+              - identifier: app
                 port: *port
