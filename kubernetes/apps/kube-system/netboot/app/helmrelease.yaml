@@ -62,3 +62,10 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
+    persistence:
+      config:
+        type: emptyDir
+        advancedMounts:
+          netboot:
+            app:
+              - path: /config
