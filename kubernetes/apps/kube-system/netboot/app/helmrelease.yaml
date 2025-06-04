@@ -22,19 +22,19 @@ spec:
         type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
-      containers:
-        main:
-          image:
-            repository: ghcr.io/netbootxyz/netbootxyz
-            tag: latest
-          env:
-            MENU_VERSION: "2.0.84"
-            WEB_APP_PORT: &port 3000
-          resources:
-            requests:
-              cpu: 10m
-            limits:
-              memory: 512Mi
+        containers:
+          main:
+            image:
+              repository: ghcr.io/netbootxyz/netbootxyz
+              tag: latest
+            env:
+              MENU_VERSION: "2.0.84"
+              WEB_APP_PORT: &port 3000
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 512Mi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
