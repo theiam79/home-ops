@@ -30,11 +30,12 @@ spec:
             env:
               MENU_VERSION: "2.0.84"
               WEB_APP_PORT: &port 3000
+              TFTPD_OPTS: --tftp-single-port
             resources:
               requests:
-                cpu: 10m
+                cpu: 100m
               limits:
-                memory: 512Mi
+                memory: 1024Mi
     service:
       app:
         controller: netboot
