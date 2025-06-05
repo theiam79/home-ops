@@ -30,8 +30,9 @@ spec:
     rbac:
       enabled: false
     udev:
-      enabled: true
-      name: akri-coral
-      discoveryDetails:
-        udevRules:
-          - 'ATTRS{idProduct}=="089a"'
+      configuration:
+        enabled: true
+        name: akri-coral
+        discoveryDetails:
+          udevRules:
+            - 'ATTRS{idProduct}=="089a"'
