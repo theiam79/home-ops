@@ -98,6 +98,24 @@ nodes:
           - network: "0.0.0.0/0"
             gateway: "192.168.100.1"
         mtu: 1500
+  - hostname: "dvergar-04"
+    ipAddress: "192.168.100.24"
+    installDiskSelector:
+      model: KINGSTON*
+    machineSpec:
+      secureboot: false
+    talosImageURL: factory.talos.dev/installer/176603246fc5e700eec6b7044a57dd2bd0521b1d8da6e335c5c24bd66dafba4b
+    controlPlane: false
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "48:4d:7e:d8:83:c8"
+        dhcp: false
+        addresses:
+          - "192.168.100.24/24"
+        routes:
+          - network: "0.0.0.0/0"
+            gateway: "192.168.100.1"
+        mtu: 1500
 
 # Global patches
 patches:

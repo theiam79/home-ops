@@ -28,6 +28,19 @@ tasks:
       - test -f {{.TALOSCONFIG}}
       - which talhelper talosctl yq
 
+  join-node:
+    desc: Apply Talos config to a new node [IP=required]
+    dir: '{{.TALOS_DIR}}'
+    cmd: until talhelper gencommand apply --node {{.IP}} --extra-flags '--mode={{.MODE}} --insecure' | bash; do sleep 5; done
+    vars:
+      MODE: '{{.MODE | default "auto"}}'
+    requires:
+      vars: [IP]
+    preconditions:
+      - talosctl config info
+      - test -f {{.TALOSCONFIG}}
+      - which talhelper talosctl yq
+
   upgrade-node:
     desc: Upgrade Talos on a single node [IP=required]
     dir: '{{.TALOS_DIR}}'
