@@ -14,7 +14,7 @@ spec:
     secretRef:
       name: sops-age
   interval: 1h
-  path: ./kubernetes/apps/kube-system/akri/agent/app
+  path: ./kubernetes/apps/kube-system/akri/agent
   postBuild:
     substituteFrom:
       - name: cluster-secrets
@@ -44,7 +44,7 @@ spec:
     secretRef:
       name: sops-age
   interval: 1h
-  path: ./kubernetes/apps/kube-system/akri/coral-handler/app
+  path: ./kubernetes/apps/kube-system/akri/coral-handler
   postBuild:
     substituteFrom:
       - name: cluster-secrets
