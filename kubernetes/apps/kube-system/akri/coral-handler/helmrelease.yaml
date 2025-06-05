@@ -25,6 +25,8 @@ spec:
       enabled: false
     agent:
       enabled: false
+    webhookConfiguration:
+      enabled: false
     udev:
       enabled: true
       name: akri-coral
