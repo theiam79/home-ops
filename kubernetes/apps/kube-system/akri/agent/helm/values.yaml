@@ -7,9 +7,9 @@ udev:
   configuration:
     enabled: true
     name: akri-coral
-    discoveryDetails:
+    discoveryDetails: |+
       udevRules:
-        - ATTRS{idProduct}=="089a"
+        - 'ATTR{vendor}=="Global Unichip Corp."'
   discovery:
     enabled: true
 agent:
