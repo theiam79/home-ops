@@ -9,7 +9,7 @@ udev:
     name: akri-coral
     discoveryDetails:
       udevRules:
-        - ATTRS{idProduct}=="089a",
+        - ATTRS{idProduct}=="089a"
   discovery:
     enabled: true
 allowDebugEcho: true
