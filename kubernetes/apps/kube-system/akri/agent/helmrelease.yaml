@@ -40,6 +40,10 @@ spec:
         name: akri-coral
         discoveryDetails:
           udevRules:
-            - 'ATTR{idProduct}=="089a"'
+            - ATTRS{idProduct}=="089a",
       discovery:
+        enabled: true
+    allowDebugEcho: true
+    debugEcho:
+      configuration:
         enabled: true
