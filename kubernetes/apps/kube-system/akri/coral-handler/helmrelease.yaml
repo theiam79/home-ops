@@ -35,4 +35,4 @@ spec:
         name: akri-coral
         discoveryDetails:
           udevRules:
-            - 'ATTR{idVendor}=="1ac1", ATTRS{idProduct}=="089a"'
+            - 'ATTR{idVendor}=="1ac1", ATTR{idProduct}=="089a"'
