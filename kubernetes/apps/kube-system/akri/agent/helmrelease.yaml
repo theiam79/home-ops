@@ -29,21 +29,6 @@ spec:
     cleanupOnFail: true
     remediation:
       retries: 3
-  values:
-    rbac:
-      enabled: true
-    webhookConfiguration:
-      enabled: false
-    udev:
-      configuration:
-        enabled: true
-        name: akri-coral
-        discoveryDetails:
-          udevRules:
-            - ATTRS{idProduct}=="089a",
-      discovery:
-        enabled: true
-    allowDebugEcho: true
-    debugEcho:
-      configuration:
-        enabled: true
+  valuesFrom:
+    - kind: ConfigMap
+      name: akri-agent-values
