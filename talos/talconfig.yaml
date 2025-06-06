@@ -116,6 +116,24 @@ nodes:
           - network: "0.0.0.0/0"
             gateway: "192.168.100.1"
         mtu: 1500
+  - hostname: "dvergar-05"
+    ipAddress: "192.168.100.25"
+    installDiskSelector:
+      serial: IB25ZD0256*
+    machineSpec:
+      secureboot: false
+    talosImageURL: factory.talos.dev/installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
+    controlPlane: false
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "6c:2b:59:e4:ca:c8"
+        dhcp: false
+        addresses:
+          - "192.168.100.25/25"
+        routes:
+          - network: "0.0.0.0/0"
+            gateway: "192.168.100.1"
+        mtu: 1500
 
 # Global patches
 patches:

@@ -32,3 +32,10 @@ spec:
   values:
     webhookConfiguration:
       enabled: false
+    udev:
+      configuration:
+        enabled: true
+        name: akri-coral
+        discoveryDetails:
+          udevRules:
+            - 'ATTR{idVendor}=="1ac1", ATTRS{idProduct}=="089a"'
