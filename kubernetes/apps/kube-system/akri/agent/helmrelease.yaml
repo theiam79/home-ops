@@ -30,6 +30,8 @@ spec:
     remediation:
       retries: 3
   values:
+    rbac:
+      enabled: false
     webhookConfiguration:
       enabled: false
     udev:
