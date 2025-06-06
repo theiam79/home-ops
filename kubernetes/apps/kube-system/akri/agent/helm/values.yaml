@@ -17,3 +17,5 @@ agent:
 debugEcho:
   configuration:
     enabled: true
+  discovery:
+    enabled: true
