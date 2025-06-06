@@ -9,7 +9,7 @@ udev:
     name: akri-coral
     discoveryDetails: |+
       udevRules:
-        - 'ATTR{vendor}=="Global Unichip Corp."'
+      -  'ATTR{vendor}=="Global Unichip Corp."'
   discovery:
     enabled: true
 agent:
