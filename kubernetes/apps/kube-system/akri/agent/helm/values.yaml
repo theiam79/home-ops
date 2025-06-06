@@ -12,7 +12,8 @@ udev:
         - ATTRS{idProduct}=="089a"
   discovery:
     enabled: true
-allowDebugEcho: true
+agent:
+  allowDebugEcho: true
 debugEcho:
   configuration:
     enabled: true
