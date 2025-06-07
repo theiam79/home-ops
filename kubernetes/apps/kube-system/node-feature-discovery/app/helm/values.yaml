@@ -5,7 +5,7 @@ worker:
     sources:
       pci:
         # https://pci-ids.ucw.cz/read/PD
-        deviceClassWhitelist: ["01", "03", "0b40", "12"]
+        deviceClassWhitelist: ["01", "03", "0b40", "12", "0880"]
 
       usb:
         # https://www.usb.org/defined-class-codes
