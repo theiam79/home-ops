@@ -24,7 +24,8 @@ worker:
           labels:
             "feature.node.kubernetes.io/coral-tpu": "true"
           matchAny:
-            - feature: pci.device
-              matchExpressions:
-                class: ["0880"]
-                vendor: ["1ac1"]
+            - matchFeatures:
+              - feature: pci.device
+                matchExpressions:
+                  class: ["0880"]
+                  vendor: ["1ac1"]
