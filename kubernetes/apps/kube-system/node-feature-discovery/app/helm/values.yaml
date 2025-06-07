@@ -1,0 +1,24 @@
+worker:
+  config:
+    core:
+      sources: ["custom", "pci", "usb"]
+    sources:
+      pci:
+        # https://pci-ids.ucw.cz/read/PD
+        deviceClassWhitelist: ["01", "03", "0b40", "12"]
+
+      usb:
+        # https://www.usb.org/defined-class-codes
+        deviceClassWhitelist: ["02", "03", "0e", "ef", "fe", "ff"]
+
+      custom:
+        - name: "intel-gpu" # Intel integrated GPU
+          matchOn:
+            - pciId:
+                class: ["0300"]
+                vendor: ["8086"]
+        - name: "google-coral-device" # USB Coral TPU
+          matchOn:
+            - pciId:
+                class: ["0880"]
+                vendor: ["1ac1"]

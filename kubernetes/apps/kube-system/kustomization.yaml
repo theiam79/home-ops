@@ -13,4 +13,4 @@ resources:
   - ./spegel/ks.yaml
   - ./reflector/ks.yaml
   - ./netboot/ks.yaml
-  - ./akri/ks.yaml
+  - ./node-feature-discovery/ks.yaml
