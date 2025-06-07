@@ -19,8 +19,6 @@ kind: HelmRelease
 metadata:
   name: rook-ceph-cluster
 spec:
-  driftDetection:
-    mode: enabled
   interval: 1h
   timeout: 15m
   chartRef:
@@ -102,11 +100,11 @@ spec:
             csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
             csi.storage.k8s.io/node-stage-secret-namespace: "{{ .Release.Namespace }}"
             csi.storage.k8s.io/fstype: ext4
-    # cephBlockPoolsVolumeSnapshotClass:
-    #   enabled: false
-    #   name: csi-ceph-blockpool
-    #   isDefault: false
-    #   deletionPolicy: Delete
+    cephBlockPoolsVolumeSnapshotClass:
+      enabled: false
+      name: csi-ceph-blockpool
+      isDefault: false
+      deletionPolicy: Delete
     # NOTE: After disabling the filesystem, the filesystem can be removed with the following commands:
     # ceph fs fail ceph-filesystem && ceph fs rm ceph-filesystem --yes-i-really-mean-it
     cephFileSystems: []
