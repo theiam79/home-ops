@@ -10,8 +10,8 @@ tasks:
     cmd: talhelper genconfig
     preconditions:
       - test -f {{.TALOS_DIR}}/talconfig.yaml
-      - test -f {{.ROOT_DIR}}/.sops.yaml
-      - test -f {{.SOPS_AGE_KEY_FILE}}
+      # - test -f {{.ROOT_DIR}}/.sops.yaml
+      # - test -f {{.SOPS_AGE_KEY_FILE}}
       - which talhelper
 
   apply-node:
