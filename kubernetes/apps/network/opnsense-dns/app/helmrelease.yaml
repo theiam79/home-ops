@@ -48,6 +48,8 @@ spec:
               secretKeyRef:
                 name: *secret
                 key: api-secret
+    extraArgs:
+      - --ignore-ingress-tls-spec
     policy: sync
     sources: ["ingress", "gateway-httproute", "service"]
     txtOwnerId: main
