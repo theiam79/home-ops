@@ -55,6 +55,7 @@ spec:
     domainFilters: ["${SECRET_DOMAIN}"]
     extraArgs:
       - --ignore-ingress-tls-spec
+      - --gateway-name=internal
     serviceMonitor:
       enabled: true
     podAnnotations:
