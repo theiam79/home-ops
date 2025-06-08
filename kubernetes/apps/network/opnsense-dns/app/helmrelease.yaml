@@ -47,7 +47,7 @@ spec:
               secretKeyRef:
                 name: *secret
                 key: api-secret
-    policy: upsert-only
+    policy: sync
     sources: ["ingress", "gateway-httproute", "service"]
     txtOwnerId: main
     txtPrefix: k8s.main.
