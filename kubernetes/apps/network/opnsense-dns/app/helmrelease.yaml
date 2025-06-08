@@ -56,4 +56,3 @@ spec:
       enabled: true
     podAnnotations:
       secret.reloader.stakater.com/reload: *secret
-    loglevel: debug
