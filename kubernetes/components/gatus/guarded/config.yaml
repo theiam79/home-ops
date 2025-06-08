@@ -1,5 +1,5 @@
 endpoints:
-  - name: "${APP}"-
+  - name: "${APP}"
     group: guarded
     url: 1.1.1.1
     interval: 1m
@@ -7,7 +7,7 @@ endpoints:
       hide-hostname: true
       hide-url: true
     dns:
-      query-name: "${GATUS_SUBDOMAIN:=${APP}}.tylerhundley.dev"
+      query-name: "${GATUS_SUBDOMAIN:=${APP}}.${SECRET_DOMAIN}"
       query-type: A
     conditions:
       - "len([BODY]) == 0"
