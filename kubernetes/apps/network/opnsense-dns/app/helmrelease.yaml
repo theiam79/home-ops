@@ -48,14 +48,10 @@ spec:
                 name: *secret
                 key: api-secret
     policy: upsert-only
-    registry: noop
     sources: ["ingress", "gateway-httproute", "service"]
     txtOwnerId: main
     txtPrefix: k8s.main.
     domainFilters: ["${SECRET_DOMAIN}"]
-    extraArgs:
-      - --ignore-ingress-tls-spec
-      - --gateway-name=internal
     serviceMonitor:
       enabled: true
     podAnnotations:
