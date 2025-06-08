@@ -41,16 +41,18 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: &secret external-dns-opnsense-secret
-                key: api_key
+                key: api-key
           - name: OPNSENSE_API_SECRET
             valueFrom:
               secretKeyRef:
                 name: *secret
-                key: api_secret
+                key: api-secret
     policy: upsert-only
     registry: noop
-    sources: ["ingress", "service"]
-    domainFilters: ["inherently.xyz"]
+    sources: ["gateway-httproute", "service"]
+    txtOwnerId: main
+    txtPrefix: k8s.main.
+    domainFilters: ["${SECRET_DOMAIN}"]
     extraArgs:
       - --ignore-ingress-tls-spec
     serviceMonitor:
