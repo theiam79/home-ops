@@ -1,0 +1,44 @@
+apiVersion: k8s.bitwarden.com/v1
+kind: BitwardenSecret
+metadata:
+  labels:
+    app.kubernetes.io/name: bitwardensecret
+    app.kubernetes.io/instance: bitwardensecret-sample
+    app.kubernetes.io/part-of: sm-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: sm-operator
+  name: bitwardensecret-sample
+  namespace: bitwarden-sm
+spec:
+  organizationId: "86a45a90-4e27-431a-8a6a-b2ed005257f3"
+  secretName: bw-sample-secret
+  map:
+    - bwSecretId: 1310b647-5609-4895-a057-b2f1006a30d7
+      secretKeyName: sample
+  authToken:
+    secretName: bw-auth-token
+    secretKey: token
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-bw-dep
+  namespace: bitwarden-sm
+  labels:
+    app: test-bw-dep
+spec:
+  selector:
+    matchLabels:
+      app: test-bw-dep
+  template:
+    metadata:
+      labels:
+        app: test-bw-dep
+    spec:
+      containers:
+      - name: test-bw-dep
+        image: alpine
+        command: ['/bin/ash', '-c', 'tail -f /dev/null']
+        envFrom:
+        - secretRef:
+            name: bw-sample-secret
