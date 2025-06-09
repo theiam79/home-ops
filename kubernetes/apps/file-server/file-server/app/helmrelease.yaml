@@ -56,3 +56,11 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
+    persistence:
+      config-file:
+        type: configMap
+        name: nginx-configmap
+        globalMounts:
+          - path: /etc/nginx/nginx.conf
+            subPath: config.yaml
+            readOnly: true
