@@ -5,15 +5,15 @@ kind: Gateway
 metadata:
   name: internal
   annotations:
-    external-dns.alpha.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+    external-dns.alpha.kubernetes.io/target: &ip4 192.168.100.12
 spec:
   gatewayClassName: cilium
   addresses:
     - type: IPAddress
-      value: "192.168.100.12"
-  infrastructure:
-    annotations:
-      external-dns.alpha.kubernetes.io/hostname: "internal.${SECRET_DOMAIN}"
+      value: *ip4
+  # infrastructure:
+  #   annotations:
+  #     external-dns.alpha.kubernetes.io/hostname: "internal.${SECRET_DOMAIN}"
   listeners:
     - name: http
       protocol: HTTP
