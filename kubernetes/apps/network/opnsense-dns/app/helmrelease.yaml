@@ -53,6 +53,7 @@ spec:
       - --crd-source-apiversion=externaldns.k8s.io/v1alpha1
       - --crd-source-kind=DNSEndpoint
       - --gateway-name=internal
+      - --resolve-service-load-balancer-hostname
     policy: sync
     sources: ["ingress", "gateway-httproute", "service"]
     registry: noop
