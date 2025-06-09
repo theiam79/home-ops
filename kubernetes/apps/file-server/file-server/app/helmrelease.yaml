@@ -28,7 +28,7 @@ spec:
               repository: ghcr.io/nginx/nginx
               tag: latest
             ports:
-              - containerPort: &http 80
+              - containerPort: &port 80
             resources:
               requests:
                 cpu: 100m
@@ -39,7 +39,7 @@ spec:
         controller: file-server
         ports:
           http:
-            port: *http
+            port: *port
     serviceMonitor:
       app:
         serviceName: file-server
