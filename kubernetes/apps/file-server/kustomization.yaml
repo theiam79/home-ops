@@ -11,3 +11,7 @@ configMapGenerator:
   - name: nginx-configmap
     files:
       - nginx.conf=./resources/nginx.conf
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
