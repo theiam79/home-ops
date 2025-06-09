@@ -64,3 +64,9 @@ spec:
           - path: /etc/nginx/nginx.conf
             subPath: nginx.conf
             readOnly: true
+      files:
+        type: nfs
+        server: snotra.internal.theiam79.com
+        path: /mnt/user/file-server
+        globalMounts:
+          - path: /www/data
