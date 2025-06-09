@@ -48,14 +48,15 @@ spec:
               secretKeyRef:
                 name: *secret
                 key: api-secret
+        annotations:
+          externaldns.alpha.kubernetes.io/type: 'A'
     extraArgs:
       - --ignore-ingress-tls-spec
       - --crd-source-apiversion=externaldns.k8s.io/v1alpha1
       - --crd-source-kind=DNSEndpoint
       - --gateway-name=internal
-      - --resolve-service-load-balancer-hostname
     policy: sync
-    sources: ["ingress", "gateway-httproute", "service"]
+    sources: ["gateway-httproute", "service"]
     registry: noop
     domainFilters: ["${SECRET_DOMAIN}"]
     serviceMonitor:
