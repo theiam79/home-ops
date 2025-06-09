@@ -25,7 +25,7 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/nginx/nginx
+              repository: nginx
               tag: latest
             ports:
               - containerPort: &port 80
