@@ -50,6 +50,7 @@ spec:
               GATUS_DELAY_START_SECONDS: 5
               WEB_PORT: &port 80
               SECRET_DOMAIN: ${SECRET_DOMAIN}
+              GATUS_LOG_LEVEL: DEBUG
             probes:
               liveness: &probes
                 enabled: false
