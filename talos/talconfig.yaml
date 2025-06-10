@@ -24,6 +24,15 @@ nodes:
     ipAddress: "192.168.100.20"
     installDiskSelector:
       serial: "IB25ZD0256P00073"
+    userVolumes:
+      - name: local-hostpath
+        provisioning:
+          diskSelector:
+            match: system_disk
+          maxSize: 150GiB
+          minSize: 20GiB
+        filesystem:
+          type: xfs
     machineSpec:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
@@ -44,6 +53,15 @@ nodes:
     ipAddress: "192.168.100.21"
     installDiskSelector:
       serial: "IB25ZD0256P00323"
+    userVolumes:
+      - name: local-hostpath
+        provisioning:
+          diskSelector:
+            match: system_disk
+          maxSize: 150GiB
+          minSize: 20GiB
+        filesystem:
+          type: xfs
     machineSpec:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
@@ -64,6 +82,15 @@ nodes:
     ipAddress: "192.168.100.22"
     installDiskSelector:
       serial: "IB25ZD0256P00322"
+    userVolumes:
+      - name: local-hostpath
+        provisioning:
+          diskSelector:
+            match: system_disk
+          maxSize: 150GiB
+          minSize: 20GiB
+        filesystem:
+          type: xfs
     machineSpec:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
@@ -84,6 +111,15 @@ nodes:
     ipAddress: "192.168.100.23"
     installDiskSelector:
       serial: "IB25ZD0256P00351"
+    userVolumes:
+      - name: local-hostpath
+        provisioning:
+          diskSelector:
+            match: system_disk
+          maxSize: 150GiB
+          minSize: 20GiB
+        filesystem:
+          type: xfs
     machineSpec:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
@@ -102,6 +138,15 @@ nodes:
     ipAddress: "192.168.100.24"
     installDiskSelector:
       model: KINGSTON*
+    userVolumes:
+      - name: local-hostpath
+        provisioning:
+          diskSelector:
+            match: system_disk
+          maxSize: 150GiB
+          minSize: 20GiB
+        filesystem:
+          type: xfs
     machineSpec:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/176603246fc5e700eec6b7044a57dd2bd0521b1d8da6e335c5c24bd66dafba4b
@@ -120,6 +165,15 @@ nodes:
     ipAddress: "192.168.100.25"
     installDiskSelector:
       serial: IB25ZD0256*
+    userVolumes:
+      - name: local-hostpath
+        provisioning:
+          diskSelector:
+            match: system_disk
+          maxSize: 150GiB
+          minSize: 20GiB
+        filesystem:
+          type: xfs
     machineSpec:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
