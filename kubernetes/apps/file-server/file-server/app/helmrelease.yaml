@@ -66,7 +66,7 @@ spec:
             readOnly: true
       files:
         type: nfs
-        server: snotra.internal.theiam79.com
+        server: snotra.internal
         path: /mnt/user/file-server
         globalMounts:
           - path: /www/data

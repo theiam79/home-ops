@@ -98,7 +98,7 @@ spec:
               value: Object.spec.template.spec.volumes{
                 name: "repository",
                 nfs: Object.spec.template.spec.volumes.nfs{
-                  server: "snotra.internal.theiam79.com",
+                  server: "snotra.internal",
                   path: "/mnt/user/volsync"
                 }
               }
