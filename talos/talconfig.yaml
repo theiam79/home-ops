@@ -147,6 +147,13 @@ nodes:
           minSize: 20GiB
         filesystem:
           type: xfs
+      - name: local-archive
+        provisioning:
+          diskSelector:
+            match: disk.size > 1u * TB && disk.rotational
+          minSize: 100GiB
+        filesystem:
+          type: xfs
     machineSpec:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/176603246fc5e700eec6b7044a57dd2bd0521b1d8da6e335c5c24bd66dafba4b
