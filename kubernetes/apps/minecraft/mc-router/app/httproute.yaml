@@ -12,5 +12,5 @@ spec:
       sectionName: https
   rules:
     - backendRefs:
-        - identifier: app
+        - identifier: mc-router
           port: 8080
