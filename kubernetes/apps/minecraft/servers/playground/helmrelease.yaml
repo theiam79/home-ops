@@ -29,8 +29,6 @@ spec:
       eula: "TRUE"
       type: "FABRIC"
       difficulty: normal
-      whitelist:
-      ops:
       forcegameMode: true
       gameMode: creative
       modrinth:
@@ -47,7 +45,6 @@ spec:
     persistence:
       dataDir:
         enabled: true
-        size: 5Gi
         existingClaim: playground
     # sidecarContainers:
     #   - |
