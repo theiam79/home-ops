@@ -59,6 +59,8 @@ spec:
     #         readOnly: true
     #       - name: nginx-conf
     #         mountPath: /etc/nginx/conf.d
+    serviceAnnotations:
+      reloader.stakater.com/auto: "true"
     extraVolumes:
       # - volumeMounts:
       #     - name: bluemap-web
