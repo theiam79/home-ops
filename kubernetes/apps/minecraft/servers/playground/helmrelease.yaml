@@ -47,7 +47,7 @@ spec:
       dataDir:
         enabled: true
         existingClaim: playground-mc
-    securityContext:
+    podSecurityContext:
       readOnlyRootFilesystem: false
     sidecarContainers:
       - |
