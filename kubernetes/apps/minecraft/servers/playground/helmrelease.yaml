@@ -37,12 +37,12 @@ spec:
           - fabric-api
           - chunky
           - bluemap
-      extraPorts:
-        - name: map
-          containerPort: 8100
-          protocol: TCP
-          service:
-            port: 8100
+    extraPorts:
+      - name: map
+        containerPort: 8100
+        protocol: TCP
+        service:
+          port: 8100
     persistence:
       dataDir:
         enabled: true
