@@ -8,4 +8,4 @@ components:
   - ../../components/volsync
 resources:
   - ./mc-router/ks.yaml
-  - ./servers/ks.yaml
+  # - ./servers/ks.yaml
