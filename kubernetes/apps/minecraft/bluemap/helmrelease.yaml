@@ -46,7 +46,7 @@ spec:
               readiness: *probes
             securityContext:
               allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: false
+              readOnlyRootFilesystem: true
               capabilities: { drop: ["ALL"] }
     defaultPodOptions:
       securityContext:
@@ -88,3 +88,11 @@ spec:
           - path: /etc/nginx/nginx.conf
             subPath: nginx.conf
             readOnly: true
+      cache:
+        type: emptyDir
+        globalMounts:
+          - path: /var/cache/nginx
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp/nginx
