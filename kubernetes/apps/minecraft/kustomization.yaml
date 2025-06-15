@@ -7,5 +7,5 @@ components:
   - ../../components/common
   - ../../components/volsync
 resources:
-  - ./mc-router/ks.yaml
-  # - ./servers/ks.yaml
+  # - ./mc-router/ks.yaml
+  - ./servers/ks.yaml
