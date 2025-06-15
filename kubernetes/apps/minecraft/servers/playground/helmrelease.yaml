@@ -47,8 +47,6 @@ spec:
       dataDir:
         enabled: true
         existingClaim: playground-mc
-    podSecurityContext:
-      readOnlyRootFilesystem: false
     sidecarContainers:
       - |
         name: {{ template "minecraft.fullname" . }}-proxy
@@ -61,8 +59,12 @@ spec:
             mountPath: /data
             readOnly: true
           - name: nginx-conf
-            mountPath: /etc/nginx/conf.d/default.conf
-            subPath: default.conf
+            mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+          - name: nginx-cache
+            mountPath: /var/cache/nginx
+          - name: nginx-tmp
+            mountPath: /tmp/nginx
     extraVolumes:
       # - volumeMounts:
       #     - name: bluemap-web
@@ -78,6 +80,10 @@ spec:
           - name: nginx-conf
             configMap:
               name: nginx-conf
+          - name: nginx-cache
+            emptyDir: {}
+          - name: nginx-tmp
+            emptyDir: {}
     extraDeploy:
       - |
         apiVersion: v1
@@ -95,38 +101,46 @@ spec:
         metadata:
           name: nginx-conf
         data:
-          default.conf: |
-            server {
-                listen 8080;
-                root /data/bluemap/web;
+          nginx.conf: |
+            user nginx;
 
-                location /maps/ {
-                  # All high-res tile data and some json data is precompressed into *.gz files
-                  gzip_static always;
+            error_log /tmp/nginx/error.log warn;
+            pid /tmp/nginx/nginx.pid;
 
-                  # Return 204 No Content if requesting a missing tile
-                  location ~* ^/maps/[^/]*/tiles/ {
-                    error_page 404 = @no-content;
+            events {}
+            http {
+              server {
+                  listen 8080;
+                  root /data/bluemap/web;
+
+                  location /maps/ {
+                    # All high-res tile data and some json data is precompressed into *.gz files
+                    gzip_static always;
+
+                    # Return 204 No Content if requesting a missing tile
+                    location ~* ^/maps/[^/]*/tiles/ {
+                      error_page 404 = @no-content;
+                    }
+
+                    # Proxy all requests for live data to the integrated webserver.
+                    # Fall back to @server-offline if it can't be contacted.
+                    location ~* ^/maps/[^/]*/live/ {
+                      error_page 502 504 = @server-offline;
+                      resolver kube-dns.kube-system.svc.cluster.local;
+                      set $live_bluemap_upstream 127.0.0.1:8100;
+                      proxy_pass $live_bluemap_upstream;
+                    }
                   }
 
-                  # Proxy all requests for live data to the integrated webserver.
-                  # Fall back to @server-offline if it can't be contacted.
-                  location ~* ^/maps/[^/]*/live/ {
-                    error_page 502 504 = @server-offline;
-                    resolver kube-dns.kube-system.svc.cluster.local;
-                    set $live_bluemap_upstream 127.0.0.1:8100;
-                    proxy_pass $live_bluemap_upstream;
+                  location @no-content {
+                    internal;
+                    return 204;
                   }
-                }
 
-                location @no-content {
-                  internal;
-                  return 204;
-                }
-
-                # Serve "live" data from the disk when the integrated webserver can't be reached
-                location @server-offline {
-                  internal;
-                  try_files $uri =204;
-                }
+                  # Serve "live" data from the disk when the integrated webserver can't be reached
+                  location @server-offline {
+                    internal;
+                    try_files $uri =204;
+                  }
+              }
             }
