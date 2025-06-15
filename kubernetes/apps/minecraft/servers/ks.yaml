@@ -17,13 +17,14 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app playground
+  name: &app playground-mc
   namespace: &namespace minecraft
 spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  interval: 1h
+  components:
+    - ../../../../components/volsync
   path: ./kubernetes/apps/minecraft/servers/playground
   postBuild:
     substituteFrom:
