@@ -81,6 +81,9 @@ spec:
     persistence:
       data:
         existingClaim: ${APP}
+        globalMounts:
+          - path: /data
+            readOnly: true
       config-file:
         type: configMap
         name: nginx-configmap
