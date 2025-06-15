@@ -96,7 +96,7 @@ spec:
           default.conf: |
             server {
                 listen 8080;
-                root /usr/share/nginx/html/bluemap_mod_webroot;
+                root /data/bluemap/web;
 
                 location /maps/ {
                   # All high-res tile data and some json data is precompressed into *.gz files
