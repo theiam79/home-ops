@@ -58,6 +58,9 @@ spec:
   components:
     - ../../../../components/volsync
     - ../../bluemap
+  dependsOn:
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
   interval: 1h
   path: ./kubernetes/apps/minecraft/servers/test
   postBuild:
