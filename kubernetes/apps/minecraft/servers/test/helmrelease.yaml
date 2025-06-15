@@ -1,0 +1,69 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP}-mc
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: minecraft
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  values:
+    resources:
+      requests:
+        cpu: 512m
+        memory:  500Mi
+    workloadAsStatefulSet: true
+    strategyType: RollingUpdate
+    serviceAnnotations:
+      mc-router.itzg.me/externalServerName: ${APP}.mc.${SECRET_DOMAIN}
+      reloader.stakater.com/auto: "true"
+    minecraftServer:
+      eula: "TRUE"
+      type: "FABRIC"
+      difficulty: normal
+      forcegameMode: true
+      gameMode: creative
+      modrinth:
+        projects:
+          - fabric-api
+          - chunky
+          - bluemap
+    extraPorts:
+      - name: map
+        containerPort: 8100
+        protocol: TCP
+        service:
+          port: 8100
+    persistence:
+      dataDir:
+        enabled: true
+        existingClaim: ${APP}
+    extraVolumes:
+      - volumeMounts:
+          - name: bluemap-config
+            mountPath: /data/config/bluemap/core.conf
+            subPath: core.conf
+        volumes:
+          - name: bluemap-config
+            configMap:
+              name: bluemap-config
+    extraDeploy:
+      - |
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: bluemap-config # Will be prefixed
+        data:
+          core.conf: |
+            accept-download: true
+            data: "/data/bluemap/web"
+            render-thread-count: 2
