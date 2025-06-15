@@ -66,6 +66,7 @@ spec:
       - volumeMounts:
           - name: bluemap-config
             mountPath: /data/config/bluemap
+            subPath: core.conf
         volumes:
           - name: bluemap-config
             configMap:
