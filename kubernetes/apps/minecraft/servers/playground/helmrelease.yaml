@@ -24,7 +24,8 @@ spec:
     workloadAsStatefulSet: true
     strategyType: RollingUpdate
     serviceAnnotations:
-       mc-router.itzg.me/externalServerName: playground.mc.${SECRET_DOMAIN}
+      mc-router.itzg.me/externalServerName: playground.mc.${SECRET_DOMAIN}
+      reloader.stakater.com/auto: "true"
     minecraftServer:
       eula: "TRUE"
       type: "FABRIC"
@@ -59,8 +60,6 @@ spec:
     #         readOnly: true
     #       - name: nginx-conf
     #         mountPath: /etc/nginx/conf.d
-    serviceAnnotations:
-      reloader.stakater.com/auto: "true"
     extraVolumes:
       # - volumeMounts:
       #     - name: bluemap-web
