@@ -73,7 +73,7 @@ spec:
           - name: bluemap-config
             configMap:
               name: bluemap-config
-          - name: nginx-config
+          - name: nginx-conf
             configMap:
               name: nginx-conf
     extraDeploy:
