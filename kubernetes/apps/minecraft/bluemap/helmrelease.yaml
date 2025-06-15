@@ -102,7 +102,3 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp/nginx
-      sample:
-        type: emptyDir
-        globalMounts:
-          - path: /sample
