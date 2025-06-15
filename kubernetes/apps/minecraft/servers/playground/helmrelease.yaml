@@ -48,7 +48,7 @@ spec:
         enabled: true
         existingClaim: playground-mc
     securityContext:
-      readOnlyRootFileSystem: false
+      readOnlyRootFilesystem: false
     sidecarContainers:
       - |
         name: {{ template "minecraft.fullname" . }}-proxy
