@@ -46,7 +46,7 @@ spec:
     persistence:
       dataDir:
         enabled: true
-        existingClaim: ${APP}-mc
+        existingClaim: ${APP}
     extraVolumes:
       - volumeMounts:
           - name: bluemap-config
