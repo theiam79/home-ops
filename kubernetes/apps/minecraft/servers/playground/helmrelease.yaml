@@ -80,5 +80,5 @@ spec:
         data:
           core.conf: |
             accept-download: true
-            data: "/web/bluemap"
+            data: "/data/web/bluemap"
             render-thread-count: 2
