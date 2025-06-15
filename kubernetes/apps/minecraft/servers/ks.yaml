@@ -25,7 +25,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../components/volsync
-    - ./bluemap
+    - ../bluemap
   interval: 1h
   path: ./kubernetes/apps/minecraft/servers/playground
   postBuild:
