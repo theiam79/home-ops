@@ -31,7 +31,6 @@ spec:
         kind: Secret
     substitute:
       APP: *app
-      GATUS_SUBDOMAIN: sh
       VOLSYNC_CAPACITY: 5Gi
   prune: true
   retryInterval: 2m
