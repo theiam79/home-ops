@@ -47,6 +47,8 @@ spec:
       dataDir:
         enabled: true
         existingClaim: playground-mc
+    securityContext:
+      readOnlyRootFileSystem: false
     sidecarContainers:
       - |
         name: {{ template "minecraft.fullname" . }}-proxy
