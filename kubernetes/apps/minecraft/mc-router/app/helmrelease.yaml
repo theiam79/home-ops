@@ -40,7 +40,7 @@ spec:
         up:
           enabled: true
         down:
-          enabled: true
+          enabled: false
           after: 90m
     metrics:
       backend: prometheus

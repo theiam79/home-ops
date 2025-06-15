@@ -59,25 +59,25 @@ spec:
     #         readOnly: true
     #       - name: nginx-conf
     #         mountPath: /etc/nginx/conf.d
-    # extraVolumes:
-    #   - volumeMounts:
-    #       - name: bluemap-web
-    #         mountPath: /web/bluemap
-    #   - volumeMounts:
-    #       - name: bluemap-config
-    #         mountPath: /data/config/bluemap
-    #     volumes:
-    #       - name: bluemap-config
-    #         configMap:
-    #           name: bluemap-config
-    # extraDeploy:
-    #   - |
-    #     apiVersion: v1
-    #     kind: ConfigMap
-    #     metadata:
-    #       name: bluemap-config # Will be prefixed
-    #     data:
-    #       core.conf: |
-    #         accept-download: true
-    #         data: "/web/bluemap"
-    #         render-thread-count: 2
+    extraVolumes:
+      # - volumeMounts:
+      #     - name: bluemap-web
+      #       mountPath: /web/bluemap
+      - volumeMounts:
+          - name: bluemap-config
+            mountPath: /data/config/bluemap
+        volumes:
+          - name: bluemap-config
+            configMap:
+              name: bluemap-config
+    extraDeploy:
+      - |
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: bluemap-config # Will be prefixed
+        data:
+          core.conf: |
+            accept-download: true
+            data: "/web/bluemap"
+            render-thread-count: 2
