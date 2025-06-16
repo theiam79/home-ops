@@ -22,7 +22,7 @@ spec:
     resources:
       requests:
         cpu: 512m
-        memory:  500Mi
+        memory:  1000Mi
     workloadAsStatefulSet: true
     strategyType: RollingUpdate
     serviceAnnotations:
