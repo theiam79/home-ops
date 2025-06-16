@@ -4,8 +4,6 @@ apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: ${APP}-mc
-  labels:
-    mc.server: ${APP}
 spec:
   interval: 1h
   chartRef:

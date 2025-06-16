@@ -1,0 +1,16 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/volsync.backube/replicationdestination_v1alpha1.json
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: "${APP}-map-dst"
+  labels:
+    kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
+spec:
+  rsyncTLS:
+    copyMethod: Snapshot
+    capacity: 5Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClassName: ceph-block
+    volumeSnapshotClassName: csi-ceph-blockpool
