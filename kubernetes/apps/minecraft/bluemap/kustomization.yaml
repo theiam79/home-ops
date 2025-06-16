@@ -5,6 +5,7 @@ kind: Component
 resources:
   - ./helmrelease.yaml
   - ./replicationdestination.yaml
+  - ./replicationsource.yaml
 configMapGenerator:
   - name: nginx-configmap
     files:

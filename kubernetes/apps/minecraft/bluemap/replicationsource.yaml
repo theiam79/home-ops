@@ -1,0 +1,15 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/volsync.backube/replicationsource_v1alpha1.json
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: "${APP}-map"
+spec:
+  sourcePVC: "${APP}"
+  trigger:
+    schedule: "0 * * * *"
+  rsyncTLS:
+    keySecret: "${APP}-map-volsync-secret"
+    address: volsync-rsync-tls-dst-${APP}-map-dst.minecraft.svc.cluster.local.default.svc.cluster.local
+    copyMethod: Snapshot
+    volumeSnapshotClassName: csi-ceph-blockpool
