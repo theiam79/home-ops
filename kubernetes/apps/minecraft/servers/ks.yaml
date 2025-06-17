@@ -25,7 +25,6 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../components/volsync
-    - ../../bluemap
   interval: 1h
   path: ./kubernetes/apps/minecraft/servers/playground
   postBuild:
@@ -57,7 +56,6 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../components/volsync
-    # - ../../bluemap
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
