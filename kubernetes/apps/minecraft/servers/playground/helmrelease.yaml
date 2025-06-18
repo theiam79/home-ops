@@ -42,6 +42,7 @@ spec:
         containerPort: 8100
         protocol: TCP
         service:
+          enabled: true
           port: 8100
     persistence:
       dataDir:
