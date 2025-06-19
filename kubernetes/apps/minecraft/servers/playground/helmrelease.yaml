@@ -29,6 +29,7 @@ spec:
     minecraftServer:
       eula: "TRUE"
       type: "FABRIC"
+      version: "1.21.5"
       difficulty: normal
       forcegameMode: true
       gameMode: creative
