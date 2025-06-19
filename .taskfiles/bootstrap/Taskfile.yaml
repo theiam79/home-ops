@@ -8,24 +8,25 @@ tasks:
     desc: Bootstrap the Talos cluster
     dir: '{{.TALOS_DIR}}'
     cmds:
-      - '[ -f talsecret.sops.yaml ] || talhelper gensecret | sops --filename-override talos/talsecret.sops.yaml --encrypt /dev/stdin > talsecret.sops.yaml'
-      - talhelper genconfig
+      - bws run -- talhelper genconfig
       - talhelper gencommand apply --extra-flags="--insecure" | bash
       - until talhelper gencommand bootstrap | bash; do sleep 10; done
       - until talhelper gencommand kubeconfig --extra-flags="{{.ROOT_DIR}} --force" | bash; do sleep 10; done
     preconditions:
-      - test -f {{.ROOT_DIR}}/.sops.yaml
-      - test -f {{.SOPS_AGE_KEY_FILE}}
       - test -f {{.TALOS_DIR}}/talconfig.yaml
-      - which talhelper talosctl sops
+      - which talhelper talosctl
 
   apps:
-    desc: Bootstrap apps into the Talos cluster
+    desc: Bootstrap apps into the Talos cluster [ROOK_DISK=required]
+    summary: |
+      IMPORTANT: ROOK_DISK must be set to the disk model used across all the nodes (e.g. SAMSUNG MZ7L3960)
     cmd: bash {{.SCRIPTS_DIR}}/bootstrap-apps.sh
+    env:
+      ROOK_DISK: '{{.ROOK_DISK}}'
+    requires:
+      vars: [ROOK_DISK]
     preconditions:
       - msg: Unsupported bash version, run `brew install bash` to upgrade
         sh: '{{if eq OS "darwin"}}test -f /opt/homebrew/bin/bash || test -f /usr/local/bin/bash{{end}}'
       - test -f {{.KUBECONFIG}}
-      - test -f {{.ROOT_DIR}}/.sops.yaml
       - test -f {{.SCRIPTS_DIR}}/bootstrap-apps.sh
-      - test -f {{.SOPS_AGE_KEY_FILE}}
