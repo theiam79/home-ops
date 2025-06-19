@@ -19,6 +19,8 @@ kind: HelmRelease
 metadata:
   name: mc-router
 spec:
+  driftDetection:
+    mode: enabled
   interval: 1h
   chartRef:
     kind: OCIRepository
