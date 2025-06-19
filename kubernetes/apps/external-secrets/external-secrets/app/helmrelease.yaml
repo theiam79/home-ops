@@ -19,8 +19,6 @@ kind: HelmRelease
 metadata:
   name: external-secrets
 spec:
-  driftDetection:
-    mode: enabled
   interval: 1h
   chartRef:
     kind: OCIRepository
