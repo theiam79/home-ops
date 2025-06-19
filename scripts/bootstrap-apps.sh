@@ -173,6 +173,7 @@ function main() {
     apply_crds
     apply_namespaces
     apply_helm_releases
+    apply_sops_secrets
 
     log info "Congrats! The cluster is bootstrapped and Flux is syncing the Git repository"
 }
