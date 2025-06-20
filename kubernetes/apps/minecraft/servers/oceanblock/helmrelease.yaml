@@ -48,6 +48,8 @@ spec:
             enabled: true
             type: ClusterIP
             port: 8100
+    extraEnv:
+      DEBUG: true
     persistence:
       dataDir:
         enabled: true
