@@ -32,7 +32,7 @@ spec:
       eula: "TRUE"
       type: "CUSTOM"
       version: "1.13.2"
-      downloadWorldUrl: "https://file-server.${SECRET_DOMAIN}/minecraft/vintage/world-20250527-023552.tgz"
+      downloadWorldUrl: "https://file-server.${SECRET_DOMAIN}/minecraft/vintage/vintage-backup.zip"
       pluginUrls:
         - https://cdn.modrinth.com/data/swbUV1cr/versions/Qgel0oQB/BlueMap-3.21-spigot.jar
       extraPorts:
