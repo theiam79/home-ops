@@ -1,0 +1,69 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP}-mc
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: minecraft
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  values:
+    resources:
+      requests:
+        cpu: 512m
+        memory:  1000Mi
+    workloadAsStatefulSet: true
+    strategyType: RollingUpdate
+    serviceAnnotations:
+      mc-router.itzg.me/externalServerName: ${APP}.mc.${SECRET_DOMAIN}
+      reloader.stakater.com/auto: "true"
+    minecraftServer:
+      eula: "TRUE"
+      type: "CUSTOM"
+      version: "1.13.2"
+      downloadWorldUrl: "https://file-server.${SECRET_DOMAIN}/minecraft/vintage/world-20250527-023552.tgz"
+      pluginUrls:
+        - https://cdn.modrinth.com/data/swbUV1cr/versions/Qgel0oQB/BlueMap-3.21-spigot.jar
+      extraPorts:
+        - name: map
+          containerPort: 8100
+          protocol: TCP
+          service:
+            enabled: true
+            type: ClusterIP
+            port: 8100
+      extraEnv:
+        CUSTOM_SERVER: https://file-server.${SECRET_DOMAIN}/minecraft/vintage/spigot-1.13.2.jar
+    persistence:
+      dataDir:
+        enabled: true
+        existingClaim: ${APP}
+    extraVolumes:
+      - volumeMounts:
+          - name: bluemap-config
+            mountPath: /data/plugins/BlueMap/core.conf
+            subPath: core.conf
+        volumes:
+          - name: bluemap-config
+            configMap:
+              name: bluemap-config
+    extraDeploy:
+      - |
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: bluemap-config # Will be prefixed
+        data:
+          core.conf: |
+            accept-download: true
+            data: "/data/bluemap/web"
+            render-thread-count: 2
