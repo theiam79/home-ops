@@ -19,6 +19,8 @@ spec:
     remediation:
       retries: 3
   values:
+    image:
+      tag: java11
     resources:
       requests:
         cpu: 512m
