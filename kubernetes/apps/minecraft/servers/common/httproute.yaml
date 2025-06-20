@@ -7,10 +7,11 @@ metadata:
 spec:
   hostnames: ["${APP}.${SECRET_DOMAIN}"]
   parentRefs:
-    - name: external
+    - name: internal
       namespace: kube-system
       sectionName: https
   rules:
     - backendRefs:
         - name: ${APP}-mc-minecraft
+          namespace: minecraft
           port: 8100
