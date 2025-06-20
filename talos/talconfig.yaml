@@ -195,6 +195,33 @@ nodes:
           - network: "0.0.0.0/0"
             gateway: "192.168.100.1"
         mtu: 1500
+  - hostname: "elli"
+    ipAddress: "192.168.100.30"
+    installDiskSelector:
+      model: "Samsung SSD 850"
+    userVolumes:
+      - name: local-hostpath
+        provisioning:
+          diskSelector:
+            match: system_disk
+          maxSize: 150GiB
+          minSize: 20GiB
+        filesystem:
+          type: xfs
+    machineSpec:
+      secureboot: true
+    talosImageURL: factory.talos.dev/installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
+    controlPlane: false
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "0c:9d:92:85:2a:66"
+        dhcp: false
+        addresses:
+          - "192.168.100.30/25"
+        routes:
+          - network: "0.0.0.0/0"
+            gateway: "192.168.100.1"
+        mtu: 1500
 
 # Global patches
 patches:
