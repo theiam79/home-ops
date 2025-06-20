@@ -34,7 +34,7 @@ spec:
       forcegameMode: true
       gameMode: survival
       difficulty: normal
-      memory: ""
+      memory: "8g"
       whitelist: ${WHITELIST}
       ops: ${OPS}
       modrinth:
