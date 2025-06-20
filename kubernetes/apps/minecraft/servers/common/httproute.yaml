@@ -12,6 +12,6 @@ spec:
       sectionName: https
   rules:
     - backendRefs:
-        - name: ${APP}-mc-minecraft
+        - name: ${APP}-mc-minecraft-map
           namespace: minecraft
           port: 8100
