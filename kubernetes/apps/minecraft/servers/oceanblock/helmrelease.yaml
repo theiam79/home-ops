@@ -26,6 +26,14 @@ spec:
     serviceAnnotations:
       mc-router.itzg.me/externalServerName: ${APP}.mc.${SECRET_DOMAIN}
       reloader.stakater.com/auto: "true"
+    livenessProbe:
+      command:
+        - mc-health
+      initialDelaySeconds: 240
+    readinessProbe:
+      command:
+        - mc-health
+      initialDelaySeconds: 240
     minecraftServer:
       eula: "TRUE"
       type: "FTBA"
