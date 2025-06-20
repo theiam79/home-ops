@@ -5,6 +5,8 @@ kind: HelmRelease
 metadata:
   name: ${APP}-mc
 spec:
+  driftDetection:
+    mode: enabled
   interval: 1h
   chartRef:
     kind: OCIRepository
