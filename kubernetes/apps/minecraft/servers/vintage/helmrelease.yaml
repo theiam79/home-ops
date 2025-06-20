@@ -41,8 +41,8 @@ spec:
             enabled: true
             type: ClusterIP
             port: 8100
-      extraEnv:
-        CUSTOM_SERVER: https://file-server.${SECRET_DOMAIN}/minecraft/vintage/spigot-1.13.2.jar
+    extraEnv:
+      CUSTOM_SERVER: https://file-server.${SECRET_DOMAIN}/minecraft/vintage/spigot-1.13.2.jar
     persistence:
       dataDir:
         enabled: true
