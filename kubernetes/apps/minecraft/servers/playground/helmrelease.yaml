@@ -33,6 +33,7 @@ spec:
       difficulty: normal
       forcegameMode: true
       gameMode: creative
+      memory: ""
       whitelist: ${WHITELIST}
       ops: ${OPS}
       modrinth:

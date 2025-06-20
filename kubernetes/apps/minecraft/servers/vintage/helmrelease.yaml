@@ -34,6 +34,7 @@ spec:
       eula: "TRUE"
       type: "CUSTOM"
       version: "1.13.2"
+      memory: ""
       whitelist: ${WHITELIST}
       ops: ${OPS}
       downloadWorldUrl: "https://file-server.${SECRET_DOMAIN}/minecraft/vintage/vintage-backup.zip"
