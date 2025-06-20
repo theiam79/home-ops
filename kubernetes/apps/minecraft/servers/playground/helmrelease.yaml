@@ -33,6 +33,8 @@ spec:
       difficulty: normal
       forcegameMode: true
       gameMode: creative
+      whitelist: ${WHITELIST}
+      ops: ${OPS}
       modrinth:
         projects:
           - fabric-api

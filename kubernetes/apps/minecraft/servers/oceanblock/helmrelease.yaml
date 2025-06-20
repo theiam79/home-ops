@@ -20,7 +20,7 @@ spec:
     resources:
       requests:
         cpu: 512m
-        memory:  500Mi
+        memory:  4000Mi
     workloadAsStatefulSet: true
     strategyType: RollingUpdate
     serviceAnnotations:
@@ -28,21 +28,25 @@ spec:
       reloader.stakater.com/auto: "true"
     minecraftServer:
       eula: "TRUE"
-      type: "FABRIC"
-      difficulty: normal
+      type: "FTBA"
+      ftbModpackId: "128"
+      downloadWorldUrl: "https://file-server.${SECRET_DOMAIN}/minecraft/oceanblock/oceanblock-source.zip"
       forcegameMode: true
-      gameMode: creative
+      gameMode: survival
+      difficulty: normal
+      whitelist: ${WHITELIST}
+      ops: ${OPS}
       modrinth:
         projects:
-          - fabric-api
-          - chunky
           - bluemap
-    extraPorts:
-      - name: map
-        containerPort: 8100
-        protocol: TCP
-        service:
-          port: 8100
+      extraPorts:
+        - name: map
+          containerPort: 8100
+          protocol: TCP
+          service:
+            enabled: true
+            type: ClusterIP
+            port: 8100
     persistence:
       dataDir:
         enabled: true
