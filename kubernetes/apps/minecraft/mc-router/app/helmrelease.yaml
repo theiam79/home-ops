@@ -41,7 +41,7 @@ spec:
       minecraft:
         type: LoadBalancer
         annotations:
-          external-dns.alpha.kubernetes.io/hostname: mc.${SECRET_DOMAIN}, playground.mc.${SECRET_DOMAIN}
+          external-dns.alpha.kubernetes.io/hostname: mc.${SECRET_DOMAIN}, playground.mc.${SECRET_DOMAIN}, *.mc.${SECRET_DOMAIN}
     minecraftRouter:
       autoScale:
         up:
