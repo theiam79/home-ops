@@ -5,6 +5,8 @@ kind: HelmRelease
 metadata:
   name: &app system-upgrade-controller
 spec:
+  driftDetection:
+    mode: enabled
   interval: 1h
   chartRef:
     kind: OCIRepository
