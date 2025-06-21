@@ -26,6 +26,15 @@ spec:
     serviceAnnotations:
       mc-router.itzg.me/externalServerName: ${APP}.mc.${SECRET_DOMAIN}
       reloader.stakater.com/auto: "true"
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: clusterrole
+              operator: In
+              values:
+              - highspeed
     livenessProbe:
       command:
         - mc-health

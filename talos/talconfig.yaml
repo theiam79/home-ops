@@ -24,6 +24,8 @@ nodes:
     ipAddress: "192.168.100.20"
     installDiskSelector:
       serial: "IB25ZD0256P00073"
+    nodeLabels:
+      clusterrole: highspeed
     userVolumes:
       - name: local-hostpath
         provisioning:
@@ -172,6 +174,8 @@ nodes:
     ipAddress: "192.168.100.25"
     installDiskSelector:
       serial: IB25ZD0256*
+    nodeLabels:
+      clusterrole: highspeed
     userVolumes:
       - name: local-hostpath
         provisioning:
@@ -199,6 +203,8 @@ nodes:
     ipAddress: "192.168.100.30"
     installDiskSelector:
       model: "Samsung SSD 850"
+    nodeLabels:
+      clusterrole: highspeed
     userVolumes:
       - name: local-hostpath
         provisioning:
