@@ -19,6 +19,8 @@ kind: HelmRelease
 metadata:
   name: rook-ceph-operator
 spec:
+  driftDetection:
+    mode: enabled
   interval: 1h
   timeout: 15m
   chartRef:
