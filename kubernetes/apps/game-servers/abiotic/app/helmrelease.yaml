@@ -73,3 +73,15 @@ spec:
         existingClaim: ${APP}
         globalMounts:
           - path: /server/AbioticFactor/Saved
+      server:
+        existingClaim: abiotic-server-files
+        globalMounts:
+          - path: /server
+      local:
+        type: emptyDir
+        globalMounts:
+          - path: /.local
+      steam:
+        type: emptyDir
+        globalMounts:
+          - path: /.steam
