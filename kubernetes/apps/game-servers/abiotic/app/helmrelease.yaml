@@ -42,13 +42,13 @@ spec:
               requests:
                 cpu: 512m
                 memory:  4000Mi
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
-        fsGroupChangePolicy: OnRootMismatch
+    # defaultPodOptions:
+    #   securityContext:
+    #     runAsNonRoot: true
+    #     runAsUser: 1000
+    #     runAsGroup: 1000
+    #     fsGroup: 1000
+    #     fsGroupChangePolicy: OnRootMismatch
     service:
       app:
         type: LoadBalancer
@@ -77,15 +77,15 @@ spec:
         existingClaim: abiotic-server-files
         globalMounts:
           - path: /server
-      local:
-        type: emptyDir
-        globalMounts:
-          - path: /.local
-      steam:
-        type: emptyDir
-        globalMounts:
-          - path: /.steam
-      wine:
-        type: emptyDir
-        globalMounts:
-          - path: /.wine
+      # local:
+      #   type: emptyDir
+      #   globalMounts:
+      #     - path: /.local
+      # steam:
+      #   type: emptyDir
+      #   globalMounts:
+      #     - path: /.steam
+      # wine:
+      #   type: emptyDir
+      #   globalMounts:
+      #     - path: /.wine
