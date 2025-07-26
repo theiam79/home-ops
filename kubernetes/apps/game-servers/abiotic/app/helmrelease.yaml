@@ -56,7 +56,8 @@ spec:
         ports:
           game:
             protocol: UDP
-            port: *port
+            port: 30000
+            targetPort: *port
           query:
             port: *query
     route:
