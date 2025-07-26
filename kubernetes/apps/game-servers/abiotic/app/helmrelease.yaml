@@ -56,10 +56,11 @@ spec:
         ports:
           game:
             protocol: UDP
-            port: 30000
+            port: *port
             targetPort: *port
           query:
             port: *query
+            targetPort: *query
     route:
       app:
         hostnames:
