@@ -53,7 +53,7 @@ spec:
       app:
         controller: abiotic
         type: LoadBalancer
-        loadBalancerIP: 192.168.100.21
+        # loadBalancerIP: 192.168.100.21
         ports:
           game:
             protocol: UDP
@@ -62,18 +62,18 @@ spec:
           query:
             port: *query
             targetPort: *query
-    route:
-      app:
-        hostnames:
-          - "${APP}.${SECRET_DOMAIN}"
-        parentRefs:
-          - name: internal
-            namespace: kube-system
-            sectionName: https
-        rules:
-          - backendRefs:
-              - identifier: app
-                port: *port
+    # route:
+    #   app:
+    #     hostnames:
+    #       - "${APP}.${SECRET_DOMAIN}"
+    #     parentRefs:
+    #       - name: internal
+    #         namespace: kube-system
+    #         sectionName: https
+    #     rules:
+    #       - backendRefs:
+    #           - identifier: app
+    #             port: *port
     persistence:
       data:
         existingClaim: ${APP}
