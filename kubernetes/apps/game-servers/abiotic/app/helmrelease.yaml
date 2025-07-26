@@ -30,14 +30,25 @@ spec:
               repository: ghcr.io/pleut/abiotic-factor-linux-docker
               tag: latest
             env:
-              MaxServerPlayers: 6
-              Port: &port 7777
-              QueryPort: &query 27015
-              ServerPassword: ${SERVER_PASSWORD}
-              SteamServerName: "Tired Old Scientists"
-              UsePerfThreads: true
-              NoAsyncLoadingThread: true
-              WorldSaveName: "Cascade"
+              - name: MaxServerPlayers
+                value: 6
+              - name: Port
+                value: &port 7777
+              - name: QueryPort
+                value: &query 27015
+              - name: ServerPassword
+                valueFrom:
+                  secretKeyRef:
+                    name: abiotic-secret
+                    key: SERVER_PASSWORD
+              - name: SteamServerName
+                value: "Tired Old Scientists"
+              - name: UsePerfThreads
+                value: true
+              - name: NoAsyncLoadingThread
+                value: true
+              - name: WorldSaveName
+                value: "Cascade"
               # AutoUpdate: false
               # AdditionalArgs: -SandboxIniPath=Config/WindowsServer/ServerSandbox.ini
             resources:
