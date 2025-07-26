@@ -85,3 +85,7 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /.steam
+      wine:
+        type: emptyDir
+        globalMounts:
+          - path: /.wine
