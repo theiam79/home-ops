@@ -1,0 +1,75 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: abiotic
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  values:
+    controllers:
+      abiotic:
+        type: statefulset
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/pleut/abiotic-factor-linux-docker
+              tag: latest
+            env:
+              MaxServerPlayers: 6
+              Port: &port 7777
+              QueryPort: &query 27015
+              ServerPassword: ${SERVER_PASSWORD}
+              SteamServerName: "Tired Old Scientists"
+              UsePerfThreads: true
+              NoAsyncLoadingThread: true
+              WorldSaveName: "Cascade"
+              # AutoUpdate: false
+              # AdditionalArgs: -SandboxIniPath=Config/WindowsServer/ServerSandbox.ini
+            resources:
+              requests:
+                cpu: 512m
+                memory:  4000Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        type: LoadBalancer
+        ports:
+          game:
+            protocol: UDP
+            port: *port
+          query:
+            port: *query
+    route:
+      app:
+        annotations:
+          external-dns.alpha.kubernetes.io/target: ipv4.${SECRET_DOMAIN}
+        hostnames:
+          - "${APP}.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: external
+            namespace: kube-system
+            sectionName: https
+    persistence:
+      data:
+        existingClaim: ${APP}
+        globalMounts:
+          - path: /server/AbioticFactor/Saved
