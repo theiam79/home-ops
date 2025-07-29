@@ -1,3 +1,48 @@
+# ---
+# # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/helmrepository_v1.json
+# apiVersion: source.toolkit.fluxcd.io/v1
+# kind: HelmRepository
+# metadata:
+#   name: abiotic
+# spec:
+#   interval: 10m
+#   url: https://radical-egg.github.io/pineapple-bun/
+# ---
+# # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# apiVersion: helm.toolkit.fluxcd.io/v2
+# kind: HelmRelease
+# metadata:
+#   name: abiotic
+# spec:
+#   interval: 1h
+#   chart:
+#     spec:
+#       chart: abiotic-factor-gameserver
+#       reconcileStrategy: ChartVersion
+#       sourceRef:
+#         kind: HelmRepository
+#         name: abiotic
+#   install:
+#     remediation:
+#       retries: -1
+#   upgrade:
+#     cleanupOnFail: true
+#     remediation:
+#       retries: 3
+#   values:
+#     ServerPassword: ${SERVER_PASSWORD}
+#     SteamServerName: "Tired Old Scientists"
+#     resources:
+#       requests:
+#         memory: 4Gi
+#         cpu: "1"
+#     storage:
+#       kind: persistenVolumeClaim
+#       pvc:
+#         size: 10Gi
+#     networking:
+#       type: LoadBalancer
+#       publishQueryPort: true
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2
@@ -49,7 +94,8 @@ spec:
                 value: true
               - name: WorldSaveName
                 value: "Cascade"
-              # AutoUpdate: false
+              - name: AutoUpdate
+                value: true
               # AdditionalArgs: -SandboxIniPath=Config/WindowsServer/ServerSandbox.ini
             resources:
               requests:
