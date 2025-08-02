@@ -34,17 +34,27 @@ spec:
                 cpu: 100m
               limits:
                 memory: 1024Mi
+          exporter:
+            dependsOn: app
+            image:
+              repository: ghcr.io/nginx/nginx-prometheus-exporter
+              tag: latest
     service:
       app:
         controller: file-server
         ports:
           http:
             port: *port
+      exporter:
+        controller: file-server
+        ports:
+          metrics:
+            port: 9113
     serviceMonitor:
-      app:
+      exporter:
         serviceName: file-server
         endpoints:
-          - port: http
+          - port: metrics
     route:
       app:
         hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
