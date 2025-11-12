@@ -1,0 +1,95 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP}-mc
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: minecraft
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  values:
+    resources:
+      requests:
+        cpu: 512m
+        memory:  4000Mi
+    workloadAsStatefulSet: true
+    strategyType: RollingUpdate
+    serviceAnnotations:
+      mc-router.itzg.me/externalServerName: ${APP}.mc.${SECRET_DOMAIN}
+      reloader.stakater.com/auto: "true"
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: clusterrole
+              operator: In
+              values:
+              - highspeed
+    livenessProbe:
+      command:
+        - mc-health
+      initialDelaySeconds: 240
+    readinessProbe:
+      command:
+        - mc-health
+      initialDelaySeconds: 240
+    minecraftServer:
+      eula: "TRUE"
+      type: "AUTO_CURSEFORGE"
+      autoCurstForge:
+        apiKey:
+          key: ${CF_API_KEY}
+        slug: vault-hunters-1-18-2
+      forcegameMode: true
+      gameMode: survival
+      difficulty: normal
+      memory: "8g"
+      whitelist: ${WHITELIST}
+      ops: ${OPS}
+      modrinth:
+        projects:
+          - bluemap
+      extraPorts:
+        - name: map
+          containerPort: 8100
+          protocol: TCP
+          service:
+            enabled: true
+            type: ClusterIP
+            port: 8100
+    extraEnv:
+      DEBUG: true
+    persistence:
+      dataDir:
+        enabled: true
+        existingClaim: ${APP}
+    extraVolumes:
+      - volumeMounts:
+          - name: bluemap-config
+            mountPath: /data/config/bluemap/core.conf
+            subPath: core.conf
+        volumes:
+          - name: bluemap-config
+            configMap:
+              name: bluemap-config
+    extraDeploy:
+      - |
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: bluemap-config # Will be prefixed
+        data:
+          core.conf: |
+            accept-download: true
+            data: "/data/bluemap/web"
+            render-thread-count: 2
