@@ -46,7 +46,7 @@ spec:
     minecraftServer:
       eula: "TRUE"
       type: "AUTO_CURSEFORGE"
-      autoCurstForge:
+      autoCurseForge:
         apiKey:
           key: ${CF_API_KEY}
         slug: vault-hunters-1-18-2
