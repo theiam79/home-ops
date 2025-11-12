@@ -56,17 +56,17 @@ spec:
       memory: "8g"
       whitelist: ${WHITELIST}
       ops: ${OPS}
-      # modrinth:
-      #   projects:
-      #     - bluemap
-      # extraPorts:
-      #   - name: map
-      #     containerPort: 8100
-      #     protocol: TCP
-      #     service:
-      #       enabled: true
-      #       type: ClusterIP
-      #       port: 8100
+      modrinth:
+        projects:
+          - bluemap
+      extraPorts:
+        - name: map
+          containerPort: 8100
+          protocol: TCP
+          service:
+            enabled: true
+            type: ClusterIP
+            port: 8100
     extraEnv:
       DEBUG: true
     persistence:
