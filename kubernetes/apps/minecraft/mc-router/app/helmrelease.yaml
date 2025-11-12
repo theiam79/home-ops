@@ -37,6 +37,8 @@ spec:
       requests:
         cpu: 100m
         memory:  50Mi
+    debug:
+      enabled: true
     services:
       minecraft:
         type: LoadBalancer
