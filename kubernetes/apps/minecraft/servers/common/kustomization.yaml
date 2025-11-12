@@ -5,4 +5,4 @@ kind: Component
 resources:
   - ./dnsendpoint.yaml
   - ./httproute.yaml
-  - ./externalsecrets.yaml
+  - ./externalsecret.yaml
