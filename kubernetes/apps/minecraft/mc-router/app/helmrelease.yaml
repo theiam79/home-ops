@@ -33,12 +33,12 @@ spec:
     remediation:
       retries: 3
   values:
+    debug:
+      enabled: true
     resources:
       requests:
         cpu: 100m
         memory:  50Mi
-    debug:
-      enabled: true
     services:
       minecraft:
         type: LoadBalancer
