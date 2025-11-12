@@ -33,8 +33,6 @@ spec:
     remediation:
       retries: 3
   values:
-    debug:
-      enabled: true
     resources:
       requests:
         cpu: 100m
@@ -45,6 +43,8 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/hostname: mc.${SECRET_DOMAIN}, *.mc.${SECRET_DOMAIN}
     minecraftRouter:
+      debug:
+        enabled: true
       autoScale:
         up:
           enabled: true
