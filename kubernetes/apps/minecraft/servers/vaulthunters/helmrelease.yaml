@@ -53,12 +53,13 @@ spec:
       forcegameMode: true
       gameMode: survival
       difficulty: normal
-      memory: "8g"
+      memory: "12g"
       whitelist: ${WHITELIST}
       ops: ${OPS}
       modrinth:
         projects:
           - bluemap
+          - chunky
       extraPorts:
         - name: map
           containerPort: 8100
