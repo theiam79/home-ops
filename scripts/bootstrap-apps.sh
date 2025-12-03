@@ -165,6 +165,7 @@ function wipe_rook_disks() {
 }
 
 function main() {
+    check_env KUBECONFIG TALOSCONFIG
     check_cli helmfile kubectl kustomize sops talhelper yq
 
     # Apply resources and Helm releases
