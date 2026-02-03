@@ -4,6 +4,8 @@ kind: HelmRelease
 metadata:
   name: cloudflare-tunnel
 spec:
+  driftDetection:
+    enable: true
   chartRef:
     kind: OCIRepository
     name: cloudflare-tunnel
