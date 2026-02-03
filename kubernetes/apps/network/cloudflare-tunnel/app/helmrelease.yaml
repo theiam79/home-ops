@@ -5,7 +5,7 @@ metadata:
   name: cloudflare-tunnel
 spec:
   driftDetection:
-    enable: true
+    mode: enabled
   chartRef:
     kind: OCIRepository
     name: cloudflare-tunnel

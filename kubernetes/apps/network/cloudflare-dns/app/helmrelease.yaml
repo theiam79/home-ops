@@ -5,7 +5,7 @@ metadata:
   name: &app cloudflare-dns
 spec:
   driftDetection:
-    enable: true
+    mode: enabled
   chartRef:
     kind: OCIRepository
     name: cloudflare-dns
