@@ -1,14 +1,9 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app node-feature-discovery
-  namespace: &namespace kube-system
+  name: node-feature-discovery
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
   decryption:
     provider: sops
     secretRef:
@@ -20,11 +15,9 @@ spec:
       - name: cluster-secrets
         kind: Secret
   prune: true
-  retryInterval: 2m
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
-  timeout: 5m
+  targetNamespace: kube-system
   wait: false

@@ -1,29 +1,13 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: &app cloudflare-dns
 spec:
-  driftDetection:
-    mode: enabled
+  chartRef:
+    kind: OCIRepository
+    name: cloudflare-dns
   interval: 1h
-  chart:
-    spec:
-      chart: external-dns
-      version: 1.16.1
-      sourceRef:
-        kind: HelmRepository
-        name: external-dns
-        namespace: flux-system
-  install:
-    remediation:
-      retries: -1
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      strategy: rollback
-      retries: 3
   values:
     fullnameOverride: *app
     provider: cloudflare
@@ -38,7 +22,7 @@ spec:
       - --cloudflare-proxied
       - --crd-source-apiversion=externaldns.k8s.io/v1alpha1
       - --crd-source-kind=DNSEndpoint
-      - --gateway-name=external
+      - --gateway-name=envoy-external
     triggerLoopOnEvent: true
     policy: sync
     sources: ["crd", "gateway-httproute"]

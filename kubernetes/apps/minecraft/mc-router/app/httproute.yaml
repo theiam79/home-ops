@@ -1,6 +1,5 @@
 # ---
-# # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
-# apiVersion: gateway.networking.k8s.io/v1
+# # apiVersion: gateway.networking.k8s.io/v1
 # kind: HTTPRoute
 # metadata:
 #   name: mc-router
@@ -15,7 +14,6 @@
 #         - name: mc-router
 #           port: 8080
 ---
-# yaml-language-server: $schema=https://kube-schemas.pages.dev/externaldns.k8s.io/dnsendpoint_v1alpha1.json
 apiVersion: externaldns.k8s.io/v1alpha1
 kind: DNSEndpoint
 metadata:
