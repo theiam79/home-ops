@@ -5,6 +5,8 @@ kind: HelmRelease
 metadata:
   name: &app cloudflare-dns
 spec:
+  driftDetection:
+    mode: enabled
   interval: 1h
   chart:
     spec:
