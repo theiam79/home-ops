@@ -9,7 +9,7 @@ resources:
   - ./coredns/ks.yaml
   - ./metrics-server/ks.yaml
   - ./reloader/ks.yaml
-  - ./spegel/ks.yaml
+  # - ./spegel/ks.yaml
   - ./reflector/ks.yaml
   - ./netboot/ks.yaml
   - ./node-feature-discovery/ks.yaml
