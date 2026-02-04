@@ -43,7 +43,7 @@ spec:
       - --gateway-name=envoy-internal
     triggerLoopOnEvent: true
     policy: sync
-    sources: ["gateway-httproute", "service"]
+    sources: ["gateway-httproute", "service", "crd"]
     registry: noop
     domainFilters: ["${SECRET_DOMAIN}"]
     serviceMonitor:
