@@ -16,7 +16,7 @@ spec:
       webhook:
         image:
           repository: ghcr.io/crutonjohn/external-dns-opnsense-webhook
-          tag: v0.1.0
+          tag: v1.0.0
         env:
           - name: LOG_LEVEL
             value: debug
@@ -44,7 +44,7 @@ spec:
     triggerLoopOnEvent: true
     policy: sync
     sources: ["gateway-httproute", "service"]
-    registry: noop
+    registry: txt
     domainFilters: ["${SECRET_DOMAIN}"]
     serviceMonitor:
       enabled: true
