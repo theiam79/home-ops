@@ -101,35 +101,35 @@ spec:
     namespace: flux-system
   targetNamespace: *namespace
   wait: false
----
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: &app vaulthunters
-  namespace: &namespace minecraft
-spec:
-  dependsOn:
-    - name: mc-router
-  components:
-    - ../../../../components/volsync
-    - ../common
-  interval: 1h
-  path: ./kubernetes/apps/minecraft/servers/vaulthunters
-  postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
-      - name: mc-users-secret
-        kind: Secret
-      - name: mc-server-secret
-        kind: Secret
-    substitute:
-      APP: *app
-      VOLSYNC_CAPACITY: 20Gi
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-    namespace: flux-system
-  targetNamespace: *namespace
-  wait: false
+# ---
+# apiVersion: kustomize.toolkit.fluxcd.io/v1
+# kind: Kustomization
+# metadata:
+#   name: &app vaulthunters
+#   namespace: &namespace minecraft
+# spec:
+#   dependsOn:
+#     - name: mc-router
+#   components:
+#     - ../../../../components/volsync
+#     - ../common
+#   interval: 1h
+#   path: ./kubernetes/apps/minecraft/servers/vaulthunters
+#   postBuild:
+#     substituteFrom:
+#       - name: cluster-secrets
+#         kind: Secret
+#       - name: mc-users-secret
+#         kind: Secret
+#       - name: mc-server-secret
+#         kind: Secret
+#     substitute:
+#       APP: *app
+#       VOLSYNC_CAPACITY: 20Gi
+#   prune: true
+#   sourceRef:
+#     kind: GitRepository
+#     name: flux-system
+#     namespace: flux-system
+#   targetNamespace: *namespace
+#   wait: false
