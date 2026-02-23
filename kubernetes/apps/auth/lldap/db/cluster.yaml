@@ -8,11 +8,7 @@ metadata:
     cnpg.io/skipEmptyWalArchiveCheck: "enabled"
 spec:
   instances: 1
-  imageCatalogRef:
-    apiGroup: postgresql.cnpg.io
-    kind: ClusterImageCatalog
-    major: 17
-    name: postgresql
+  imageName: ghcr.io/cloudnative-pg/postgresql:17
   enableSuperuserAccess: true
   superuserSecret:
     name: lldap-pg-superuser
