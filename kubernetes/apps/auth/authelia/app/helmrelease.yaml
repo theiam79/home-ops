@@ -68,6 +68,7 @@ spec:
             port: 9959
     serviceMonitor:
       app:
+        serviceName: authelia
         endpoints:
           - port: metrics
     route:
