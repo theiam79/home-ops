@@ -1,0 +1,26 @@
+---
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: "${APP}-pg-backup"
+spec:
+  retentionPolicy: "${CNPG_RETENTION:=15d}"
+  configuration:
+    destinationPath: "s3://cnpg/${APP}/"
+    endpointURL: "http://snotra.internal:3900"
+    s3Credentials:
+      region:
+        name: "${APP}-cnpg-secret"
+        key: AWS_REGION
+      accessKeyId:
+        name: "${APP}-cnpg-secret"
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKey:
+        name: "${APP}-cnpg-secret"
+        key: AWS_SECRET_ACCESS_KEY
+  instanceSidecarConfiguration:
+    env:
+      - name: AWS_REQUEST_CHECKSUM_CALCULATION
+        value: when_required
+      - name: AWS_RESPONSE_CHECKSUM_VALIDATION
+        value: when_required

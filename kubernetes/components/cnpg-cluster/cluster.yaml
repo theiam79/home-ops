@@ -1,0 +1,48 @@
+---
+# yaml-language-server: $schema=https://github.com/datreeio/CRDs-catalog/raw/refs/heads/main/postgresql.cnpg.io/cluster_v1.json
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: "${APP}-pg"
+  annotations:
+    cnpg.io/skipEmptyWalArchiveCheck: "enabled"
+spec:
+  instances: ${CNPG_INSTANCES:=1}
+  imageCatalogRef:
+    apiGroup: postgresql.cnpg.io
+    kind: ClusterImageCatalog
+    major: ${CNPG_PG_MAJOR:=17}
+    name: postgresql
+  enableSuperuserAccess: true
+  superuserSecret:
+    name: "${APP}-pg-superuser"
+  storage:
+    size: "${CNPG_CAPACITY:=5Gi}"
+    storageClass: "${CNPG_STORAGECLASS:=ceph-block}"
+  resources:
+    limits:
+      memory: "${CNPG_MEMORY_LIMIT:=256Mi}"
+    requests:
+      cpu: "${CNPG_CPU_REQUEST:=50m}"
+  # For first deploy (no backup exists yet), temporarily change to:
+  #   bootstrap:
+  #     initdb:
+  #       database: app
+  #       owner: app
+  # After the first ScheduledBackup completes, switch back to recovery.
+  bootstrap:
+    recovery:
+      source: "${APP}-pg-v1"
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: "${APP}-pg-backup"
+        serverName: "${APP}-pg-v1"
+  externalClusters:
+    - name: "${APP}-pg-v1"
+      plugin:
+        name: barman-cloud.cloudnative-pg.io
+        parameters:
+          barmanObjectName: "${APP}-pg-backup"
+          serverName: "${APP}-pg-v1"
