@@ -77,6 +77,11 @@ spec:
             port: *ldap
           http:
             port: *http
+    persistence:
+      data:
+        type: emptyDir
+        globalMounts:
+          - path: /data
     route:
       app:
         hostnames:
