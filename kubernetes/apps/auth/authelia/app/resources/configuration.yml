@@ -1,0 +1,114 @@
+---
+theme: dark
+
+server:
+  address: 'tcp4://:9091'
+  buffers:
+    write: 4096
+    read: 4096
+
+log:
+  level: warn
+
+authentication_backend:
+  password_reset:
+    disable: false
+  refresh_interval: 1m
+  ldap:
+    implementation: custom
+    address: 'ldap://lldap.auth.svc.cluster.local:3890'
+    timeout: 5s
+    start_tls: false
+    base_dn: '{{ secret "/secrets/authelia/LDAP_BASE_DN" }}'
+    additional_users_dn: 'ou=people'
+    users_filter: '(&({username_attribute}={input})(objectClass=person))'
+    additional_groups_dn: 'ou=groups'
+    groups_filter: '(member={dn})'
+    attributes:
+      display_name: displayName
+      username: uid
+      group_name: cn
+      mail: mail
+    user: 'uid=authelia,ou=people,{{ secret "/secrets/authelia/LDAP_BASE_DN" }}'
+
+access_control:
+  default_policy: deny
+  rules:
+    - domain:
+        - 'frigate.${SECRET_DOMAIN}'
+      subject:
+        - 'group:security'
+      policy: two_factor
+    - domain:
+        - 'books.${SECRET_DOMAIN}'
+        - 'audiobookshelf.${SECRET_DOMAIN}'
+      subject:
+        - 'group:books'
+      policy: two_factor
+    - domain:
+        - '${SECRET_DOMAIN}'
+        - '*.${SECRET_DOMAIN}'
+      subject:
+        - 'group:admins'
+      policy: two_factor
+
+session:
+  name: authelia_session
+  expiration: 3600
+  inactivity: 300
+  cookies:
+    - domain: '${SECRET_DOMAIN}'
+      authelia_url: 'https://auth.${SECRET_DOMAIN}'
+      default_redirection_url: 'https://www.${SECRET_DOMAIN}'
+
+regulation:
+  max_retries: 3
+  find_time: 120
+  ban_time: 300
+
+storage:
+  postgres:
+    address: 'tcp://authelia-pg-rw:5432'
+    database: authelia
+    username: authelia
+
+notifier:
+  disable_startup_check: false
+  smtp:
+    username: '{{ secret "/secrets/authelia/SMTP_USERNAME" }}'
+    address: 'submission://smtp.gmail.com:587'
+    sender: 'admin@${SECRET_DOMAIN}'
+
+totp:
+  issuer: 'auth.${SECRET_DOMAIN}'
+  period: 30
+  skew: 2
+
+identity_providers:
+  oidc:
+    hmac_secret: 'secret'
+    jwks:
+      - algorithm: 'RS256'
+        use: 'sig'
+        key: '{{ secret "/secrets/authelia/OIDC_JWKS_KEY" }}'
+    lifespans:
+      access_token: 1h
+      authorize_code: 1m
+      id_token: 1h
+      refresh_token: 90m
+    clients:
+      - client_id: audiobookshelf
+        client_name: audiobookshelf
+        client_secret: '{{ secret "/secrets/authelia/AUDIOBOOKSHELF_CLIENT_SECRET" }}'
+        public: false
+        authorization_policy: one_factor
+        consent_mode: implicit
+        scopes:
+          - openid
+          - groups
+          - email
+          - profile
+        redirect_uris:
+          - 'https://audiobookshelf.${SECRET_DOMAIN}/auth/openid/callback'
+          - 'https://audiobookshelf.${SECRET_DOMAIN}/auth/openid/mobile-redirect'
+          - 'audiobookshelf://oauth'

@@ -1,0 +1,105 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: authelia
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  interval: 1h
+  values:
+    controllers:
+      authelia:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: authelia/authelia
+              tag: 4.39.15
+            env:
+              TZ: America/Chicago
+              AUTHELIA_SERVER_ADDRESS: "tcp4://:9091"
+              AUTHELIA_SERVER_DISABLE_HEALTHCHECK: "true"
+              AUTHELIA_TELEMETRY_METRICS_ENABLED: "true"
+              AUTHELIA_TELEMETRY_METRICS_ADDRESS: "tcp://0.0.0.0:9959"
+              AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET_FILE: /secrets/authelia/JWT_SECRET
+              AUTHELIA_SESSION_SECRET_FILE: /secrets/authelia/SESSION_SECRET
+              AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE: /secrets/authelia/ENCRYPTION_KEY
+              AUTHELIA_NOTIFIER_SMTP_PASSWORD_FILE: /secrets/authelia/SMTP_PASSWORD
+              AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD_FILE: /secrets/authelia/LDAP_PASSWORD
+              AUTHELIA_STORAGE_POSTGRES_PASSWORD_FILE: /secrets/pg/password
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/health
+                    port: &port 9091
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 256Mi
+    defaultPodOptions:
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+    service:
+      app:
+        controller: authelia
+        ports:
+          http:
+            port: *port
+          metrics:
+            port: 9959
+    serviceMonitor:
+      app:
+        serviceName: authelia
+        endpoints:
+          - port: metrics
+    route:
+      app:
+        hostnames:
+          - "auth.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      config:
+        type: configMap
+        name: authelia-config
+        globalMounts:
+          - path: /config/configuration.yml
+            subPath: configuration.yml
+            readOnly: true
+      authelia-secret:
+        type: secret
+        name: authelia-secret
+        globalMounts:
+          - path: /secrets/authelia
+            readOnly: true
+      pg-secret:
+        type: secret
+        name: authelia-pg-app
+        globalMounts:
+          - path: /secrets/pg
+            readOnly: true
