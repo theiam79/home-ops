@@ -2,6 +2,29 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
+  name: authelia-pg
+  namespace: &namespace auth
+spec:
+  dependsOn:
+    - name: cloudnative-pg
+      namespace: database
+    - name: cloudnative-pg-barman-cloud
+      namespace: database
+    - name: external-secrets
+      namespace: external-secrets
+  interval: 1h
+  path: ./kubernetes/apps/auth/authelia/db
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: *namespace
+  wait: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
   name: &app authelia
   namespace: &namespace auth
 spec:
@@ -11,12 +34,8 @@ spec:
   dependsOn:
     - name: lldap
       namespace: auth
-    - name: cloudnative-pg
-      namespace: database
-    - name: cloudnative-pg-barman-cloud
-      namespace: database
-    - name: external-secrets
-      namespace: external-secrets
+    - name: authelia-pg
+      namespace: auth
   interval: 1h
   path: ./kubernetes/apps/auth/authelia/app
   postBuild:
