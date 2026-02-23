@@ -90,7 +90,8 @@ identity_providers:
     jwks:
       - algorithm: 'RS256'
         use: 'sig'
-        key: '{{ secret "/secrets/authelia/OIDC_JWKS_KEY" }}'
+        key: |
+{{ secret "/secrets/authelia/OIDC_JWKS_KEY" | indent 10 }}
     lifespans:
       access_token: 1h
       authorize_code: 1m
