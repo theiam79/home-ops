@@ -76,10 +76,14 @@ spec:
       app:
         hostnames:
           - "auth.${SECRET_DOMAIN}"
+          - "auth.${SECRET_DOMAIN_2}"
         parentRefs:
           - name: envoy-external
             namespace: network
             sectionName: https
+          - name: envoy-external
+            namespace: network
+            sectionName: https-2
         rules:
           - backendRefs:
               - identifier: app

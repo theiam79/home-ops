@@ -51,6 +51,12 @@ access_control:
       subject:
         - 'group:admins'
       policy: two_factor
+    - domain:
+        - '${SECRET_DOMAIN_2}'
+        - '*.${SECRET_DOMAIN_2}'
+      subject:
+        - 'group:admins'
+      policy: two_factor
 
 session:
   name: authelia_session
@@ -60,6 +66,9 @@ session:
     - domain: '${SECRET_DOMAIN}'
       authelia_url: 'https://auth.${SECRET_DOMAIN}'
       default_redirection_url: 'https://www.${SECRET_DOMAIN}'
+    - domain: '${SECRET_DOMAIN_2}'
+      authelia_url: 'https://auth.${SECRET_DOMAIN_2}'
+      default_redirection_url: 'https://www.${SECRET_DOMAIN_2}'
 
 regulation:
   max_retries: 3
