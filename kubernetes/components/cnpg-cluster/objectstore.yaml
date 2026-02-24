@@ -7,7 +7,7 @@ spec:
   retentionPolicy: "${CNPG_RETENTION:=15d}"
   configuration:
     destinationPath: "s3://cnpg/${APP}/"
-    endpointURL: "http://snotra.internal:3900"
+    endpointURL: "http://garage.internal:3900"
     s3Credentials:
       region:
         name: "${APP}-cnpg-secret"
