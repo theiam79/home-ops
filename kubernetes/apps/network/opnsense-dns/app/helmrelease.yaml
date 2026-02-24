@@ -45,7 +45,7 @@ spec:
     policy: sync
     sources: ["gateway-httproute", "service"]
     registry: noop
-    domainFilters: ["${SECRET_DOMAIN}"]
+    domainFilters: ["${SECRET_DOMAIN}", "${SECRET_DOMAIN_2}"]
     serviceMonitor:
       enabled: true
     podAnnotations:
