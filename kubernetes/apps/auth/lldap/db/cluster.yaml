@@ -65,7 +65,7 @@ spec:
   retentionPolicy: "15d"
   configuration:
     destinationPath: "s3://cnpg/lldap/"
-    endpointURL: "http://snotra.internal:3900"
+    endpointURL: "http://garage.internal:3900"
     s3Credentials:
       region:
         name: lldap-cnpg-secret
