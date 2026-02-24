@@ -91,7 +91,7 @@ identity_providers:
       - algorithm: 'RS256'
         use: 'sig'
         key: |
-{{ secret "/secrets/authelia/OIDC_JWKS_KEY" | indent 10 }}
+          {{ secret "/secrets/authelia/OIDC_JWKS_KEY" | mindent 10 "|" | msquote }}
     lifespans:
       access_token: 1h
       authorize_code: 1m
