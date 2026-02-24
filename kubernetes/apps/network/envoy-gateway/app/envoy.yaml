@@ -61,6 +61,7 @@ spec:
         namespaces:
           from: Same
     - name: https
+      hostname: "*.${SECRET_DOMAIN}"
       protocol: HTTPS
       port: 443
       allowedRoutes:
@@ -71,6 +72,7 @@ spec:
           - kind: Secret
             name: ${SECRET_DOMAIN/./-}-production-tls
     - name: https-2
+      hostname: "*.${SECRET_DOMAIN_2}"
       protocol: HTTPS
       port: 443
       allowedRoutes:
@@ -101,6 +103,7 @@ spec:
         namespaces:
           from: Same
     - name: https
+      hostname: "*.${SECRET_DOMAIN}"
       protocol: HTTPS
       port: 443
       allowedRoutes:
@@ -111,6 +114,7 @@ spec:
           - kind: Secret
             name: ${SECRET_DOMAIN/./-}-production-tls
     - name: https-2
+      hostname: "*.${SECRET_DOMAIN_2}"
       protocol: HTTPS
       port: 443
       allowedRoutes:
