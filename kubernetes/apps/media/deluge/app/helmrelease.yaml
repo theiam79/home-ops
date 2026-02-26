@@ -71,7 +71,7 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               capabilities:
-                add: ["NET_ADMIN"]
+                add: ["NET_ADMIN", "MKNOD"]
                 drop: ["ALL"]
             resources:
               requests:
