@@ -9,9 +9,6 @@ metadata:
 spec:
   instances: 1
   imageName: ghcr.io/cloudnative-pg/postgresql:17
-  enableSuperuserAccess: true
-  superuserSecret:
-    name: authelia-pg-superuser
   storage:
     size: 5Gi
     storageClass: ceph-block
@@ -20,21 +17,9 @@ spec:
       memory: 256Mi
     requests:
       cpu: 50m
-  # After first ScheduledBackup completes, change bootstrap to:
-  #   bootstrap:
-  #     recovery:
-  #       source: authelia-pg-v1
-  # and remove the unraid-authelia-pg externalCluster entry.
   bootstrap:
-    initdb:
-      database: authelia
-      owner: authelia
-      import:
-        type: microservice
-        databases:
-          - authelia
-        source:
-          externalCluster: unraid-authelia-pg
+    recovery:
+      source: authelia-pg-v1
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true
@@ -42,14 +27,6 @@ spec:
         barmanObjectName: authelia-pg-backup
         serverName: authelia-pg-v1
   externalClusters:
-    - name: unraid-authelia-pg
-      connectionParameters:
-        host: "192.168.20.201"
-        user: authelia
-        dbname: authelia
-      password:
-        name: authelia-cnpg-secret
-        key: UNRAID_PG_PASSWORD
     - name: authelia-pg-v1
       plugin:
         name: barman-cloud.cloudnative-pg.io

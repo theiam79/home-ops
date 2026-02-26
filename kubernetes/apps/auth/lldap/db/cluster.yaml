@@ -9,9 +9,6 @@ metadata:
 spec:
   instances: 1
   imageName: ghcr.io/cloudnative-pg/postgresql:17
-  enableSuperuserAccess: true
-  superuserSecret:
-    name: lldap-pg-superuser
   storage:
     size: 5Gi
     storageClass: ceph-block
@@ -20,21 +17,9 @@ spec:
       memory: 256Mi
     requests:
       cpu: 50m
-  # After first ScheduledBackup completes, change bootstrap to:
-  #   bootstrap:
-  #     recovery:
-  #       source: lldap-pg-v1
-  # and remove the unraid-lldap-pg externalCluster entry.
   bootstrap:
-    initdb:
-      database: lldap
-      owner: lldap
-      import:
-        type: microservice
-        databases:
-          - lldap
-        source:
-          externalCluster: unraid-lldap-pg
+    recovery:
+      source: lldap-pg-v1
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true
@@ -42,14 +27,6 @@ spec:
         barmanObjectName: lldap-pg-backup
         serverName: lldap-pg-v1
   externalClusters:
-    - name: unraid-lldap-pg
-      connectionParameters:
-        host: "192.168.20.204"
-        user: lldap
-        dbname: lldap
-      password:
-        name: lldap-cnpg-secret
-        key: UNRAID_PG_PASSWORD
     - name: lldap-pg-v1
       plugin:
         name: barman-cloud.cloudnative-pg.io
