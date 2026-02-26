@@ -82,6 +82,6 @@ spec:
       books:
         type: nfs
         server: snotra.internal
-        path: /mnt/user/media/books
+        path: /mnt/user/Media/books
         globalMounts:
           - path: /books

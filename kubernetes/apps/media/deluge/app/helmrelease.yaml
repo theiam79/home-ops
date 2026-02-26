@@ -122,7 +122,7 @@ spec:
       books:
         type: nfs
         server: snotra.internal
-        path: /mnt/user/media/books
+        path: /mnt/user/Media/books
         advancedMounts:
           deluge:
             app:
@@ -130,7 +130,7 @@ spec:
       audiobooks:
         type: nfs
         server: snotra.internal
-        path: /mnt/user/media/audiobooks
+        path: /mnt/user/Media/audiobooks
         advancedMounts:
           deluge:
             app:
