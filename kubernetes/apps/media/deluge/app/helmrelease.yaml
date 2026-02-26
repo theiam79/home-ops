@@ -1,0 +1,143 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: deluge
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  interval: 1h
+  values:
+    controllers:
+      deluge:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            dependsOn: gluetun
+            image:
+              repository: ghcr.io/onedr0p/deluge
+              tag: 2.1.1
+            env:
+              TZ: America/Chicago
+              DELUGE_LOGLEVEL: info
+              DELUGE_WEB_PORT: &port 8112
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: *port
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 50m
+              limits:
+                memory: 1Gi
+          gluetun:
+            image:
+              repository: ghcr.io/qdm12/gluetun
+              tag: v3.40.0
+            env:
+              TZ: America/Chicago
+              VPN_TYPE: wireguard
+              DOT: "off"
+              FIREWALL_VPN_INPUT_PORTS: "58846"
+            envFrom:
+              - secretRef:
+                  name: deluge-secret
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /v1/openvpn/status
+                    port: 8000
+                  initialDelaySeconds: 10
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                add: ["NET_ADMIN"]
+                drop: ["ALL"]
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 256Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 0
+        runAsGroup: 0
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        controller: deluge
+        ports:
+          http:
+            primary: true
+            port: *port
+    route:
+      app:
+        hostnames:
+          - "deluge.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      config:
+        existingClaim: deluge
+        advancedMounts:
+          deluge:
+            app:
+              - path: /config
+      downloads:
+        type: nfs
+        server: snotra.internal
+        path: /mnt/disks/85AAZU6GS/cluster/downloads
+        advancedMounts:
+          deluge:
+            app:
+              - path: /downloads
+      books:
+        type: nfs
+        server: snotra.internal
+        path: /mnt/user/media/books
+        advancedMounts:
+          deluge:
+            app:
+              - path: /books
+      audiobooks:
+        type: nfs
+        server: snotra.internal
+        path: /mnt/user/media/audiobooks
+        advancedMounts:
+          deluge:
+            app:
+              - path: /audiobooks
+      gluetun-data:
+        type: emptyDir
+        advancedMounts:
+          deluge:
+            gluetun:
+              - path: /tmp/gluetun
