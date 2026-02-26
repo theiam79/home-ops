@@ -88,6 +88,8 @@ spec:
                   timeoutSeconds: 5
                   failureThreshold: 5
             securityContext:
+              runAsNonRoot: false
+              runAsUser: 0
               capabilities:
                 add: ["NET_ADMIN", "MKNOD", "NET_RAW"]
             resources:
