@@ -21,6 +21,8 @@ spec:
             env:
               TZ: America/Chicago
               PORT: &port 80
+              CONFIG_PATH: /config
+              METADATA_PATH: /config/metadata
             probes:
               liveness: &probes
                 enabled: true
@@ -63,12 +65,6 @@ spec:
         existingClaim: audiobookshelf
         globalMounts:
           - path: /config
-            subPath: config
-      metadata:
-        existingClaim: audiobookshelf
-        globalMounts:
-          - path: /metadata
-            subPath: metadata
       audiobooks:
         type: nfs
         server: snotra.internal
