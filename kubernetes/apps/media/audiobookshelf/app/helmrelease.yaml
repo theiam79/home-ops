@@ -78,9 +78,9 @@ spec:
         globalMounts:
           - path: /metadata
             subPath: metadata
-      audiobooks:
+      media:
         type: nfs
         server: snotra.internal
-        path: /mnt/user/Media/audiobooks
+        path: /mnt/user/Media
         globalMounts:
-          - path: /audiobooks
+          - path: /media

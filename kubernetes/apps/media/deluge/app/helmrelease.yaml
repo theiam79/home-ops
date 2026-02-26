@@ -114,27 +114,19 @@ spec:
       downloads:
         type: nfs
         server: snotra.internal
-        path: /mnt/disks/85AAZU6GS/cluster/downloads
+        path: /mnt/disks/85AAZU6GS
         advancedMounts:
           deluge:
             app:
               - path: /downloads
-      books:
+      media:
         type: nfs
         server: snotra.internal
-        path: /mnt/user/Media/books
+        path: /mnt/user/Media
         advancedMounts:
           deluge:
             app:
-              - path: /books
-      audiobooks:
-        type: nfs
-        server: snotra.internal
-        path: /mnt/user/Media/audiobooks
-        advancedMounts:
-          deluge:
-            app:
-              - path: /audiobooks
+              - path: /media
       gluetun-data:
         type: emptyDir
         advancedMounts:
