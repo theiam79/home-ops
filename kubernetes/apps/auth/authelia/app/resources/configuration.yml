@@ -5,7 +5,7 @@ server:
   address: 'tcp4://:9091'
   buffers:
     write: 4096
-    read: 4096
+    read: 8192
 
 log:
   level: warn
@@ -122,3 +122,30 @@ identity_providers:
           - 'https://audiobookshelf.${SECRET_DOMAIN}/auth/openid/callback'
           - 'https://audiobookshelf.${SECRET_DOMAIN}/auth/openid/mobile-redirect'
           - 'audiobookshelf://oauth'
+      - client_id: booklore
+        client_name: BookLore
+        public: true
+        authorization_policy: one_factor
+        consent_mode: implicit
+        scopes:
+          - openid
+          - offline_access
+          - profile
+          - email
+        redirect_uris:
+          - 'https://books.${SECRET_DOMAIN}/api/oidc'
+        token_endpoint_auth_method: none
+        pkce_challenge_method: S256
+      - client_id: shelfmark
+        client_name: Shelfmark
+        client_secret: '{{ secret "/secrets/authelia/SHELFMARK_CLIENT_SECRET" }}'
+        public: false
+        authorization_policy: one_factor
+        consent_mode: implicit
+        scopes:
+          - openid
+          - groups
+          - email
+          - profile
+        redirect_uris:
+          - 'https://shelfmark.${SECRET_DOMAIN}/oauth2/callback'
