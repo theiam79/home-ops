@@ -17,12 +17,15 @@ spec:
           app:
             dependsOn: gluetun
             image:
-              repository: ghcr.io/onedr0p/deluge
+              repository: lscr.io/linuxserver/deluge
               tag: 2.1.1
             env:
               TZ: America/Chicago
+              PUID: "1000"
+              PGID: "1000"
               DELUGE_LOGLEVEL: info
-              DELUGE_WEB_PORT: &port 8112
+            ports:
+              - containerPort: &port 8112
             probes:
               liveness: &probes
                 enabled: true
