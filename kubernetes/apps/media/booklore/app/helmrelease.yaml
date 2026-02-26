@@ -20,6 +20,8 @@ spec:
               tag: v2.0.2
             env:
               TZ: America/Chicago
+              USER_ID: "1000"
+              GROUP_ID: "1000"
               SPRING_DATASOURCE_URL: "jdbc:mariadb://mariadb.media.svc.cluster.local:3306/booklore"
               SPRING_DATASOURCE_USERNAME: booklore
               SPRING_DATASOURCE_PASSWORD:
@@ -65,10 +67,10 @@ spec:
               - identifier: app
                 port: *port
     persistence:
-      config:
+      data:
         existingClaim: booklore
         globalMounts:
-          - path: /config
+          - path: /app/data
       books:
         type: nfs
         server: snotra.internal
