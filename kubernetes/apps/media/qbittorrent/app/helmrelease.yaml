@@ -17,26 +17,36 @@ spec:
           app:
             dependsOn: gluetun
             image:
-              repository: ghcr.io/qbittorrent/docker-qbittorrent-nox
-              tag: 5.1.4-2
+              repository: ghcr.io/home-operations/qbittorrent-libtorrentv1
+              tag: 5.1.4
             env:
               TZ: America/Chicago
-              QBT_LEGAL_NOTICE: confirm
+              QBT_TORRENTING_PORT: "58846"
               QBT_WEBUI_PORT: &port 8080
             ports:
               - containerPort: *port
             probes:
-              liveness: &probes
+              liveness:
+                enabled: true
+                spec:
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              readiness:
                 enabled: true
                 custom: true
                 spec:
-                  tcpSocket:
+                  httpGet:
+                    path: /api/v2/app/version
                     port: *port
-                  initialDelaySeconds: 30
                   periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
-              readiness: *probes
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 10
             resources:
               requests:
                 cpu: 50m
@@ -135,6 +145,12 @@ spec:
           qbittorrent:
             app:
               - path: /audiobooks
+      tmp:
+        type: emptyDir
+        advancedMounts:
+          qbittorrent:
+            app:
+              - path: /tmp
       gluetun-data:
         type: emptyDir
         advancedMounts:
