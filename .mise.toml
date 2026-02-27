@@ -26,3 +26,4 @@ TALOSCONFIG = "{{config_root}}/talos/clusterconfig/talosconfig"
 "aqua:yannh/kubeconform" = "0.7.0"
 k9s = "latest"
 kompose = "latest"
+bitwarden-secrets-manager = { version = "latest", version_prefix = "bws-v" }
