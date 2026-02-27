@@ -65,6 +65,8 @@ spec:
       persistence:
         enabled: true
         storageClass: ceph-block
+        accessModes:
+          - ReadWriteOnce
         size: 50Gi
     gateway:
       replicas: 0
