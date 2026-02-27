@@ -9,5 +9,4 @@ resources:
   - ./audiobookshelf/ks.yaml
   - ./booklore/ks.yaml
   - ./prowlarr/ks.yaml
-  - ./qbittorrent/ks.yaml
   - ./shelfmark/ks.yaml
