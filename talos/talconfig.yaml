@@ -41,6 +41,9 @@ nodes:
         mtu: 1500
         vip:
           ip: "192.168.100.5"
+        vlans:
+          - vlanId: 70
+            dhcp: false
   - hostname: "dvergar-01"
     ipAddress: "192.168.100.21"
     installDiskSelector:
@@ -61,6 +64,9 @@ nodes:
         mtu: 1500
         vip:
           ip: "192.168.100.5"
+        vlans:
+          - vlanId: 70
+            dhcp: false
   - hostname: "dvergar-02"
     ipAddress: "192.168.100.22"
     installDiskSelector:
@@ -81,6 +87,9 @@ nodes:
         mtu: 1500
         vip:
           ip: "192.168.100.5"
+        vlans:
+          - vlanId: 70
+            dhcp: false
   - hostname: "dvergar-03"
     ipAddress: "192.168.100.23"
     installDiskSelector:
@@ -99,6 +108,9 @@ nodes:
           - network: "0.0.0.0/0"
             gateway: "192.168.100.1"
         mtu: 1500
+        vlans:
+          - vlanId: 70
+            dhcp: false
   - hostname: "dvergar-04"
     ipAddress: "192.168.100.24"
     installDiskSelector:
@@ -125,6 +137,9 @@ nodes:
           - network: "0.0.0.0/0"
             gateway: "192.168.100.1"
         mtu: 1500
+        vlans:
+          - vlanId: 70
+            dhcp: false
   - hostname: "dvergar-05"
     ipAddress: "192.168.100.25"
     installDiskSelector:
@@ -145,6 +160,9 @@ nodes:
           - network: "0.0.0.0/0"
             gateway: "192.168.100.1"
         mtu: 1500
+        vlans:
+          - vlanId: 70
+            dhcp: false
   - hostname: "elli"
     ipAddress: "192.168.100.30"
     installDiskSelector:
@@ -165,6 +183,9 @@ nodes:
           - network: "0.0.0.0/0"
             gateway: "192.168.100.1"
         mtu: 1500
+        vlans:
+          - vlanId: 70
+            dhcp: false
 
 # Global patches
 patches:
