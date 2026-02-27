@@ -51,68 +51,51 @@ cilium/cilium#44430 for resolution.
 
 ---
 
-## Talos (#11) + Kubelet (#21) — v1.12.4 + k8s v1.35.1 ⏳ PLANNED
+## Talos (#11) + Kubelet (#21) — v1.12.4 + k8s v1.35.1 🔄 IN PROGRESS
 
-**Current state**: Talos v1.10.4, Kubernetes v1.33.2 (7 nodes: 3 CP + 4 worker).
-Neither PR can be merged directly — both skip minors. Close both PRs and apply
-the final state manually after completing the stepping sequence.
+### Steps 1-2: ✅ COMPLETE — deployed 2026-02-27
 
-**Key risks**:
-- Kubernetes 1.35 removes cgroup v1 support entirely (Talos uses v2 by default)
-- Talos v1.12 jumps kernel from 6.12 to 6.18
-- Talos v1.12 deprecates legacy single-document network config
-- onedr0p reverted a Talos v1.12.1 patch before re-merging
-- Node **elli** has SecureBoot enabled — needs SecureBoot installer image variant
+- Talos upgraded v1.10.4 → v1.11.6 (all 7 nodes)
+- Kubernetes upgraded v1.33.2 → v1.34.4 (siderolabs kubelet latest for 1.34)
+- Fixed: added `admissionregistration.k8s.io/v1beta1=true` to API server
+  runtime-config — `MutatingAdmissionPolicy` graduated from v1alpha1 to v1beta1
+  in k8s 1.34, causing apiserver crash loops without this.
 
-### Step 1: Talos v1.10.4 → v1.11.6
+### Steps 3-4: ⏸️ ON HOLD
 
-1. Update `talos/talenv.yaml`: set Talos version to `v1.11.6`
-2. Regenerate configs: `talhelper genconfig`
-3. Upgrade each node one at a time:
-   ```bash
-   talosctl upgrade --nodes <ip> \
-     --image ghcr.io/siderolabs/installer:v1.11.6
-   ```
-   For **elli** (SecureBoot):
-   ```bash
-   talosctl upgrade --nodes 192.168.100.30 \
-     --image factory.talos.dev/installer-secureboot/<schematic-id>:v1.11.6
-   ```
-4. Wait for each node to rejoin before upgrading the next.
+Paused pending investigation of reported Talos v1.12 concerns. Current state
+(Talos v1.11.6 / k8s v1.34.4) is stable.
+
+**When resuming:**
+
+#### Step 3: Talos v1.11.6 → v1.12.4
+
+1. Investigate reported v1.12 concerns before proceeding
+2. Update `talos/talenv.yaml`: set Talos version to `v1.12.4`
+3. Regenerate configs: `task talos:generate-config`
+4. Upgrade each node: `task talos:upgrade-node IP=<ip>` one at a time
 5. Verify: `talosctl health`, `kubectl get nodes`
 
-### Step 2: Kubernetes v1.33.2 → v1.34.5
-
-1. Update `talos/talenv.yaml`: set Kubernetes version to `v1.34.5`
-2. Run: `talosctl upgrade-k8s --to v1.34.5`
-3. Verify: `kubectl version`, `kubectl get nodes`
-
-### Step 3: Talos v1.11.6 → v1.12.4
-
-1. Update `talos/talenv.yaml`: set Talos version to `v1.12.4`
-2. Regenerate configs: `talhelper genconfig`
-3. Upgrade each node one at a time (same process as Step 1).
-4. Verify: `talosctl health`, `kubectl get nodes`
-
-### Step 4: Kubernetes v1.34.5 → v1.35.1
+#### Step 4: Kubernetes v1.34.4 → v1.35.1
 
 1. Verify cgroup v2: `talosctl read /proc/filesystems --nodes <ip> | grep cgroup`
-2. Update `talos/talenv.yaml`: set Kubernetes version to `v1.35.1`
-3. Run: `talosctl upgrade-k8s --to v1.35.1`
-4. Verify: `kubectl version`, `kubectl get nodes`
+2. Check siderolabs kubelet image availability for v1.35.1
+3. Update `talos/talenv.yaml`: set Kubernetes version
+4. Run: `task talos:upgrade-k8s`
+5. Verify: `kubectl version`, `kubectl get nodes`
+6. May need to update runtime-config if MutatingAdmissionPolicy graduates again
 
-### Post-upgrade cleanup
+#### Post-upgrade cleanup
 
 1. Close PRs #11 and #21 (versions applied manually via stepping).
 2. Commit final `talos/talenv.yaml` and regenerated configs.
 3. Verify all workloads healthy, VolSync jobs running, Ceph HEALTH_OK.
 
-### Timeline
-
-- Each Talos step: ~30-60 min (7 nodes sequential)
-- Each k8s step: ~10 min
-- Total: ~2-3 hours if done in one window, or spread across sessions
-- Have Talos console access available (not SSH, which goes through the CNI).
+**Key lessons from Steps 1-2:**
+- Use `task talos:upgrade-node` and `task talos:upgrade-k8s` (not raw talosctl)
+- Regenerate configs before upgrading k8s (version baked into machine configs)
+- Check API server feature gate / runtime-config compatibility at each k8s minor
+- Siderolabs kubelet images lag slightly behind upstream k8s releases
 
 ---
 
