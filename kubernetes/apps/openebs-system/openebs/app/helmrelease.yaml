@@ -53,6 +53,10 @@ spec:
       enabled: false
     lvm-localpv:
       enabled: false
+    loki:
+      enabled: false
+    alloy:
+      enabled: false
     mayastor:
       enabled: false
     engines:
