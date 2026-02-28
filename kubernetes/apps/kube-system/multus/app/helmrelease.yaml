@@ -23,15 +23,21 @@ spec:
         patches:
           - target:
               kind: DaemonSet
-              name: kube-multus-ds
+              name: multus
             patch: |
               apiVersion: apps/v1
               kind: DaemonSet
               metadata:
-                name: kube-multus-ds
+                name: multus
               spec:
                 template:
                   spec:
+                    containers:
+                      - name: multus
+                        volumeMounts:
+                          - name: host-run-netns
+                            mountPath: /run/netns
+                            mountPropagation: HostToContainer
                     volumes:
                       - name: host-run-netns
                         hostPath:
