@@ -47,7 +47,7 @@ spec:
         k8s.v1.cni.cncf.io/networks: |
           [{
             "name": "vpn",
-            "default-route": ["10.1.70.1"]
+            "default-route": ["192.168.70.1"]
           }]
       affinity:
         nodeAffinity:
