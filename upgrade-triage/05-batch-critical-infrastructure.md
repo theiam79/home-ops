@@ -7,20 +7,18 @@ a time with stability verification between each.
 
 ---
 
-## Rook Ceph (#47 + #48) — v1.17.7 → v1.19.2 🔄 IN PROGRESS
+## Rook Ceph (#47 + #48) — v1.17.7 → v1.19.2 ✅ COMPLETE
 
 **Phase 1 (v1.17.7 → v1.18.9): ✅ COMPLETE** — deployed 2026-02-27.
 - Ceph confirmed on Squid v19.2.3 (satisfies v1.19 prerequisite).
 - Manual commit `36fa4a8` bumped both OCIRepositories to v1.18.9.
 - OSDs rolled successfully, cluster reporting HEALTH_OK.
-- Soaking on v1.18.9 before proceeding.
 
-**Phase 2 (v1.18.9 → v1.19.2): ⏳ WAITING**
-- PRs #47 and #48 target v1.19.2 but will conflict on the version lines
-  changed in Phase 1 (v1.17.7→v1.18.9 vs v1.17.7→v1.19.2).
-- Will need to apply manually and close PRs, same as SM-Operator.
-- **Proceed after v1.18.9 has been stable for 24-48 hours.**
-- Monitor OSD, MON, and MGR pods during rollout.
+**Phase 2 (v1.18.9 → v1.19.2): ✅ COMPLETE** — deployed 2026-02-27.
+- Soaked on v1.18.9 for 12+ hours before proceeding.
+- Renovate rebased PRs #47 and #48 against v1.18.9, so both merged cleanly.
+- MGR pods crashed during rollout (expected during minor upgrade), recovered.
+- Cluster stable at v1.19.2.
 
 ---
 
@@ -51,7 +49,7 @@ cilium/cilium#44430 for resolution.
 
 ---
 
-## Talos (#11) + Kubelet (#21) — v1.12.4 + k8s v1.35.1 🔄 IN PROGRESS
+## Talos (#11) + Kubelet (#21) — v1.12.4 + k8s v1.35.2 ✅ COMPLETE
 
 ### Steps 1-2: ✅ COMPLETE — deployed 2026-02-27
 
@@ -61,48 +59,35 @@ cilium/cilium#44430 for resolution.
   runtime-config — `MutatingAdmissionPolicy` graduated from v1alpha1 to v1beta1
   in k8s 1.34, causing apiserver crash loops without this.
 
-### Steps 3-4: ⏸️ ON HOLD
+### Steps 3-4: ✅ COMPLETE — deployed 2026-02-27
 
-Paused pending investigation of reported Talos v1.12 concerns. Current state
-(Talos v1.11.6 / k8s v1.34.4) is stable.
+- Talos upgraded v1.11.6 → v1.12.4 (all 7 nodes, `--reboot-mode=powercycle`)
+- Kubernetes upgraded v1.34.4 → v1.35.2
+- Dropped `admissionregistration.k8s.io/v1alpha1=true` from runtime-config
+  (v1alpha1 no longer served in k8s 1.35).
+- Migrated VolSync MutatingAdmissionPolicy manifests from v1alpha1 to v1beta1.
+- Converted admission-controller patch from JSON6902 to strategic merge
+  (`$$patch: delete` for talhelper escaping) — Talos v1.12 dropped JSON6902
+  support for multi-document configs.
+- OSD.1 went down after upgrade due to PodSecurity `baseline:latest` enforcement
+  blocking Rook pods. Resolved by applying updated admission control config to
+  CP nodes; OSD purged and rebuilt, Ceph back to HEALTH_OK with 5/5 OSDs.
+- PRs #11 and #21 closed (versions applied manually via stepping).
 
-**When resuming:**
-
-#### Step 3: Talos v1.11.6 → v1.12.4
-
-1. Investigate reported v1.12 concerns before proceeding
-2. Update `talos/talenv.yaml`: set Talos version to `v1.12.4`
-3. Regenerate configs: `task talos:generate-config`
-4. Upgrade each node: `task talos:upgrade-node IP=<ip>` one at a time
-5. Verify: `talosctl health`, `kubectl get nodes`
-
-#### Step 4: Kubernetes v1.34.4 → v1.35.1
-
-1. Verify cgroup v2: `talosctl read /proc/filesystems --nodes <ip> | grep cgroup`
-2. Check siderolabs kubelet image availability for v1.35.1
-3. Update `talos/talenv.yaml`: set Kubernetes version
-4. Run: `task talos:upgrade-k8s`
-5. Verify: `kubectl version`, `kubectl get nodes`
-6. May need to update runtime-config if MutatingAdmissionPolicy graduates again
-
-#### Post-upgrade cleanup
-
-1. Close PRs #11 and #21 (versions applied manually via stepping).
-2. Commit final `talos/talenv.yaml` and regenerated configs.
-3. Verify all workloads healthy, VolSync jobs running, Ceph HEALTH_OK.
-
-**Key lessons from Steps 1-2:**
+**Key lessons:**
 - Use `task talos:upgrade-node` and `task talos:upgrade-k8s` (not raw talosctl)
 - Regenerate configs before upgrading k8s (version baked into machine configs)
 - Check API server feature gate / runtime-config compatibility at each k8s minor
 - Siderolabs kubelet images lag slightly behind upstream k8s releases
+- Talos v1.12 requires strategic merge patches — use `$$patch:` to escape for talhelper
+- Use `--reboot-mode=powercycle` to avoid kexec hang on v1.12
 
 ---
 
 ## Recommended order
 
-1. **Rook Ceph** — Phase 2 after v1.18 soak ✅ Phase 1 done
-2. **Talos + Kubelet** — After Ceph is stable
+1. **Rook Ceph** — ✅ COMPLETE (v1.17.7 → v1.18.9 → v1.19.2)
+2. **Talos + Kubelet** — ✅ COMPLETE (v1.10.4/v1.33.2 → v1.12.4/v1.35.2)
 3. **Cilium** — HOLD until 1.19.2+, do last after Talos/k8s stable
 
 Do NOT upgrade Cilium and Talos in the same maintenance window.
