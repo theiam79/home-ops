@@ -52,11 +52,9 @@ spec:
               TZ: America/Chicago
               VPN_TYPE: wireguard
               DOT: "off"
-              FIREWALL_VPN_INPUT_PORTS: "8080"
-              FIREWALL_OUTBOUND_SUBNETS: "10.42.0.0/15"
-              HEALTH_VPN_DURATION_INITIAL: "1m"
-              HEALTH_VPN_DURATION_ADDITION: "1m"
-              HEALTH_SUCCESS_WAIT_DURATION: "1m"
+              DNS_KEEP_NAMESERVER: "on"
+              FIREWALL_INPUT_PORTS: "8080"
+              FIREWALL_OUTBOUND_SUBNETS: "10.42.0.0/15,192.168.100.0/24"
             envFrom:
               - secretRef:
                   name: qbittorrent-secret
@@ -66,9 +64,9 @@ spec:
                 custom: true
                 spec:
                   httpGet:
-                    path: /v1/openvpn/status
-                    port: 8000
-                  initialDelaySeconds: 5
+                    path: /
+                    port: 9999
+                  initialDelaySeconds: 10
                   periodSeconds: 5
                   timeoutSeconds: 5
                   failureThreshold: 30
@@ -77,9 +75,8 @@ spec:
                 custom: true
                 spec:
                   httpGet:
-                    path: /v1/openvpn/status
-                    port: 8000
-                  initialDelaySeconds: 0
+                    path: /
+                    port: 9999
                   periodSeconds: 30
                   timeoutSeconds: 5
                   failureThreshold: 5
