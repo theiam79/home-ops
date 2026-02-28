@@ -53,7 +53,8 @@ spec:
               VPN_TYPE: wireguard
               DOT: "off"
               DNS_KEEP_NAMESERVER: "on"
-              FIREWALL_INPUT_PORTS: "8080"
+              HEALTH_SERVER_ADDRESS: "0.0.0.0:9999"
+              FIREWALL_INPUT_PORTS: "8080,9999"
               FIREWALL_VPN_INPUT_PORTS: "58846"
               FIREWALL_OUTBOUND_SUBNETS: "10.42.0.0/15,192.168.100.0/24"
             envFrom:
