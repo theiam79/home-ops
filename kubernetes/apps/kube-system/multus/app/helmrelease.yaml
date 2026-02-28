@@ -1,0 +1,38 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: multus
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: multus
+  interval: 1h
+  values:
+    image:
+      repository: ghcr.io/k8snetworkplumbingwg/multus-cni
+      tag: v4.1.4-thick
+    cni:
+      paths:
+        bin: /opt/cni/bin
+        config: /etc/cni/net.d
+    hostPaths:
+      netns: /var/run/netns
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: DaemonSet
+              name: kube-multus-ds
+            patch: |
+              apiVersion: apps/v1
+              kind: DaemonSet
+              metadata:
+                name: kube-multus-ds
+              spec:
+                template:
+                  spec:
+                    volumes:
+                      - name: host-run-netns
+                        hostPath:
+                          path: /var/run/netns/
