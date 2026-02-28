@@ -47,11 +47,11 @@ spec:
           gluetun:
             image:
               repository: ghcr.io/qdm12/gluetun
-              tag: v3.39.1
+              tag: v3.41.1
             env:
               TZ: America/Chicago
               VPN_TYPE: wireguard
-              DOT: "off"
+              DNS_SERVER: "off"
               DNS_KEEP_NAMESERVER: "on"
               HEALTH_SERVER_ADDRESS: "0.0.0.0:9999"
               FIREWALL_INPUT_PORTS: "8080,9999"
