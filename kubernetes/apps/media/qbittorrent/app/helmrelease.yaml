@@ -8,6 +8,7 @@ spec:
     kind: OCIRepository
     name: app-template
   interval: 1h
+  timeout: 15m
   values:
     controllers:
       qbittorrent:
@@ -15,6 +16,7 @@ spec:
           reloader.stakater.com/auto: "true"
         containers:
           app:
+            dependsOn: gluetun
             image:
               repository: ghcr.io/home-operations/qbittorrent-libtorrentv1
               tag: 5.1.4
@@ -42,19 +44,56 @@ spec:
                 cpu: 50m
               limits:
                 memory: 1Gi
+          gluetun:
+            image:
+              repository: ghcr.io/qdm12/gluetun
+              tag: v3.39.1
+            env:
+              TZ: America/Chicago
+              VPN_TYPE: wireguard
+              DOT: "off"
+              FIREWALL_VPN_INPUT_PORTS: "8080"
+              FIREWALL_OUTBOUND_SUBNETS: "10.42.0.0/15"
+              HEALTH_VPN_DURATION_INITIAL: "1m"
+              HEALTH_VPN_DURATION_ADDITION: "1m"
+              HEALTH_SUCCESS_WAIT_DURATION: "1m"
+            envFrom:
+              - secretRef:
+                  name: qbittorrent-secret
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /v1/openvpn/status
+                    port: 8000
+                  initialDelaySeconds: 5
+                  periodSeconds: 5
+                  timeoutSeconds: 5
+                  failureThreshold: 30
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /v1/openvpn/status
+                    port: 8000
+                  initialDelaySeconds: 0
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+            securityContext:
+              runAsNonRoot: false
+              runAsUser: 0
+              capabilities:
+                add: ["NET_ADMIN", "MKNOD", "NET_RAW"]
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 256Mi
     defaultPodOptions:
-      annotations:
-        k8s.v1.cni.cncf.io/networks: vpn
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: kubernetes.io/hostname
-                    operator: In
-                    values:
-                      - dvergar-03
-                      - dvergar-04
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -117,3 +156,9 @@ spec:
           qbittorrent:
             app:
               - path: /tmp
+      gluetun-data:
+        type: emptyDir
+        advancedMounts:
+          qbittorrent:
+            gluetun:
+              - path: /tmp/gluetun
