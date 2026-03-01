@@ -16,7 +16,7 @@ containers:
   kubeRbacProxy:
     image:
       repository: quay.io/brancz/kube-rbac-proxy
-      tag: v0.16.0
+      tag: v0.21.0
     # The pod resource requirements.  You can adjust these up and down for your environment
     resources:
       limits:
