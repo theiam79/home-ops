@@ -1,27 +1,49 @@
-# Batch 3: Moderate Prep — Config Changes and Testing Required ✅ COMPLETE
+# Batch 3 — Moderate Prep (config changes and testing)
 
-5 of 6 PRs resolved on 2026-02-27. Helm CLI deferred.
+These require configuration changes, backups, or pre-merge testing.
 
-| PR | Title | Prep Done | Status |
-|----|-------|-----------|--------|
-| #61 | Minecraft chart 4.26.3 → 5.1.1 | No nameOverride/fullnameOverride set, PVCs are existingClaim | ✅ Merged |
-| #65 | k8s-sidecar 1.30.3 → 2.5.0 | Gatus init container memory bumped 128Mi → 256Mi | ✅ Merged |
-| #36 | Loki chart 6.30.1 → 6.53.0 | Added `singleBinary.persistence.accessModes: [ReadWriteOnce]` | ✅ Merged |
-| #9 | Grafana chart 9.2.2 → 9.4.5 | Step 1 of sequence, no prep needed | ✅ Merged |
-| #55 | Grafana chart 9.4.5 → 10.5.15 | Removed Angular plugins and `GF_SECURITY_ANGULAR_SUPPORT_ENABLED` | ✅ Merged |
-| #69 | Helm CLI 3.20.0 → 4.1.1 (mise) | Bootstrap uses flags needing Helm 4 validation | ⏸️ Deferred |
+---
 
-## Prep commits
+## #117 — MariaDB 11.7.2 -> 12.2.2 (MAJOR)
 
-- `039dfa1` — Loki accessModes fix and Gatus k8s-sidecar memory bump
-- `d64d574` — Grafana Angular plugin removal (natel-discrete-panel, vonage-status-panel,
-  GF_SECURITY_ANGULAR_SUPPORT_ENABLED)
+- **Risk:** Medium-High
+- **Rationale:** Major version bump with a new rolling release model. MariaDB 12.x removes the query cache entirely and several deprecated system variables. The Docker container will refuse to start without `MARIADB_AUTO_UPGRADE=1`. Currently backs Booklore only, limiting blast radius.
+- **Reference repo:** No comparison available (onedr0p does not use MariaDB).
+- **Extra steps:**
+  1. **Backup the database** before upgrading:
+     ```
+     kubectl exec -n media deploy/mariadb -- mariadb-dump --all-databases > mariadb-backup-$(date +%Y%m%d).sql
+     ```
+     Also snapshot the PVC via VolSync or manual PVC snapshot.
+  2. **Add `MARIADB_AUTO_UPGRADE: "1"`** to the MariaDB container env in `kubernetes/apps/media/mariadb/app/helmrelease.yaml`. Without this, the container exits immediately on version mismatch.
+  3. Verify no custom `my.cnf` references removed variables (`query_cache_size`, `query_cache_type`, `big_tables`, `large_page_size`, `storage_engine`). Current helmrelease does not pass a custom config, so this is likely fine.
+  4. After merge, verify MariaDB starts and `mariadb-upgrade` runs successfully:
+     ```
+     kubectl logs -n media -l app.kubernetes.io/name=mariadb --tail=50
+     ```
+  5. Verify Booklore can connect and read data:
+     ```
+     kubectl logs -n media -l app.kubernetes.io/name=booklore --tail=20
+     ```
+  6. **Note:** MariaDB 12.x uses a rolling release model — expect more frequent minor bumps (12.2 -> 12.3 -> ...) going forward.
 
-## Notes
+### Superseded PR: #116 (mariadb 11.7.2 -> 11.8.6)
 
-- **Grafana**: Upgraded in two steps (9.2.2 → 9.4.5 → 10.5.15). First reconciliation
-  timed out with rate limiter error but succeeded on retry. Dashboards verified working.
-  Angular plugins removed rather than replaced — will revisit if specific dashboards
-  need panel replacements.
-- **Helm CLI (#69)**: Deferred indefinitely. Helm 3 supported until November 2026.
-  Bootstrap uses `--include-crds` and `--no-hooks` flags that need Helm 4 validation.
+Not required as an intermediate step. Close #116 after merging #117. See `00-superseded-close.md`.
+
+---
+
+## #69 — Helm 3.20.0 -> 4.1.1 (MAJOR, local CLI tool)
+
+- **Risk:** Low-Medium
+- **Rationale:** Major version bump of the local Helm CLI managed via mise. Flux uses its own embedded Helm SDK, so in-cluster reconciliation is NOT affected. The blast radius is limited to manual `helm` commands and the `helmfile` bootstrap workflow. Key changes: Server-Side Apply by default, CLI flag renames (`--atomic` -> `--rollback-on-failure`), post-renderers require plugins.
+- **Reference repo:** **onedr0p has deliberately rejected Helm 4 — they closed 6 consecutive Renovate PRs** for this upgrade between November 2025 and February 2026, staying on Helm 3.19.x. This is a strong signal to wait.
+- **Extra steps:**
+  1. **Consider deferring this upgrade** given the onedr0p signal.
+  2. If proceeding, test bootstrap scripts first:
+     ```
+     cd bootstrap/helmfile.d && helmfile --environment default template
+     ```
+  3. Check helmfile compatibility with Helm 4 SDK.
+  4. Audit any scripts or Taskfile targets for removed/renamed flags.
+  5. Update `.mise.toml` line 19 from `3.20.0` to `4.1.1`.
