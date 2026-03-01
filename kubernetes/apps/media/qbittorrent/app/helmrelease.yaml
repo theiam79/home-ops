@@ -197,9 +197,7 @@ spec:
             gluetun:
               - path: /tmp/gluetun
       mousehole-data:
-        type: persistentVolumeClaim
-        accessMode: ReadWriteOnce
-        size: 1Gi
+        existingClaim: mousehole
         advancedMounts:
           qbittorrent:
             mousehole:
