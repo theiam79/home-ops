@@ -15,8 +15,8 @@ containers:
         memory: 64Mi
   kubeRbacProxy:
     image:
-      repository: gcr.io/kubebuilder/kube-rbac-proxy
-      tag: v0.14.1
+      repository: quay.io/brancz/kube-rbac-proxy
+      tag: v0.16.0
     # The pod resource requirements.  You can adjust these up and down for your environment
     resources:
       limits:
