@@ -77,3 +77,10 @@ spec:
         path: /mnt/disks/85AAZU6GS/cluster/downloads
         globalMounts:
           - path: /data/downloads
+      bookdrop:
+        type: nfs
+        server: snotra.internal
+        path: /mnt/disks/85AAZU6GS/cluster/imports/books
+        globalMounts:
+          - path: /bookdrop
+
