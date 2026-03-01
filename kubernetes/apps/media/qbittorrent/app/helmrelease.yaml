@@ -55,7 +55,7 @@ spec:
               DNS_KEEP_NAMESERVER: "on"
               HEALTH_SERVER_ADDRESS: "0.0.0.0:9999"
               HEALTH_VPN_DURATION_INITIAL: "15s"
-              FIREWALL_INPUT_PORTS: "8080,9999"
+              FIREWALL_INPUT_PORTS: "8080,9999,5010"
               FIREWALL_VPN_INPUT_PORTS: "58846"
               FIREWALL_OUTBOUND_SUBNETS: "10.42.0.0/15,192.168.100.0/24"
             envFrom:
@@ -93,6 +93,32 @@ spec:
                 cpu: 10m
               limits:
                 memory: 256Mi
+          mousehole:
+            dependsOn: gluetun
+            image:
+              repository: tmmrtn/mousehole
+              tag: latest
+            env:
+              TZ: America/Chicago
+            ports:
+              - containerPort: 5010
+            probes:
+              liveness: &mouseholeProbes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: 5010
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              readiness: *mouseholeProbes
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 128Mi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -107,6 +133,11 @@ spec:
           http:
             primary: true
             port: *port
+      mousehole:
+        controller: qbittorrent
+        ports:
+          http:
+            port: 5010
     route:
       app:
         hostnames:
@@ -119,6 +150,17 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
+      mousehole:
+        hostnames:
+          - "mousehole.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: mousehole
+                port: 5010
     persistence:
       config:
         existingClaim: qbittorrent
@@ -154,3 +196,11 @@ spec:
           qbittorrent:
             gluetun:
               - path: /tmp/gluetun
+      mousehole-data:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        advancedMounts:
+          qbittorrent:
+            mousehole:
+              - path: /config
