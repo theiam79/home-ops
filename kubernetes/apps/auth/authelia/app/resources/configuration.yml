@@ -107,6 +107,9 @@ identity_providers:
       authorize_code: 1m
       id_token: 1h
       refresh_token: 90m
+    claims_policies:
+      booklore:
+        id_token: ['email', 'preferred_username', 'name']
     clients:
       - client_id: audiobookshelf
         client_name: audiobookshelf
@@ -124,7 +127,8 @@ identity_providers:
           - 'https://audiobookshelf.${SECRET_DOMAIN}/auth/openid/mobile-redirect'
           - 'audiobookshelf://oauth'
       - client_id: booklore
-        client_name: BookLore
+        claim_policy: booklore
+        client_name: Booklore
         public: true
         authorization_policy: two_factor
         require_pkce: true
@@ -142,7 +146,9 @@ identity_providers:
         grant_types:
           - authorization_code
           - refresh_token
-        token_endpoint_auth_method: none
+        access_token_signed_response_alg: 'none'
+        userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'none'
         pkce_challenge_method: S256
       - client_id: shelfmark
         client_name: Shelfmark
