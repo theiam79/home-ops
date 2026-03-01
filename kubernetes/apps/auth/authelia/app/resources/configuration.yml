@@ -127,6 +127,8 @@ identity_providers:
         public: true
         authorization_policy: one_factor
         consent_mode: implicit
+        response_types:
+          - code
         scopes:
           - openid
           - offline_access
