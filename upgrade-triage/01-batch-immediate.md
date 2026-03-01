@@ -1,33 +1,48 @@
-# Batch 1: Immediate Merges — No Prep Required ✅ COMPLETE
+# Batch 1 — Immediate (no prep needed)
 
-All 15 PRs merged on 2026-02-27 in three groups.
+Merge these directly. All are patches or low-risk minors with no breaking changes.
 
-## Group A — CI only (merged simultaneously)
+---
 
-| PR | Title | Status |
-|----|-------|--------|
-| #71 | actions/checkout v4.3.1 → v6.0.2 | ✅ Merged |
-| #68 | flux-local v7.11.0 → v8.1.0 | ✅ Merged |
-| #53 | tj-actions/changed-files v46.0.5 → v47.0.4 | ✅ Merged (SHA verified) |
+## #110 — kube-prometheus-stack 82.4.1 -> 82.4.3
 
-## Group B — Negligible patches (merged together)
+- **Risk:** Negligible
+- **Rationale:** Patch bump within the 82.x line. No config changes.
+- **Reference repo:** onedr0p merged all 82.x patches without issue, auto-merging aggressively through the entire 82.0.0-82.4.3 range with zero reverts.
+- **Extra steps:** None.
 
-| PR | Title | Status |
-|----|-------|--------|
-| #87 | Reloader 2.2.7 → 2.2.8 | ✅ Merged |
-| #83 | mc-router 1.4.0 → 1.4.1 | ✅ Merged |
-| #64 | Promtail 6.17.0 → 6.17.1 | ✅ Merged |
-| #54 | tnu 0.4.3 → 0.4.4 | ✅ Merged |
-| #82 | Cloudflared tool (mise) 2025.11.1 → 2026.2.0 | ✅ Merged |
+---
 
-## Group C — Low-risk minors (merged together)
+## #109 — reflector 10.0.13 -> 10.0.14
 
-| PR | Title | Notes | Status |
-|----|-------|-------|--------|
-| #74 | cert-manager v1.19.2 → v1.19.4 | | ✅ Merged |
-| #80 | Cloudflared container 2026.1.2 → 2026.2.0 | | ✅ Merged |
-| #81 | Reflector 9.1.7 → 10.0.12 | Cosmetic major | ✅ Merged |
-| #88 | Flux Operator 0.40.0 → 0.42.1 | Anon auth CRB not needed (web UI not exposed) | ✅ Merged |
-| #13 | app-template 4.0.1 → 4.6.2 | | ✅ Merged |
-| #29 | System Upgrade Controller v0.15.2 → v0.19.0 | | ✅ Merged |
-| #39 | Gatus v5.18.1 → v5.35.0 | | ✅ Merged |
+- **Risk:** Negligible
+- **Rationale:** Patch bump. Reflector is a simple secret/configmap mirror.
+- **Reference repo:** No comparison available (removed from their cluster years ago).
+- **Extra steps:** None.
+
+---
+
+## #108 — booklore v2.0.2 -> v2.0.5
+
+- **Risk:** Negligible
+- **Rationale:** Patch bump within the 2.0.x line.
+- **Reference repo:** No comparison available (not used).
+- **Extra steps:** None.
+
+---
+
+## #114 — prowlarr-develop 1.31.2.4975 -> 1.32.2.4987
+
+- **Risk:** Low
+- **Rationale:** Minor bump. Prowlarr develop builds are frequent and generally stable. No breaking changes expected within the 1.x line.
+- **Reference repo:** onedr0p uses a different image (`ghcr.io/home-operations/prowlarr`) and is already on 2.x. No direct comparison, but their 1.x-to-2.x jump had zero reverts.
+- **Extra steps:** None.
+
+---
+
+## #113 — shelfmark v1.0.2 -> v1.1.2
+
+- **Risk:** Low
+- **Rationale:** Minor bump. Shelfmark is a relatively simple app.
+- **Reference repo:** No comparison available (not used).
+- **Extra steps:** None.
