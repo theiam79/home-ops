@@ -71,9 +71,9 @@ spec:
         existingClaim: booklore
         globalMounts:
           - path: /app/data
-      books:
+      media:
         type: nfs
         server: snotra.internal
-        path: /mnt/user/Media/Books
+        path: /mnt/user/Media
         globalMounts:
-          - path: /books
+          - path: /data/media

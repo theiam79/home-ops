@@ -65,9 +65,15 @@ spec:
         existingClaim: shelfmark
         globalMounts:
           - path: /config
+      media:
+        type: nfs
+        server: snotra.internal
+        path: /mnt/user/Media
+        globalMounts:
+          - path: /data/media
       downloads:
         type: nfs
         server: snotra.internal
         path: /mnt/disks/85AAZU6GS/cluster/downloads
         globalMounts:
-          - path: /downloads
+          - path: /data/downloads

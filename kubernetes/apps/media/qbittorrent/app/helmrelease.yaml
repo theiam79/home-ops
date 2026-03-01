@@ -126,6 +126,14 @@ spec:
           qbittorrent:
             app:
               - path: /config
+      media:
+        type: nfs
+        server: snotra.internal
+        path: /mnt/user/Media
+        advancedMounts:
+          qbittorrent:
+            app:
+              - path: /data/media
       downloads:
         type: nfs
         server: snotra.internal
@@ -133,23 +141,7 @@ spec:
         advancedMounts:
           qbittorrent:
             app:
-              - path: /downloads
-      books:
-        type: nfs
-        server: snotra.internal
-        path: /mnt/user/Media/Books
-        advancedMounts:
-          qbittorrent:
-            app:
-              - path: /books
-      audiobooks:
-        type: nfs
-        server: snotra.internal
-        path: /mnt/user/Media/Audiobooks
-        advancedMounts:
-          qbittorrent:
-            app:
-              - path: /audiobooks
+              - path: /data/downloads
       tmp:
         type: emptyDir
         advancedMounts:

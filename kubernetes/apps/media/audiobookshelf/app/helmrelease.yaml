@@ -65,9 +65,9 @@ spec:
         existingClaim: audiobookshelf
         globalMounts:
           - path: /config
-      audiobooks:
+      media:
         type: nfs
         server: snotra.internal
-        path: /mnt/user/Media/Audiobooks
+        path: /mnt/user/Media
         globalMounts:
-          - path: /audiobooks
+          - path: /data/media
