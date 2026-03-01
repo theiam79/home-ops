@@ -47,17 +47,17 @@ spec:
           gluetun:
             image:
               repository: ghcr.io/qdm12/gluetun
-              tag: v3.41.1
+              tag: v3.39.1
             env:
               TZ: America/Chicago
               VPN_TYPE: wireguard
-              DNS_SERVER: "off"
+              DOT: "off"
               DNS_KEEP_NAMESERVER: "on"
               HEALTH_SERVER_ADDRESS: "0.0.0.0:9999"
+              HEALTH_VPN_DURATION_INITIAL: "15s"
               FIREWALL_INPUT_PORTS: "8080,9999"
               FIREWALL_VPN_INPUT_PORTS: "58846"
               FIREWALL_OUTBOUND_SUBNETS: "10.42.0.0/15,192.168.100.0/24"
-              VPN_IPV6_SERVER: "off"
             envFrom:
               - secretRef:
                   name: qbittorrent-secret
