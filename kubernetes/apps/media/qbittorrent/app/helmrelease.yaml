@@ -201,4 +201,4 @@ spec:
         advancedMounts:
           qbittorrent:
             mousehole:
-              - path: /config
+              - path: /var/mousehole
