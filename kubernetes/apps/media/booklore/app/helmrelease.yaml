@@ -63,7 +63,13 @@ spec:
             namespace: network
             sectionName: https
         rules:
-          - backendRefs:
+          - filters:
+              - type: RequestHeaderModifier
+                requestHeaderModifier:
+                  set:
+                    - name: X-Forwarded-Proto
+                      value: https
+            backendRefs:
               - identifier: app
                 port: *port
     persistence:
