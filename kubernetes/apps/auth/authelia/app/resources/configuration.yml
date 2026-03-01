@@ -127,6 +127,8 @@ identity_providers:
         client_name: BookLore
         public: true
         authorization_policy: two_factor
+        require_pkce: true
+        pkce_challenge_method: 'S256'
         consent_mode: implicit
         response_types:
           - code
@@ -137,6 +139,10 @@ identity_providers:
           - email
         redirect_uris:
           - 'https://books.${SECRET_DOMAIN}/api/oidc'
+          - 'https://books.${SECRET_DOMAIN}/oauth2-callback'
+        grant_types:
+          - authorization_code
+          - refresh_token
         token_endpoint_auth_method: none
         pkce_challenge_method: S256
       - client_id: shelfmark
