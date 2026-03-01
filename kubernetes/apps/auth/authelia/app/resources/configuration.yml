@@ -127,7 +127,7 @@ identity_providers:
           - 'https://audiobookshelf.${SECRET_DOMAIN}/auth/openid/mobile-redirect'
           - 'audiobookshelf://oauth'
       - client_id: booklore
-        claim_policy: booklore
+        claims_policy: booklore
         client_name: Booklore
         public: true
         authorization_policy: two_factor
