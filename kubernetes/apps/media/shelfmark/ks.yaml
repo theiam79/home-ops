@@ -14,7 +14,7 @@ spec:
   dependsOn:
     - name: prowlarr
       namespace: media
-    - name: deluge
+    - name: qbittorrent
       namespace: media
     - name: rook-ceph-cluster
       namespace: rook-ceph
