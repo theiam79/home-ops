@@ -66,10 +66,10 @@ session:
   cookies:
     - domain: '${SECRET_DOMAIN}'
       authelia_url: 'https://auth.${SECRET_DOMAIN}'
-      default_redirection_url: 'https://www.${SECRET_DOMAIN}'
+      default_redirection_url: 'https://www.auth.${SECRET_DOMAIN}/settings/two-factor-authentication'
     - domain: '${SECRET_DOMAIN_2}'
       authelia_url: 'https://auth.${SECRET_DOMAIN_2}'
-      default_redirection_url: 'https://www.${SECRET_DOMAIN_2}'
+      default_redirection_url: 'https://www.auth.${SECRET_DOMAIN_2}/settings/two-factor-authentication'
 
 regulation:
   max_retries: 3
