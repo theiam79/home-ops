@@ -93,10 +93,10 @@ spec:
               limits:
                 memory: 256Mi
     defaultPodOptions:
-      sysctls:
-        - name: net.ipv6.conf.all.disable_ipv6
-          value: "1"
       securityContext:
+        sysctls:
+          - name: net.ipv6.conf.all.disable_ipv6
+            value: "1"
         runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 1000
