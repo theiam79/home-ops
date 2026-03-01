@@ -42,6 +42,7 @@ access_control:
     - domain:
         - 'books.${SECRET_DOMAIN}'
         - 'audiobookshelf.${SECRET_DOMAIN}'
+        - 'shelfmark.${SECRET_DOMAIN}'
       subject:
         - 'group:books'
       policy: two_factor
@@ -111,7 +112,7 @@ identity_providers:
         client_name: audiobookshelf
         client_secret: '{{ secret "/secrets/authelia/AUDIOBOOKSHELF_CLIENT_SECRET" }}'
         public: false
-        authorization_policy: one_factor
+        authorization_policy: two_factor
         consent_mode: implicit
         scopes:
           - openid
@@ -125,7 +126,7 @@ identity_providers:
       - client_id: booklore
         client_name: BookLore
         public: true
-        authorization_policy: one_factor
+        authorization_policy: two_factor
         consent_mode: implicit
         response_types:
           - code
@@ -142,7 +143,7 @@ identity_providers:
         client_name: Shelfmark
         client_secret: '{{ secret "/secrets/authelia/SHELFMARK_CLIENT_SECRET" }}'
         public: false
-        authorization_policy: one_factor
+        authorization_policy: two_factor
         consent_mode: implicit
         scopes:
           - openid
