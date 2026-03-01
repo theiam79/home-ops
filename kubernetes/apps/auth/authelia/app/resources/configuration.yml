@@ -148,4 +148,4 @@ identity_providers:
           - email
           - profile
         redirect_uris:
-          - 'https://shelfmark.${SECRET_DOMAIN}/oauth2/callback'
+          - 'https://shelfmark.${SECRET_DOMAIN}/api/auth/oidc/callback'
