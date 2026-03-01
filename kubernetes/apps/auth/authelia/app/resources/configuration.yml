@@ -66,7 +66,7 @@ session:
   cookies:
     - domain: '${SECRET_DOMAIN}'
       authelia_url: 'https://auth.${SECRET_DOMAIN}'
-      default_redirection_url: 'https://www.gatus.${SECRET_DOMAIN}'
+      default_redirection_url: 'https://gatus.${SECRET_DOMAIN}'
     - domain: '${SECRET_DOMAIN_2}'
       authelia_url: 'https://auth.${SECRET_DOMAIN_2}'
       default_redirection_url: 'https://www.${SECRET_DOMAIN_2}'
@@ -128,7 +128,6 @@ identity_providers:
         public: true
         authorization_policy: two_factor
         require_pkce: true
-        pkce_challenge_method: 'S256'
         consent_mode: implicit
         response_types:
           - code
