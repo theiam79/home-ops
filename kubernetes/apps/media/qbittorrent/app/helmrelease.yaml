@@ -22,7 +22,7 @@ spec:
               tag: 5.1.4
             env:
               TZ: America/Chicago
-              QBT_TORRENTING_PORT: "58846"
+              QBT_TORRENTING_PORT: "35338"
               QBT_WEBUI_PORT: &port 8080
             ports:
               - containerPort: *port
@@ -56,7 +56,7 @@ spec:
               HEALTH_SERVER_ADDRESS: "0.0.0.0:9999"
               HEALTH_VPN_DURATION_INITIAL: "15s"
               FIREWALL_INPUT_PORTS: "8080,9999,5010"
-              FIREWALL_VPN_INPUT_PORTS: "58846"
+              FIREWALL_VPN_INPUT_PORTS: "35338"
               FIREWALL_OUTBOUND_SUBNETS: "10.42.0.0/15,192.168.100.0/24"
             envFrom:
               - secretRef:
