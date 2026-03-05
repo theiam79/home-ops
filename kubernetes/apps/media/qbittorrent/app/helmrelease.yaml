@@ -42,7 +42,6 @@ spec:
             resources:
               requests:
                 cpu: 50m
-              limits:
                 memory: 1Gi
           gluetun:
             image:
@@ -91,7 +90,6 @@ spec:
             resources:
               requests:
                 cpu: 10m
-              limits:
                 memory: 256Mi
           mousehole:
             dependsOn: gluetun
