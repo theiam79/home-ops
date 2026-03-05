@@ -40,6 +40,19 @@ spec:
               requests:
                 cpu: 50m
                 memory: 512Mi
+          abs-agg:
+            image:
+              repository: ghcr.io/vito0912/abs-agg
+              tag: latest
+            env:
+              TZ: America/Chicago
+            envFrom:
+              - secretRef:
+                  name: abs-agg-secret
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
     service:
       app:
         controller: audiobookshelf
@@ -62,8 +75,16 @@ spec:
     persistence:
       config:
         existingClaim: audiobookshelf
-        globalMounts:
-          - path: /config
+        advancedMounts:
+          audiobookshelf:
+            app:
+              - path: /config
+      abs-agg-data:
+        type: emptyDir
+        advancedMounts:
+          audiobookshelf:
+            abs-agg:
+              - path: /app/data
       media:
         type: nfs
         server: snotra.internal
