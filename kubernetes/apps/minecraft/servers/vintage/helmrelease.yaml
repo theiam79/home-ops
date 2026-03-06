@@ -42,6 +42,8 @@ spec:
             port: 8100
     extraEnv:
       CUSTOM_SERVER: https://file-server.${SECRET_DOMAIN}/minecraft/vintage/spigot-1.13.2.jar
+      EXISTING_OPS_FILE: SKIP
+      EXISTING_WHITELIST_FILE: SKIP
     persistence:
       dataDir:
         enabled: true

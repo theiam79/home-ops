@@ -64,6 +64,8 @@ spec:
             port: 8100
     extraEnv:
       DEBUG: true
+      EXISTING_OPS_FILE: SKIP
+      EXISTING_WHITELIST_FILE: SKIP
     persistence:
       dataDir:
         enabled: true

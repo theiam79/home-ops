@@ -9,30 +9,48 @@ spec:
     kind: OCIRepository
     name: minecraft
   values:
+    image:
+      tag: java8
     resources:
       requests:
         cpu: 512m
-        memory:  1000Mi
+        memory: 4000Mi
     workloadAsStatefulSet: true
     strategyType: RollingUpdate
     serviceAnnotations:
       mc-router.itzg.me/externalServerName: ${APP}.mc.${SECRET_DOMAIN}
       reloader.stakater.com/auto: "true"
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: clusterrole
+              operator: In
+              values:
+              - highspeed
+    livenessProbe:
+      command:
+        - mc-health
+      initialDelaySeconds: 240
+    readinessProbe:
+      command:
+        - mc-health
+      initialDelaySeconds: 240
     minecraftServer:
       eula: "TRUE"
-      type: "FABRIC"
-      version: "1.21.5"
-      difficulty: normal
+      type: "FTBA"
+      ftbModpackId: "88"
       forcegameMode: true
-      gameMode: creative
-      memory: ""
+      gameMode: survival
+      difficulty: normal
+      memory: "6g"
       whitelist: ${WHITELIST}
       ops: ${OPS}
       modrinth:
         projects:
-          - fabric-api
-          - chunky
           - bluemap
+          - chunky
       extraPorts:
         - name: map
           containerPort: 8100
@@ -42,6 +60,7 @@ spec:
             type: ClusterIP
             port: 8100
     extraEnv:
+      DEBUG: true
       EXISTING_OPS_FILE: SKIP
       EXISTING_WHITELIST_FILE: SKIP
     persistence:
