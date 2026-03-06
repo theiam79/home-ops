@@ -10,7 +10,7 @@ spec:
     name: minecraft
   values:
     image:
-      tag: java8
+      tag: java11
     resources:
       requests:
         cpu: 512m
