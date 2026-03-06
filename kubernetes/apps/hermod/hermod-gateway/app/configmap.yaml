@@ -1,0 +1,34 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hermod-gateway-config
+data:
+  yarp.config: |
+    {
+      "ReverseProxy": {
+        "Routes": {
+          "api-catchall": {
+            "ClusterId": "hermod-api",
+            "Match": { "Path": "api/{**catch-all}" }
+          },
+          "auth-catchall": {
+            "ClusterId": "hermod-api",
+            "Match": { "Path": "auth/{**catch-all}" }
+          },
+          "signin-discord": {
+            "ClusterId": "hermod-api",
+            "Match": { "Path": "signin-discord" }
+          }
+        },
+        "Clusters": {
+          "hermod-api": {
+            "Destinations": {
+              "destination1": {
+                "Address": "http://hermod-api:8080"
+              }
+            }
+          }
+        }
+      }
+    }

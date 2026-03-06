@@ -48,6 +48,14 @@ spec:
                 cpu: 10m
               limits:
                 memory: 256Mi
+    persistence:
+      config:
+        type: configMap
+        name: hermod-gateway-config
+        globalMounts:
+          - path: /etc/yarp.config
+            subPath: yarp.config
+            readOnly: true
     service:
       app:
         controller: hermod-gateway
