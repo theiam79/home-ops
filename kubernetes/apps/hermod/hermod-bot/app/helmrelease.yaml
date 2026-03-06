@@ -1,0 +1,43 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: hermod-bot
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  interval: 1h
+  values:
+    controllers:
+      hermod-bot:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/theiam79/hermod-bot
+              tag: vNext
+            env:
+              TZ: America/Chicago
+              ConnectionStrings__bot-db:
+                valueFrom:
+                  secretKeyRef:
+                    name: hermod-bot-pg-app
+                    key: uri
+              ConnectionStrings__nats: nats://nats.hermod.svc.cluster.local:4222
+              WebApp__BaseUrl: https://beta.hermod.dev
+            envFrom:
+              - secretRef:
+                  name: hermod-bot-secret
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 256Mi
+    service:
+      app:
+        controller: hermod-bot
+        ports:
+          http:
+            port: 8080

@@ -82,6 +82,17 @@ spec:
         certificateRefs:
           - kind: Secret
             name: ${SECRET_DOMAIN_2/./-}-production-tls
+    - name: https-hermod
+      hostname: "*.hermod.dev"
+      protocol: HTTPS
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        certificateRefs:
+          - kind: Secret
+            name: hermod-dev-production-tls
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway

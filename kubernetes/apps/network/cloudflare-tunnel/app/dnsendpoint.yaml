@@ -11,3 +11,6 @@ spec:
     - dnsName: "external.${SECRET_DOMAIN_2}"
       recordType: CNAME
       targets: ["cdcb1276-9d36-40e8-99a2-cbcb3fd0a80c.cfargotunnel.com"]
+    - dnsName: "external.hermod.dev"
+      recordType: CNAME
+      targets: ["cdcb1276-9d36-40e8-99a2-cbcb3fd0a80c.cfargotunnel.com"]

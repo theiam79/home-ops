@@ -1,0 +1,25 @@
+---
+# yaml-language-server: $schema=https://github.com/datreeio/CRDs-catalog/raw/refs/heads/main/postgresql.cnpg.io/cluster_v1.json
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: hermod-auth-pg
+spec:
+  instances: 1
+  imageCatalogRef:
+    apiGroup: postgresql.cnpg.io
+    kind: ClusterImageCatalog
+    major: 17
+    name: postgresql
+  storage:
+    size: 5Gi
+    storageClass: ceph-block
+  resources:
+    limits:
+      memory: 256Mi
+    requests:
+      cpu: 50m
+  bootstrap:
+    initdb:
+      database: app
+      owner: app
