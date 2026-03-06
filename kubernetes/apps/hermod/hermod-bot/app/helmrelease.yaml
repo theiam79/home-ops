@@ -50,7 +50,6 @@ spec:
             resources:
               requests:
                 cpu: 10m
-              limits:
                 memory: 256Mi
     service:
       app:
