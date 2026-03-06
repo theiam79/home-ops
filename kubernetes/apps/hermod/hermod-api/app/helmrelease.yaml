@@ -18,6 +18,7 @@ spec:
             image:
               repository: ghcr.io/theiam79/hermod-api
               tag: vNext
+              pullPolicy: Always
             env:
               TZ: America/Chicago
               APP_DB_HOST:

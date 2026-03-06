@@ -8,17 +8,9 @@ data:
     {
       "ReverseProxy": {
         "Routes": {
-          "api-catchall": {
+          "catch-all": {
             "ClusterId": "hermod-api",
-            "Match": { "Path": "api/{**catch-all}" }
-          },
-          "auth-catchall": {
-            "ClusterId": "hermod-api",
-            "Match": { "Path": "auth/{**catch-all}" }
-          },
-          "signin-discord": {
-            "ClusterId": "hermod-api",
-            "Match": { "Path": "signin-discord" }
+            "Match": { "Path": "{**catch-all}" }
           }
         },
         "Clusters": {

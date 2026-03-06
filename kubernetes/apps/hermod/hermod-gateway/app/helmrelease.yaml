@@ -18,6 +18,7 @@ spec:
             image:
               repository: ghcr.io/theiam79/hermod-gateway
               tag: vNext
+              pullPolicy: Always
             env:
               TZ: America/Chicago
             probes:

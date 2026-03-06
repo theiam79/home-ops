@@ -18,6 +18,7 @@ spec:
             image:
               repository: ghcr.io/theiam79/hermod-bot
               tag: vNext
+              pullPolicy: Always
             env:
               TZ: America/Chicago
               BOT_DB_HOST:
