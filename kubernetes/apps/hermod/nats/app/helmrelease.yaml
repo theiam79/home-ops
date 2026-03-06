@@ -4,9 +4,13 @@ kind: HelmRelease
 metadata:
   name: nats
 spec:
-  chartRef:
-    kind: OCIRepository
-    name: nats
+  chart:
+    spec:
+      chart: nats
+      version: 1.2.12
+      sourceRef:
+        kind: HelmRepository
+        name: nats
   interval: 1h
   values:
     config:
