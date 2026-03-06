@@ -10,4 +10,6 @@ spec:
     operation: copy
   ref:
     tag: 1.2.12
+  secretRef:
+    name: dockerhub-auth
   url: oci://registry-1.docker.io/natsio/nats

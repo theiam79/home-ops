@@ -5,6 +5,9 @@ metadata:
   name: hermod-nats
   namespace: &namespace hermod
 spec:
+  dependsOn:
+    - name: external-secrets
+      namespace: external-secrets
   interval: 1h
   path: ./kubernetes/apps/hermod/nats/app
   prune: true
