@@ -20,16 +20,48 @@ spec:
               tag: vNext
             env:
               TZ: America/Chicago
-              ConnectionStrings__hermod-db:
+              HERMOD_DB_HOST:
                 valueFrom:
                   secretKeyRef:
                     name: hermod-api-pg-app
-                    key: uri
-              ConnectionStrings__auth-db:
+                    key: host
+              HERMOD_DB_USER:
+                valueFrom:
+                  secretKeyRef:
+                    name: hermod-api-pg-app
+                    key: username
+              HERMOD_DB_PASS:
+                valueFrom:
+                  secretKeyRef:
+                    name: hermod-api-pg-app
+                    key: password
+              HERMOD_DB_NAME:
+                valueFrom:
+                  secretKeyRef:
+                    name: hermod-api-pg-app
+                    key: dbname
+              ConnectionStrings__hermod-db: Host=$(HERMOD_DB_HOST);Port=5432;Database=$(HERMOD_DB_NAME);Username=$(HERMOD_DB_USER);Password=$(HERMOD_DB_PASS)
+              AUTH_DB_HOST:
                 valueFrom:
                   secretKeyRef:
                     name: hermod-auth-pg-app
-                    key: uri
+                    key: host
+              AUTH_DB_USER:
+                valueFrom:
+                  secretKeyRef:
+                    name: hermod-auth-pg-app
+                    key: username
+              AUTH_DB_PASS:
+                valueFrom:
+                  secretKeyRef:
+                    name: hermod-auth-pg-app
+                    key: password
+              AUTH_DB_NAME:
+                valueFrom:
+                  secretKeyRef:
+                    name: hermod-auth-pg-app
+                    key: dbname
+              ConnectionStrings__auth-db: Host=$(AUTH_DB_HOST);Port=5432;Database=$(AUTH_DB_NAME);Username=$(AUTH_DB_USER);Password=$(AUTH_DB_PASS)
               ConnectionStrings__nats: nats://nats.hermod.svc.cluster.local:4222
               Auth__ExternalBaseUrl: https://beta.hermod.dev
             envFrom:
