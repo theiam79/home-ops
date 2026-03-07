@@ -41,7 +41,7 @@ spec:
     route:
       app:
         hostnames:
-          - "aspire.beta.hermod.dev"
+          - "aspire.hermod.dev"
         parentRefs:
           - name: envoy-internal
             namespace: network
