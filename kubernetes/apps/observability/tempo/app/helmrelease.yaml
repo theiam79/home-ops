@@ -29,6 +29,9 @@ spec:
           local:
             path: /var/tempo/traces
       retention: 168h
+      metricsGenerator:
+        enabled: true
+        remoteWriteUrl: http://prometheus-operated.observability.svc.cluster.local:9090/api/v1/write
       receivers:
         otlp:
           protocols:
