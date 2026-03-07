@@ -9,4 +9,6 @@ resources:
   - ./kube-prometheus-stack/ks.yaml
   - ./grafana/ks.yaml
   - ./loki/ks.yaml
+  - ./opentelemetry-collector/ks.yaml
   - ./promtail/ks.yaml
+  - ./tempo/ks.yaml

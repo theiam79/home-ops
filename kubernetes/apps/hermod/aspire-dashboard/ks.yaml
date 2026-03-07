@@ -2,23 +2,14 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app hermod-api
+  name: &app aspire-dashboard
   namespace: &namespace hermod
 spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  dependsOn:
-    - name: hermod-db
-      namespace: hermod
-    - name: hermod-nats
-      namespace: hermod
-    - name: external-secrets
-      namespace: external-secrets
-    - name: opentelemetry-collector
-      namespace: observability
   interval: 1h
-  path: ./kubernetes/apps/hermod/hermod-api/app
+  path: ./kubernetes/apps/hermod/aspire-dashboard/app
   postBuild:
     substituteFrom:
       - name: cluster-secrets
@@ -29,4 +20,4 @@ spec:
     name: flux-system
     namespace: flux-system
   targetNamespace: *namespace
-  wait: false
+  wait: true

@@ -65,6 +65,9 @@ spec:
               ConnectionStrings__auth-db: Host=$(AUTH_DB_HOST);Port=5432;Database=$(AUTH_DB_NAME);Username=$(AUTH_DB_USER);Password=$(AUTH_DB_PASS)
               ConnectionStrings__nats: nats://nats.hermod.svc.cluster.local:4222
               Auth__ExternalBaseUrl: https://beta.hermod.dev
+              OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetry-collector.observability.svc.cluster.local:4317
+              OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+              OTEL_SERVICE_NAME: hermod-api
             envFrom:
               - secretRef:
                   name: hermod-api-secret

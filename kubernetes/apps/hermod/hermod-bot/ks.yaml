@@ -15,6 +15,8 @@ spec:
       namespace: hermod
     - name: external-secrets
       namespace: external-secrets
+    - name: opentelemetry-collector
+      namespace: observability
   interval: 1h
   path: ./kubernetes/apps/hermod/hermod-bot/app
   postBuild:

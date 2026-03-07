@@ -5,6 +5,7 @@ namespace: hermod
 components:
   - ../../components/common
 resources:
+  - ./aspire-dashboard/ks.yaml
   - ./hermod-db/ks.yaml
   - ./nats/ks.yaml
   - ./hermod-api/ks.yaml

@@ -1,0 +1,76 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: opentelemetry-collector
+spec:
+  interval: 5m
+  layerSelector:
+    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+    operation: copy
+  ref:
+    tag: 0.115.0
+  url: oci://ghcr.io/open-telemetry/helm-charts/opentelemetry-collector
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: opentelemetry-collector
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: opentelemetry-collector
+  values:
+    mode: deployment
+    ports:
+      otlp:
+        enabled: true
+        containerPort: 4317
+        servicePort: 4317
+        protocol: TCP
+      otlp-http:
+        enabled: true
+        containerPort: 4318
+        servicePort: 4318
+        protocol: TCP
+    resources:
+      requests:
+        cpu: 10m
+        memory: 256Mi
+    config:
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+              endpoint: 0.0.0.0:4317
+            http:
+              endpoint: 0.0.0.0:4318
+      exporters:
+        otlp/tempo:
+          endpoint: tempo.observability.svc.cluster.local:4317
+          tls:
+            insecure: true
+        otlp/aspire:
+          endpoint: aspire-dashboard.hermod.svc.cluster.local:18889
+          tls:
+            insecure: true
+        prometheusremotewrite:
+          endpoint: http://prometheus-operated.observability.svc.cluster.local:9090/api/v1/write
+          tls:
+            insecure: true
+        otlphttp/loki:
+          endpoint: http://loki-headless.observability.svc.cluster.local:3100/otlp
+          tls:
+            insecure: true
+      service:
+        pipelines:
+          traces:
+            receivers: [otlp]
+            exporters: [otlp/tempo, otlp/aspire]
+          metrics:
+            receivers: [otlp]
+            exporters: [prometheusremotewrite, otlp/aspire]
+          logs:
+            receivers: [otlp]
+            exporters: [otlphttp/loki, otlp/aspire]
