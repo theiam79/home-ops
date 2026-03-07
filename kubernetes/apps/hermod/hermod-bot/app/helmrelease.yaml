@@ -44,8 +44,8 @@ spec:
               ConnectionStrings__bot-db: Host=$(BOT_DB_HOST);Port=5432;Database=$(BOT_DB_NAME);Username=$(BOT_DB_USER);Password=$(BOT_DB_PASS)
               ConnectionStrings__nats: nats://nats.hermod.svc.cluster.local:4222
               WebApp__BaseUrl: https://beta.hermod.dev
-              OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetry-collector.observability.svc.cluster.local:4317
-              OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+              OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetry-collector.observability.svc.cluster.local:4318
+              OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
               OTEL_SERVICE_NAME: hermod-bot
             envFrom:
               - secretRef:
