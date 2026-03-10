@@ -7,7 +7,7 @@ spec:
   dependsOn:
     - name: node-feature-discovery
   interval: 1h
-  path: ./kubernetes/apps/kube-system/intel-device-plugin/app
+  path: ./kubernetes/apps/kube-system/intel-device-plugin
   prune: true
   sourceRef:
     kind: GitRepository
