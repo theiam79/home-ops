@@ -19,4 +19,4 @@ spec:
       retries: 3
   values:
     sharedDevNum: 3
-    nodeFeatureRule: true
+    nodeFeatureRule: false
