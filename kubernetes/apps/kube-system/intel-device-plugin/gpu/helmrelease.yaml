@@ -19,6 +19,4 @@ spec:
       retries: 3
   values:
     sharedDevNum: 3
-    nodeFeatureRule: false
-    nodeSelector:
-      feature.node.kubernetes.io/intel-gpu: "true"
+    nodeFeatureRule: true
