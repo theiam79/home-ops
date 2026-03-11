@@ -68,6 +68,8 @@ spec:
               OTEL_EXPORTER_OTLP_ENDPOINT: http://opentelemetry-collector.observability.svc.cluster.local:4318
               OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
               OTEL_SERVICE_NAME: hermod-api
+              ForwardedHeaders__ForwardLimit: "3"
+              ForwardedHeaders__KnownNetworks__0: "10.42.0.0/16"
             envFrom:
               - secretRef:
                   name: hermod-api-secret
