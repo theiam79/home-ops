@@ -11,13 +11,16 @@ data:
         api_key: !env_var SONARR_API_KEY
         delete_old_custom_formats: true
 
-        include:
-          - template: sonarr-quality-definition-series
-          - template: sonarr-v4-quality-profile-web-1080p
-          - template: sonarr-v4-custom-formats-web-1080p
-          - template: sonarr-quality-definition-anime
-          - template: sonarr-v4-quality-profile-anime
-          - template: sonarr-v4-custom-formats-anime
+        quality_definition:
+          type: series
+
+        quality_profiles:
+          - trash_id: 72dae194fc92bf828f32cde7744e51a1 # WEB-1080p
+            reset_unmatched_scores:
+              enabled: true
+          - trash_id: 20e0fc959f1f1704bed501f23bdae76f # [Anime] Remux-1080p
+            reset_unmatched_scores:
+              enabled: true
 
         custom_formats:
           # Anime - prefer dual audio and 10bit
@@ -42,10 +45,13 @@ data:
         api_key: !env_var SONARR4K_API_KEY
         delete_old_custom_formats: true
 
-        include:
-          - template: sonarr-quality-definition-series
-          - template: sonarr-v4-quality-profile-web-2160p
-          - template: sonarr-v4-custom-formats-web-2160p
+        quality_definition:
+          type: series
+
+        quality_profiles:
+          - trash_id: d1498e7d189fbe6c7110ceaabb7473e6 # WEB-2160p
+            reset_unmatched_scores:
+              enabled: true
 
         custom_formats:
           # HDR Formats
@@ -65,20 +71,26 @@ data:
         api_key: !env_var RADARR_API_KEY
         delete_old_custom_formats: true
 
-        include:
-          - template: radarr-quality-definition-movie
-          - template: radarr-quality-profile-remux-web-1080p
-          - template: radarr-custom-formats-remux-web-1080p
+        quality_definition:
+          type: movie
+
+        quality_profiles:
+          - trash_id: 9ca12ea80aa55ef916e3751f4b874151 # Remux + WEB 1080p
+            reset_unmatched_scores:
+              enabled: true
 
       radarr4k:
         base_url: http://radarr4k.media.svc.cluster.local
         api_key: !env_var RADARR4K_API_KEY
         delete_old_custom_formats: true
 
-        include:
-          - template: radarr-quality-definition-movie
-          - template: radarr-quality-profile-remux-web-2160p
-          - template: radarr-custom-formats-remux-web-2160p
+        quality_definition:
+          type: movie
+
+        quality_profiles:
+          - trash_id: fd161a61e3ab826d3a22d53f935696dd # Remux + WEB 2160p
+            reset_unmatched_scores:
+              enabled: true
 
         custom_formats:
           # Block DV without HDR fallback
