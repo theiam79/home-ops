@@ -21,7 +21,7 @@ spec:
             env:
               TZ: America/Chicago
               SABNZBD__PORT: &port 80
-              SABNZBD__HOST_WHITELIST_ENTRIES: "sabnzbd.${SECRET_DOMAIN}"
+              SABNZBD__HOST_WHITELIST_ENTRIES: "sabnzbd.${SECRET_DOMAIN},sabnzbd,sabnzbd.media.svc.cluster.local"
             probes:
               liveness: &probes
                 enabled: true
