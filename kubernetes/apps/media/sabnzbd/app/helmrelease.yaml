@@ -77,7 +77,7 @@ spec:
       media:
         type: nfs
         server: snotra.internal
-        path: /mnt/user/Media
+        path: /mnt/user/media
         globalMounts:
           - path: /data/media
       downloads:
