@@ -21,7 +21,7 @@ spec:
             env:
               TZ: America/Chicago
               BASE_URL: "https://multi-scrobbler.${SECRET_DOMAIN}"
-              PLEX_URL: "http://plex-app.media.svc.cluster.local:32400"
+              PLEX_URL: "http://plex.media:32400"
             envFrom:
               - secretRef:
                   name: multi-scrobbler-secret
