@@ -1,3 +1,3 @@
 # Batch 4 — Heavy Prep (CRD/bootstrap changes, coordinated upgrades)
 
-No PRs currently fall into this batch. The Talos/kubelet multi-step upgrades are in Batch 5 (critical infrastructure) due to their OS/kernel-level impact.
+No PRs in this batch. The candidates that would normally land here (Cilium, gluetun) are in Batch 5 as HOLD items due to open regressions.
