@@ -1,6 +1,6 @@
 ---
 apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
+kind: Issuer
 metadata:
   name: bitwarden-bootstrap-issuer
   namespace: external-secrets
@@ -34,11 +34,11 @@ spec:
     size: 2048
   issuerRef:
     name: bitwarden-bootstrap-issuer
-    kind: ClusterIssuer
+    kind: Issuer
     group: cert-manager.io
 ---
 apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
+kind: Issuer
 metadata:
   name: bitwarden-certificate-issuer
   namespace: external-secrets
@@ -68,5 +68,5 @@ spec:
     size: 2048
   issuerRef:
     name: bitwarden-certificate-issuer
-    kind: ClusterIssuer
+    kind: Issuer
     group: cert-manager.io
