@@ -18,3 +18,4 @@ resources:
   - ./shelfmark/ks.yaml
   - ./sonarr/ks.yaml
   - ./sonarr4k/ks.yaml
+  - ./tautulli/ks.yaml
