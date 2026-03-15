@@ -15,7 +15,7 @@ metadata:
 spec:
   commonName: cert-manager-bitwarden-tls
   isCA: true
-  secretName: bitwarden-tls-certs
+  secretName: bitwarden-ca-certs
   subject:
     organizations:
       - external-secrets.io
@@ -44,7 +44,7 @@ metadata:
   namespace: external-secrets
 spec:
   ca:
-    secretName: bitwarden-tls-certs
+    secretName: bitwarden-ca-certs
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
