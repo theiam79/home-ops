@@ -11,6 +11,8 @@ spec:
   values:
     controllers:
       multi-scrobbler:
+        annotations:
+          reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
@@ -19,6 +21,10 @@ spec:
             env:
               TZ: America/Chicago
               BASE_URL: "https://multi-scrobbler.${SECRET_DOMAIN}"
+              PLEX_URL: "http://plex-app.media.svc.cluster.local:32400"
+            envFrom:
+              - secretRef:
+                  name: multi-scrobbler-secret
             probes:
               liveness: &probes
                 enabled: true
