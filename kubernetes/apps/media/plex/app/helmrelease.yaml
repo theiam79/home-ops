@@ -20,7 +20,7 @@ spec:
               TZ: America/Chicago
               PLEX_UID: "1000"
               PLEX_GID: "1000"
-              ADVERTISE_IP: "https://plex.${SECRET_DOMAIN}:443,http://192.168.100.35:32400"
+              PLEX_ADVERTISE_URL: "https://plex.${SECRET_DOMAIN}:443,http://192.168.100.35:32400,http://plex-app.media.svc.cluster.local:32400"
             probes:
               liveness: &probes
                 enabled: true
@@ -66,7 +66,6 @@ spec:
       app:
         controller: plex
         type: LoadBalancer
-        externalTrafficPolicy: Local
         annotations:
           lbipam.cilium.io/ips: "192.168.100.35"
         ports:
