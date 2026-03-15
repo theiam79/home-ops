@@ -1,0 +1,157 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: slskd
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  interval: 1h
+  timeout: 15m
+  values:
+    controllers:
+      slskd:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            dependsOn: gluetun
+            image:
+              repository: ghcr.io/slskd/slskd
+              tag: 0.24.5
+            env:
+              TZ: America/Chicago
+              SLSKD_REMOTE_CONFIGURATION: "true"
+              SLSKD_HTTP_PORT: &port 5030
+            envFrom:
+              - secretRef:
+                  name: slskd-secret
+            ports:
+              - containerPort: *port
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: *port
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              readiness: *probes
+            resources:
+              requests:
+                cpu: 10m
+                memory: 256Mi
+          gluetun:
+            image:
+              repository: ghcr.io/qdm12/gluetun
+              tag: v3.39.1
+            env:
+              TZ: America/Chicago
+              VPN_TYPE: wireguard
+              DOT: "off"
+              DNS_KEEP_NAMESERVER: "on"
+              HEALTH_SERVER_ADDRESS: "0.0.0.0:9999"
+              HEALTH_VPN_DURATION_INITIAL: "15s"
+              FIREWALL_INPUT_PORTS: "5030,9999"
+              FIREWALL_OUTBOUND_SUBNETS: "10.42.0.0/15,192.168.100.0/24"
+            envFrom:
+              - secretRef:
+                  name: slskd-secret
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: 9999
+                  initialDelaySeconds: 10
+                  periodSeconds: 10
+                  timeoutSeconds: 10
+                  failureThreshold: 30
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: 9999
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  failureThreshold: 5
+            securityContext:
+              runAsNonRoot: false
+              runAsUser: 0
+              capabilities:
+                add: ["NET_ADMIN", "MKNOD", "NET_RAW"]
+            resources:
+              requests:
+                cpu: 10m
+                memory: 256Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        controller: slskd
+        ports:
+          http:
+            primary: true
+            port: *port
+    route:
+      app:
+        hostnames:
+          - "slskd.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      config:
+        existingClaim: slskd
+        advancedMounts:
+          slskd:
+            app:
+              - path: /app
+      media:
+        type: nfs
+        server: snotra.internal
+        path: /mnt/user/media
+        advancedMounts:
+          slskd:
+            app:
+              - path: /data/media
+                readOnly: true
+      downloads:
+        type: nfs
+        server: snotra.internal
+        path: /mnt/disks/85AAZU6GS/cluster/downloads
+        advancedMounts:
+          slskd:
+            app:
+              - path: /data/downloads
+      gluetun-data:
+        type: emptyDir
+        advancedMounts:
+          slskd:
+            gluetun:
+              - path: /tmp/gluetun
+      tmp:
+        type: emptyDir
+        advancedMounts:
+          slskd:
+            app:
+              - path: /tmp
