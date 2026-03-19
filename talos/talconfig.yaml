@@ -169,6 +169,28 @@ nodes:
         vlans:
           - vlanId: 70
             dhcp: false
+  - hostname: "dvergar-06"
+    ipAddress: "192.168.100.26"
+    installDiskSelector:
+      serial: "S3X4NB0K407511H"
+    machineSpec:
+      secureboot: false
+    talosImageURL: factory.talos.dev/installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
+    controlPlane: false
+    networkInterfaces:
+      - deviceSelector:
+          physical: true
+          hardwareAddr: "10:e7:c6:b1:1d:de"
+        dhcp: false
+        addresses:
+          - "192.168.100.26/24"
+        routes:
+          - network: "0.0.0.0/0"
+            gateway: "192.168.100.1"
+        mtu: 1500
+        vlans:
+          - vlanId: 70
+            dhcp: false
   - hostname: "elli"
     ipAddress: "192.168.100.30"
     installDiskSelector:
