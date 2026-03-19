@@ -26,7 +26,7 @@ spec:
                 spec:
                   httpGet:
                     path: /api/version
-                    port: 8971
+                    port: 5000
                   initialDelaySeconds: 0
                   periodSeconds: 30
                   timeoutSeconds: 5
@@ -37,7 +37,7 @@ spec:
                 spec:
                   httpGet:
                     path: /api/version
-                    port: 8971
+                    port: 5000
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 5
@@ -48,7 +48,7 @@ spec:
                 spec:
                   httpGet:
                     path: /api/version
-                    port: 8971
+                    port: 5000
                   initialDelaySeconds: 10
                   periodSeconds: 5
                   failureThreshold: 30
@@ -78,7 +78,7 @@ spec:
         ports:
           http:
             primary: true
-            port: 8971
+            port: 5000
           rtsp:
             port: 8554
           webrtc:
@@ -96,7 +96,7 @@ spec:
         rules:
           - backendRefs:
               - identifier: app
-                port: 8971
+                port: 5000
     persistence:
       config:
         existingClaim: frigate
