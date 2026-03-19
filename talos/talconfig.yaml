@@ -27,7 +27,7 @@ nodes:
       clusterrole: highspeed
     machineSpec:
       secureboot: false
-    talosImageURL: factory.talos.dev/installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
+    talosImageURL: factory.talos.dev/installer/dc8730aa8cc7bfa5ef7e2b3284248f2631135b2faf4ae11aa997a0c1987b0eee
     controlPlane: true
     networkInterfaces:
       - deviceSelector:
@@ -51,7 +51,7 @@ nodes:
       serial: "IB25ZD0256P00323"
     machineSpec:
       secureboot: false
-    talosImageURL: factory.talos.dev/installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
+    talosImageURL: factory.talos.dev/installer/dc8730aa8cc7bfa5ef7e2b3284248f2631135b2faf4ae11aa997a0c1987b0eee
     controlPlane: true
     networkInterfaces:
       - deviceSelector:
@@ -75,7 +75,7 @@ nodes:
       serial: "IB25ZD0256P00322"
     machineSpec:
       secureboot: false
-    talosImageURL: factory.talos.dev/installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
+    talosImageURL: factory.talos.dev/installer/dc8730aa8cc7bfa5ef7e2b3284248f2631135b2faf4ae11aa997a0c1987b0eee
     controlPlane: true
     networkInterfaces:
       - deviceSelector:
@@ -99,7 +99,7 @@ nodes:
       serial: "IB25ZD0256P00351"
     machineSpec:
       secureboot: false
-    talosImageURL: factory.talos.dev/installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
+    talosImageURL: factory.talos.dev/installer/dc8730aa8cc7bfa5ef7e2b3284248f2631135b2faf4ae11aa997a0c1987b0eee
     controlPlane: false
     networkInterfaces:
       - deviceSelector:
@@ -121,7 +121,7 @@ nodes:
       model: KINGSTON*
     machineSpec:
       secureboot: false
-    talosImageURL: factory.talos.dev/installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
+    talosImageURL: factory.talos.dev/installer/dc8730aa8cc7bfa5ef7e2b3284248f2631135b2faf4ae11aa997a0c1987b0eee
     controlPlane: false
     networkInterfaces:
       - deviceSelector:
@@ -145,7 +145,7 @@ nodes:
       clusterrole: highspeed
     machineSpec:
       secureboot: false
-    talosImageURL: factory.talos.dev/installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
+    talosImageURL: factory.talos.dev/installer/dc8730aa8cc7bfa5ef7e2b3284248f2631135b2faf4ae11aa997a0c1987b0eee
     controlPlane: false
     networkInterfaces:
       - deviceSelector:
@@ -167,7 +167,7 @@ nodes:
       serial: "S3X4NB0K407511H"
     machineSpec:
       secureboot: false
-    talosImageURL: factory.talos.dev/installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
+    talosImageURL: factory.talos.dev/installer/dc8730aa8cc7bfa5ef7e2b3284248f2631135b2faf4ae11aa997a0c1987b0eee
     controlPlane: false
     networkInterfaces:
       - deviceSelector:
@@ -191,7 +191,7 @@ nodes:
       clusterrole: highspeed
     machineSpec:
       secureboot: true
-    talosImageURL: factory.talos.dev/installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
+    talosImageURL: factory.talos.dev/installer/dc8730aa8cc7bfa5ef7e2b3284248f2631135b2faf4ae11aa997a0c1987b0eee
     controlPlane: false
     networkInterfaces:
       - deviceSelector:
