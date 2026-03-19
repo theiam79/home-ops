@@ -102,18 +102,12 @@ spec:
         existingClaim: frigate
         globalMounts:
           - path: /config
-      recordings:
+      media:
         type: nfs
         server: snotra.internal
         path: /mnt/user/frigate
         globalMounts:
-          - path: /data/recordings
-      clips:
-        type: nfs
-        server: snotra.internal
-        path: /mnt/user/frigate
-        globalMounts:
-          - path: /data/clips
+          - path: /media/frigate
       shm:
         type: emptyDir
         medium: Memory
