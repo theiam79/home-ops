@@ -187,22 +187,22 @@ spec:
                 - overlays
             plex:
               url: http://plex.media:32400
-              token: <<PLEX_TOKEN>>
+              token: <<plextoken>>
               timeout: 60
               clean_bundles: false
               empty_trash: false
               optimize: false
             tmdb:
-              apikey: <<TMDB_APIKEY>>
+              apikey: <<tmdbapikey>>
               language: en
               cache_expiration: 60
             tautulli:
               url: http://tautulli.media:8181
-              apikey: <<TAUTULLI_APIKEY>>
+              apikey: <<tautulliapikey>>
             radarr:
               radarr:
                 url: http://radarr.media:7878
-                token: <<RADARR_TOKEN>>
+                token: <<radarrtoken>>
                 add_missing: false
                 add_existing: false
                 root_folder_path: /data/media/movies
@@ -213,7 +213,7 @@ spec:
                 upgrade_existing: false
               radarr4k:
                 url: http://radarr4k.media:7878
-                token: <<RADARR4K_TOKEN>>
+                token: <<radarr4ktoken>>
                 add_missing: false
                 add_existing: false
                 root_folder_path: /data/media/movies
@@ -225,7 +225,7 @@ spec:
             sonarr:
               sonarr:
                 url: http://sonarr.media:8989
-                token: <<SONARR_TOKEN>>
+                token: <<sonarrtoken>>
                 add_missing: false
                 add_existing: false
                 root_folder_path: /data/media/tv
@@ -239,7 +239,7 @@ spec:
                 upgrade_existing: false
               sonarr4k:
                 url: http://sonarr4k.media:8989
-                token: <<SONARR4K_TOKEN>>
+                token: <<sonarr4ktoken>>
                 add_missing: false
                 add_existing: false
                 root_folder_path: /data/media/tv
