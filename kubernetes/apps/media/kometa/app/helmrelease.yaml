@@ -18,6 +18,12 @@ spec:
           concurrencyPolicy: Forbid
           successfulJobsHistory: 1
           failedJobsHistory: 1
+        initContainers:
+          copy-config:
+            image:
+              repository: ghcr.io/home-operations/busybox
+              tag: 1.37.0
+            command: ["sh", "-c", "cp /configmap/config.yml /config/config.yml"]
         containers:
           app:
             image:
@@ -56,10 +62,11 @@ spec:
       config-file:
         type: configMap
         identifier: config
-        globalMounts:
-          - path: /config/config.yml
-            subPath: config.yml
-            readOnly: true
+        advancedMounts:
+          kometa:
+            copy-config:
+              - path: /configmap
+                readOnly: true
       tmp:
         type: emptyDir
         globalMounts:
