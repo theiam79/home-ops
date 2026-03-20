@@ -72,9 +72,108 @@ spec:
               Movies:
                 collection_files:
                   - default: basic
+                  - default: imdb
+                overlay_files:
+                  - remove_overlays: false
+                  - default: resolution
+                  - default: ribbon
+                radarr_add_missing: false
+                radarr_add_existing: false
               TV Shows:
                 collection_files:
                   - default: basic
+                  - default: tmdb
+                  - default: network
+                overlay_files:
+                  - remove_overlays: false
+                  - default: resolution
+                    template_variables:
+                      vertical_offset: 125
+                  - default: ribbon
+                  - default: status
+                    template_variables:
+                      font_size: 75
+                      back_color: '#262626'
+                      back_width: 1920
+                      back_height: 125
+                      horizontal_align: center
+                      vertical_align: top
+                      vertical_offset: 0
+                sonarr_add_missing: false
+                sonarr_add_existing: false
+            playlist_files:
+              - default: playlist
+            settings:
+              cache: true
+              cache_expiration: 60
+              asset_directory: config/assets
+              asset_folders: true
+              asset_depth: 0
+              create_asset_folders: false
+              prioritize_assets: false
+              dimensional_asset_rename: false
+              download_url_assets: false
+              show_missing_season_assets: false
+              show_missing_episode_assets: false
+              show_asset_not_needed: true
+              sync_mode: append
+              minimum_items: 1
+              delete_below_minimum: true
+              delete_not_scheduled: false
+              run_again_delay: 2
+              missing_only_released: false
+              only_filter_missing: false
+              show_unmanaged: true
+              show_filtered: false
+              show_options: false
+              show_missing: true
+              show_missing_assets: true
+              save_report: false
+              tvdb_language: eng
+              item_refresh_delay: 0
+              playlist_sync_to_user: all
+              verify_ssl: true
+              run_order:
+                - operations
+                - metadata
+                - collections
+                - overlays
             plex:
               url: http://plex.media:32400
               token: <<PLEX_TOKEN>>
+              timeout: 60
+              clean_bundles: false
+              empty_trash: false
+              optimize: false
+            tmdb:
+              apikey: <<TMDB_APIKEY>>
+              language: en
+              cache_expiration: 60
+            tautulli:
+              url: http://tautulli.media:8181
+              apikey: <<TAUTULLI_APIKEY>>
+            radarr:
+              url: http://radarr.media:7878
+              token: <<RADARR_TOKEN>>
+              add_missing: false
+              add_existing: false
+              root_folder_path: /data/media/movies
+              monitor: true
+              availability: announced
+              quality_profile: HD-1080p
+              search: false
+              upgrade_existing: false
+            sonarr:
+              url: http://sonarr.media:8989
+              token: <<SONARR_TOKEN>>
+              add_missing: false
+              add_existing: false
+              root_folder_path: /data/media/tv
+              monitor: all
+              quality_profile: HD-1080p
+              language_profile: English
+              series_type: standard
+              season_folder: true
+              search: false
+              cutoff_search: false
+              upgrade_existing: false
