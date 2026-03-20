@@ -201,7 +201,7 @@ spec:
                 root_folder_path: /data/media/movies
                 monitor: true
                 availability: announced
-                quality_profile: HD-1080p
+                quality_profile: "Remux + WEB 1080p"
                 search: false
                 upgrade_existing: false
               radarr4k:
@@ -209,10 +209,10 @@ spec:
                 token: <<RADARR4K_TOKEN>>
                 add_missing: false
                 add_existing: false
-                root_folder_path: /data/media/movies-4k
+                root_folder_path: /data/media/movies
                 monitor: true
                 availability: announced
-                quality_profile: Ultra-HD
+                quality_profile: "Remux + WEB 2160p"
                 search: false
                 upgrade_existing: false
             sonarr:
@@ -223,7 +223,7 @@ spec:
                 add_existing: false
                 root_folder_path: /data/media/tv
                 monitor: all
-                quality_profile: HD-1080p
+                quality_profile: WEB-1080p
                 language_profile: English
                 series_type: standard
                 season_folder: true
@@ -235,9 +235,9 @@ spec:
                 token: <<SONARR4K_TOKEN>>
                 add_missing: false
                 add_existing: false
-                root_folder_path: /data/media/tv-4k
+                root_folder_path: /data/media/tv
                 monitor: all
-                quality_profile: Ultra-HD
+                quality_profile: WEB-2160p
                 language_profile: English
                 series_type: standard
                 season_folder: true
