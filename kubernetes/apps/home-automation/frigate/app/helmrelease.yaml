@@ -19,6 +19,9 @@ spec:
               tag: 0.17.0
             env:
               TZ: America/Chicago
+            envFrom:
+              - secretRef:
+                  name: frigate-secret
             probes:
               liveness:
                 enabled: true

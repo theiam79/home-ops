@@ -14,6 +14,8 @@ spec:
   dependsOn:
     - name: rook-ceph-cluster
       namespace: rook-ceph
+    - name: external-secrets
+      namespace: external-secrets
     - name: mosquitto
       namespace: home-automation
   interval: 1h
