@@ -97,6 +97,7 @@ totp:
 
 identity_providers:
   oidc:
+    minimum_parameter_entropy: 0
     hmac_secret: 'secret'
     jwks:
       - algorithm: 'RS256'
