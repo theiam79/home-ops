@@ -21,6 +21,7 @@ spec:
             env:
               TZ: America/Chicago
               ENABLE_WEB_UI: "true"
+              AUDIOBOOKSHELF_URL: "http://audiobookshelf"
               LOG_LEVEL: info
               DATA_DIR: /app/data
               AUTH_ENABLED: "true"
