@@ -117,7 +117,7 @@ identity_providers:
         - 'userinfo'
       allowed_origins_from_client_redirect_uris: true
     claims_policies:
-      booklore:
+      grimmory:
         id_token: ['email', 'preferred_username', 'name']
     clients:
       - client_id: audiobookshelf
@@ -135,9 +135,9 @@ identity_providers:
           - 'https://audiobookshelf.${SECRET_DOMAIN}/auth/openid/callback'
           - 'https://audiobookshelf.${SECRET_DOMAIN}/auth/openid/mobile-redirect'
           - 'audiobookshelf://oauth'
-      - client_id: booklore
-        claims_policy: booklore
-        client_name: Booklore
+      - client_id: grimmory
+        claims_policy: grimmory
+        client_name: Grimmory
         public: true
         authorization_policy: two_factor
         require_pkce: true
@@ -149,6 +149,7 @@ identity_providers:
           - offline_access
           - profile
           - email
+          - groups
         redirect_uris:
           - 'https://books.${SECRET_DOMAIN}/api/oidc'
           - 'https://books.${SECRET_DOMAIN}/oauth2-callback'
