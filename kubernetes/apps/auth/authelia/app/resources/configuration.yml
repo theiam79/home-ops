@@ -42,6 +42,7 @@ access_control:
     - domain:
         - 'books.${SECRET_DOMAIN}'
         - 'audiobookshelf.${SECRET_DOMAIN}'
+        - 'booksync.${SECRET_DOMAIN}'
         - 'shelfmark.${SECRET_DOMAIN}'
       subject:
         - 'group:books'
@@ -158,6 +159,19 @@ identity_providers:
         userinfo_signed_response_alg: 'none'
         token_endpoint_auth_method: 'none'
         pkce_challenge_method: S256
+      - client_id: booksync
+        client_name: Booksync
+        client_secret: '{{ secret "/secrets/authelia/BOOKSYNC_CLIENT_SECRET" }}'
+        public: false
+        authorization_policy: two_factor
+        consent_mode: implicit
+        scopes:
+          - openid
+          - groups
+          - email
+          - profile
+        redirect_uris:
+          - 'https://booksync.${SECRET_DOMAIN}/auth/callback/keycloak'
       - client_id: shelfmark
         client_name: Shelfmark
         client_secret: '{{ secret "/secrets/authelia/SHELFMARK_CLIENT_SECRET" }}'
