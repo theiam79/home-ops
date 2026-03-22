@@ -20,17 +20,13 @@ spec:
               tag: 3.2.0
             env:
               TZ: America/Chicago
+              CONFIG_PATH: /config/config.yaml
               ENABLE_WEB_UI: "true"
               AUDIOBOOKSHELF_URL: "http://audiobookshelf"
               LOG_LEVEL: info
               DATA_DIR: /app/data
-              AUTH_ENABLED: "true"
-              KEYCLOAK_ENABLED: "true"
               KEYCLOAK_ISSUER: "https://auth.${SECRET_DOMAIN}"
-              KEYCLOAK_CLIENT_ID: booksync
               KEYCLOAK_REDIRECT_URI: "https://booksync.${SECRET_DOMAIN}/auth/callback/keycloak"
-              KEYCLOAK_SCOPES: "openid profile email groups"
-              KEYCLOAK_ROLE_CLAIM: groups
             envFrom:
               - secretRef:
                   name: booksync-secret
@@ -40,7 +36,7 @@ spec:
                 custom: true
                 spec:
                   httpGet:
-                    path: /healthz
+                    path: /health
                     port: &port 8080
                   initialDelaySeconds: 0
                   periodSeconds: 10
@@ -52,7 +48,7 @@ spec:
                 custom: true
                 spec:
                   httpGet:
-                    path: /healthz
+                    path: /health
                     port: *port
                   initialDelaySeconds: 5
                   periodSeconds: 5
@@ -93,7 +89,28 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
+    configMaps:
+      config:
+        data:
+          config.yaml: |
+            authentication:
+              enabled: true
+              session:
+                secure: true
+                same_site: Lax
+              keycloak:
+                enabled: true
+                client_id: booksync
+                scopes: "openid profile email groups"
+                role_claim: groups
     persistence:
+      config:
+        type: configMap
+        name: booksync-config
+        globalMounts:
+          - path: /config/config.yaml
+            subPath: config.yaml
+            readOnly: true
       data:
         existingClaim: booksync
         globalMounts:
