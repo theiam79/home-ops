@@ -8,6 +8,7 @@ resources:
   - ./mariadb/ks.yaml
   - ./audiobookshelf/ks.yaml
   - ./booklore/ks.yaml
+  - ./booksync/ks.yaml
   - ./plex/ks.yaml
   - ./prowlarr/ks.yaml
   - ./qbittorrent/ks.yaml
