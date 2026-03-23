@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: booklore
+  name: grimmory
 spec:
   chartRef:
     kind: OCIRepository
@@ -10,7 +10,7 @@ spec:
   interval: 1h
   values:
     controllers:
-      booklore:
+      grimmory:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -27,7 +27,7 @@ spec:
               SPRING_DATASOURCE_PASSWORD:
                 valueFrom:
                   secretKeyRef:
-                    name: booklore-secret
+                    name: grimmory-secret
                     key: MARIADB_PASSWORD
             probes:
               liveness: &probes
@@ -49,7 +49,7 @@ spec:
                 memory: 2Gi
     service:
       app:
-        controller: booklore
+        controller: grimmory
         ports:
           http:
             primary: true
@@ -74,7 +74,7 @@ spec:
                 port: *port
     persistence:
       data:
-        existingClaim: booklore
+        existingClaim: grimmory
         globalMounts:
           - path: /app/data
       media:
