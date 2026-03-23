@@ -116,9 +116,6 @@ identity_providers:
         - 'introspection'
         - 'userinfo'
       allowed_origins_from_client_redirect_uris: true
-    claims_policies:
-      grimmory:
-        id_token: ['email', 'preferred_username', 'name']
     clients:
       - client_id: audiobookshelf
         client_name: audiobookshelf
@@ -136,7 +133,6 @@ identity_providers:
           - 'https://audiobookshelf.${SECRET_DOMAIN}/auth/openid/mobile-redirect'
           - 'audiobookshelf://oauth'
       - client_id: grimmory
-        claims_policy: grimmory
         client_name: Grimmory
         public: true
         authorization_policy: two_factor
@@ -151,13 +147,10 @@ identity_providers:
           - email
           - groups
         redirect_uris:
-          - 'https://books.${SECRET_DOMAIN}/api/oidc'
           - 'https://books.${SECRET_DOMAIN}/oauth2-callback'
         grant_types:
           - authorization_code
           - refresh_token
-        access_token_signed_response_alg: 'none'
-        userinfo_signed_response_alg: 'none'
         token_endpoint_auth_method: 'none'
         pkce_challenge_method: S256
       - client_id: booksync
