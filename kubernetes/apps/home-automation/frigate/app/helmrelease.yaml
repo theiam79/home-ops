@@ -66,6 +66,13 @@ spec:
             securityContext:
               privileged: true
     defaultPodOptions:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: plex
+              topologyKey: kubernetes.io/hostname
       securityContext:
         runAsNonRoot: false
         runAsUser: 0
