@@ -28,7 +28,7 @@ spec:
           app:
             image:
               repository: kometateam/kometa
-              tag: v2.0.2
+              tag: v2.3.0
             env:
               TZ: America/Chicago
               KOMETA_RUN: "true"
