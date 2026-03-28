@@ -15,7 +15,7 @@ spec:
           app:
             image:
               repository: mcr.microsoft.com/dotnet/aspire-dashboard
-              tag: 13.1
+              tag: 13.2
             env:
               TZ: America/Chicago
               DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true"
