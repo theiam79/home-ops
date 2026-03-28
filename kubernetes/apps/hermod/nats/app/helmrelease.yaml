@@ -7,7 +7,7 @@ spec:
   chart:
     spec:
       chart: nats
-      version: 2.12.5
+      version: 2.12.6
       sourceRef:
         kind: HelmRepository
         name: nats
@@ -21,7 +21,7 @@ spec:
     container:
       image:
         repository: nats
-        tag: 2.12.5-alpine
+        tag: 2.12.6-alpine
       merge:
         resources:
           requests:
