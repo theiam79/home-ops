@@ -17,7 +17,7 @@ spec:
           app:
             image:
               repository: ghcr.io/drallgood/audiobookshelf-hardcover-sync
-              tag: 3.2.0
+              tag: 3.3.0
             env:
               TZ: America/Chicago
               CONFIG_PATH: /config/config.yaml
