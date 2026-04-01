@@ -18,6 +18,7 @@ spec:
               tag: 1.2.9
             env:
               TZ: America/Chicago
+              XDG_DATA_HOME: /config
             probes:
               liveness: &probes
                 enabled: true
