@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: plex
+  name: tunarr
 spec:
   chartRef:
     kind: OCIRepository
@@ -10,27 +10,22 @@ spec:
   interval: 1h
   values:
     controllers:
-      plex:
+      tunarr:
         containers:
           app:
             image:
-              repository: ghcr.io/home-operations/plex
-              tag: 1.43.0.10492
+              repository: ghcr.io/chrisbenincasa/tunarr
+              tag: v1.2.8
             env:
               TZ: America/Chicago
-              PLEX_ADVERTISE_URL: "https://plex.${SECRET_DOMAIN}:443,http://192.168.100.35:32400,http://plex-app.media.svc.cluster.local:32400"
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
             probes:
               liveness: &probes
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
-                    path: /identity
-                    port: 32400
+                    path: /
+                    port: &port 8000
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 1
@@ -41,19 +36,23 @@ spec:
                 custom: true
                 spec:
                   httpGet:
-                    path: /identity
-                    port: 32400
+                    path: /
+                    port: *port
                   initialDelaySeconds: 10
                   periodSeconds: 5
                   failureThreshold: 30
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
-                cpu: 100m
-                memory: 2Gi
-                gpu.intel.com/i915: "3"
+                cpu: 10m
+                memory: 512Mi
+                gpu.intel.com/i915: "1"
               limits:
-                memory: 32Gi
-                gpu.intel.com/i915: "3"
+                memory: 4Gi
+                gpu.intel.com/i915: "1"
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -66,18 +65,15 @@ spec:
           - 105
     service:
       app:
-        controller: plex
-        type: LoadBalancer
-        annotations:
-          lbipam.cilium.io/ips: "192.168.100.35"
+        controller: tunarr
         ports:
           http:
             primary: true
-            port: 32400
+            port: *port
     route:
       app:
         hostnames:
-          - "plex.${SECRET_DOMAIN}"
+          - "tunarr.${SECRET_DOMAIN}"
         parentRefs:
           - name: envoy-internal
             namespace: network
@@ -85,12 +81,12 @@ spec:
         rules:
           - backendRefs:
               - identifier: app
-                port: 32400
+                port: *port
     persistence:
       config:
-        existingClaim: plex
+        existingClaim: tunarr
         globalMounts:
-          - path: /config
+          - path: /config/tunarr
       media:
         type: nfs
         server: snotra.internal
@@ -102,7 +98,3 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
-      transcode:
-        type: emptyDir
-        globalMounts:
-          - path: /transcode

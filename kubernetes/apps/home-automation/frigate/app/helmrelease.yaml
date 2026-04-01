@@ -59,20 +59,13 @@ spec:
               requests:
                 cpu: 500m
                 memory: 2Gi
-                gpu.intel.com/i915: "1"
+                gpu.intel.com/i915: "3"
               limits:
                 memory: 8Gi
-                gpu.intel.com/i915: "1"
+                gpu.intel.com/i915: "3"
             securityContext:
               privileged: true
     defaultPodOptions:
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchLabels:
-                  app.kubernetes.io/name: plex
-              topologyKey: kubernetes.io/hostname
       securityContext:
         runAsNonRoot: false
         runAsUser: 0
