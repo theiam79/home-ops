@@ -16,6 +16,11 @@ spec:
             image:
               repository: ghcr.io/donkie/spoolman
               tag: 0.23.1
+            command:
+              - uvicorn
+              - spoolman.main:app
+              - --host
+              - 0.0.0.0
             env:
               TZ: America/Chicago
             probes:
@@ -42,8 +47,8 @@ spec:
                   periodSeconds: 5
                   failureThreshold: 30
             securityContext:
-              allowPrivilegeEscalation: true
-              readOnlyRootFilesystem: false
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
               capabilities: { drop: ["ALL"] }
             resources:
               requests:
@@ -53,10 +58,10 @@ spec:
                 memory: 512Mi
     defaultPodOptions:
       securityContext:
-        runAsNonRoot: false
-        runAsUser: 0
-        runAsGroup: 0
-        fsGroup: 0
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
