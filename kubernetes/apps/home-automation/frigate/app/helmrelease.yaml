@@ -107,7 +107,7 @@ spec:
           - path: /config
       media:
         type: nfs
-        server: snotra.internal
+        server: snotra.cluster
         path: /mnt/user/frigate
         globalMounts:
           - path: /media/frigate

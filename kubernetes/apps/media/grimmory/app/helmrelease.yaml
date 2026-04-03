@@ -79,13 +79,13 @@ spec:
           - path: /app/data
       media:
         type: nfs
-        server: snotra.internal
+        server: snotra.cluster
         path: /mnt/user/media
         globalMounts:
           - path: /data/media
       bookdrop:
         type: nfs
-        server: snotra.internal
+        server: snotra.cluster
         path: /mnt/disks/85AAZU6GS/cluster/imports/books
         globalMounts:
           - path: /bookdrop

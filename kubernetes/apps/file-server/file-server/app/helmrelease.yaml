@@ -68,7 +68,7 @@ spec:
             readOnly: true
       files:
         type: nfs
-        server: snotra.internal
+        server: snotra.cluster
         path: /mnt/user/file-server
         globalMounts:
           - path: /www/data

@@ -168,7 +168,7 @@ spec:
               - path: /config
       media:
         type: nfs
-        server: snotra.internal
+        server: snotra.cluster
         path: /mnt/user/media
         advancedMounts:
           qbittorrent:
@@ -176,7 +176,7 @@ spec:
               - path: /data/media
       downloads:
         type: nfs
-        server: snotra.internal
+        server: snotra.cluster
         path: /mnt/disks/85AAZU6GS/cluster/downloads
         advancedMounts:
           qbittorrent:

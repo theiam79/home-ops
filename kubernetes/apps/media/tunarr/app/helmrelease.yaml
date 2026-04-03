@@ -90,7 +90,7 @@ spec:
           - path: /config/tunarr
       media:
         type: nfs
-        server: snotra.internal
+        server: snotra.cluster
         path: /mnt/user/media
         globalMounts:
           - path: /data/media
