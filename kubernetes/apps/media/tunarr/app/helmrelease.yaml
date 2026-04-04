@@ -15,7 +15,7 @@ spec:
           app:
             image:
               repository: ghcr.io/chrisbenincasa/tunarr
-              tag: 1.2.9
+              tag: 1.2.10
             env:
               TZ: America/Chicago
               TUNARR_DATABASE_PATH: /config/tunarr
