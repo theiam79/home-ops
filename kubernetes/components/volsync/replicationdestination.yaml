@@ -8,13 +8,10 @@ metadata:
 spec:
   trigger:
     manual: restore-once
-  restic:
+  kopia:
     repository: "${APP}-volsync-secret"
     copyMethod: Snapshot
     volumeSnapshotClassName: "${VOLSYNC_SNAPSHOTCLASS:=csi-ceph-blockpool}"
-    cacheStorageClassName: "${VOLSYNC_CACHE_SNAPSHOTCLASS:=openebs-hostpath}"
-    cacheAccessModes: ["${VOLSYNC_CACHE_ACCESSMODES:=ReadWriteOnce}"]
-    cacheCapacity: "${VOLSYNC_CACHE_CAPACITY:=5Gi}"
     storageClassName: "${VOLSYNC_STORAGECLASS:=ceph-block}"
     accessModes: ["${VOLSYNC_ACCESSMODES:=ReadWriteOnce}"]
     capacity: "${VOLSYNC_CAPACITY:=5Gi}"
@@ -22,6 +19,14 @@ spec:
       runAsUser: ${VOLSYNC_PUID:=1000}
       runAsGroup: ${VOLSYNC_PGID:=1000}
       fsGroup: ${VOLSYNC_PGID:=1000}
+    moverVolumes:
+      - name: repository
+        nfs:
+          server: snotra.cluster
+          path: /mnt/user/volsync-kopia
+    moverVolumeMounts:
+      - name: repository
+        mountPath: /repository
     enableFileDeletion: true
     cleanupCachePVC: true
     cleanupTempPVC: true
