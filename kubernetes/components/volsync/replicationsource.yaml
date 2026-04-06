@@ -7,20 +7,26 @@ spec:
   sourcePVC: "${APP}"
   trigger:
     schedule: "${VOLSYNC_SCHEDULE:=0 */12 * * *}"
-  restic:
+  kopia:
+    compression: zstd-fastest
     copyMethod: "${VOLSYNC_COPYMETHOD:=Snapshot}"
-    pruneIntervalDays: 14
+    parallelism: 2
     repository: "${APP}-volsync-secret"
     volumeSnapshotClassName: "${VOLSYNC_SNAPSHOTCLASS:=csi-ceph-blockpool}"
-    cacheCapacity: "${VOLSYNC_CACHE_CAPACITY:=5Gi}"
-    cacheStorageClassName: "${VOLSYNC_CACHE_SNAPSHOTCLASS:=openebs-hostpath}"
-    cacheAccessModes: ["${VOLSYNC_CACHE_ACCESSMODES:=ReadWriteOnce}"]
     storageClassName: "${VOLSYNC_STORAGECLASS:=ceph-block}"
     accessModes: ["${VOLSYNC_SNAP_ACCESSMODES:=ReadWriteOnce}"]
     moverSecurityContext:
       runAsUser: ${VOLSYNC_PUID:=1000}
       runAsGroup: ${VOLSYNC_PGID:=1000}
       fsGroup: ${VOLSYNC_PGID:=1000}
+    moverVolumes:
+      - name: repository
+        nfs:
+          server: snotra.cluster
+          path: /mnt/user/volsync-kopia
+    moverVolumeMounts:
+      - name: repository
+        mountPath: /repository
     retain:
       hourly: 24
       daily: 7

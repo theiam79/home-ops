@@ -9,8 +9,8 @@ spec:
     mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
     operation: copy
   ref:
-    tag: 0.15.0
-  url: oci://ghcr.io/home-operations/charts-mirror/volsync
+    tag: 0.17.3
+  url: oci://ghcr.io/home-operations/charts-mirror/volsync-perfectra1n
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -22,8 +22,14 @@ spec:
     kind: OCIRepository
     name: volsync
   values:
+    fullnameOverride: volsync
     manageCRDs: true
     replicaCount: 2
+    image: &image
+      repository: ghcr.io/perfectra1n/volsync
+      tag: v0.17.11
+    kopia: *image
+    restic: *image
     metrics:
       disableAuth: true
     podSecurityContext:
