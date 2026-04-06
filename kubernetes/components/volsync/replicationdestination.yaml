@@ -20,13 +20,11 @@ spec:
       runAsGroup: ${VOLSYNC_PGID:=1000}
       fsGroup: ${VOLSYNC_PGID:=1000}
     moverVolumes:
-      - name: repository
-        nfs:
-          server: snotra.cluster
-          path: /mnt/user/volsync-kopia
-    moverVolumeMounts:
-      - name: repository
-        mountPath: /repository
+      - mountPath: repository
+        volumeSource:
+          nfs:
+            server: snotra.cluster
+            path: /mnt/user/volsync-kopia
     enableFileDeletion: true
     cleanupCachePVC: true
     cleanupTempPVC: true
