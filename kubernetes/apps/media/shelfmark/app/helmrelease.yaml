@@ -16,8 +16,8 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/calibrain/shelfmark
-              tag: v1.2.1
+              repository: ghcr.io/theiam79/shelfmark
+              tag: audiobookshelf-upload
             env:
               TZ: America/Chicago
               PUID: "99"
