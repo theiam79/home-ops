@@ -92,4 +92,8 @@ spec:
         path: /mnt/disks/85AAZU6GS/cluster/imports/books
         globalMounts:
           - path: /bookdrop
+      gunicorn:
+        type: emptyDir
+        globalMounts:
+          - path: /app/.gunicorn
 
