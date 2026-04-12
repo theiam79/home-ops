@@ -20,8 +20,6 @@ spec:
               tag: audiobookshelf-upload
             env:
               TZ: America/Chicago
-              PUID: "99"
-              PGID: "100"
             envFrom:
               - secretRef:
                   name: shelfmark-secret
