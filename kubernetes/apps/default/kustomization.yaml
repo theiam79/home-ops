@@ -8,3 +8,4 @@ resources:
   - ./echo/ks.yaml
   - ./atuin/ks.yaml
   - ./spoolman/ks.yaml
+  - ./reactive-resume/ks.yaml

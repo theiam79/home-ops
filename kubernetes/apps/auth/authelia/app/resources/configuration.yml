@@ -179,3 +179,15 @@ identity_providers:
           - profile
         redirect_uris:
           - 'https://shelfmark.${SECRET_DOMAIN}/api/auth/oidc/callback'
+      - client_id: reactive-resume
+        client_name: Reactive Resume
+        client_secret: '{{ secret "/secrets/authelia/REACTIVE_RESUME_CLIENT_SECRET_DIGEST" }}'
+        public: false
+        authorization_policy: two_factor
+        consent_mode: implicit
+        scopes:
+          - openid
+          - profile
+          - email
+        redirect_uris:
+          - 'https://resume.${SECRET_DOMAIN}/api/auth/oauth2/callback/custom'
