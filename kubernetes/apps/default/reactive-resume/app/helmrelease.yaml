@@ -30,8 +30,10 @@ spec:
               OAUTH_CLIENT_ID: reactive-resume
               OAUTH_DISCOVERY_URL: "https://auth.${SECRET_DOMAIN}/.well-known/openid-configuration"
               OAUTH_SCOPES: openid profile email
-              # Auth feature flags — OIDC-only
-              FLAG_DISABLE_SIGNUPS: "true"
+              # Auth feature flags — OIDC-only (signups must stay enabled
+              # so OIDC can provision users on first login; Authelia is the
+              # actual access gate)
+              FLAG_DISABLE_SIGNUPS: "false"
               FLAG_DISABLE_EMAIL_AUTH: "true"
               FLAG_DEBUG_PRINTER: "false"
               FLAG_DISABLE_IMAGE_PROCESSING: "false"
