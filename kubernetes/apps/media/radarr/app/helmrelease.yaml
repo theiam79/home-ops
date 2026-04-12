@@ -11,6 +11,7 @@ spec:
   values:
     controllers:
       radarr:
+        strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
         containers:

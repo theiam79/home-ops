@@ -11,6 +11,7 @@ spec:
   values:
     controllers:
       lidarr:
+        strategy: Recreate
         containers:
           app:
             image:
