@@ -17,7 +17,7 @@ spec:
           app:
             image:
               repository: ghcr.io/theiam79/shelfmark
-              tag: audiobookshelf-upload@sha256:8f3ae464299b62cc878cf8023379298eb01b1ae7893fe65ef413df25aa5b8e6c
+              tag: audiobookshelf-scan@sha256:d94e0aa544aa3553cc4dbb9e25ccab0f95d41d0cc4718c53c7679237ba8b1683
             env:
               TZ: America/Chicago
             envFrom:
