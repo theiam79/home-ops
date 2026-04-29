@@ -17,7 +17,7 @@ spec:
           app:
             image:
               repository: ghcr.io/foxxmd/multi-scrobbler
-              tag: 0.12.2
+              tag: 0.13.1
             env:
               TZ: America/Chicago
               BASE_URL: "https://multi-scrobbler.${SECRET_DOMAIN}"
