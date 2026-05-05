@@ -1,0 +1,28 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vikunja-config
+data:
+  config.yml: |
+    service:
+      publicurl: https://tasks.${SECRET_DOMAIN}/
+      enableregistration: false
+      timezone: America/Chicago
+    auth:
+      local:
+        enabled: false
+      openid:
+        enabled: true
+        providers:
+          authelia:
+            name: Authelia
+            authurl: https://auth.${SECRET_DOMAIN}
+            clientid: vikunja
+            scope: openid profile email
+    database:
+      type: postgres
+      host: vikunja-pg-rw
+      database: vikunja
+    files:
+      basepath: /app/vikunja/files
