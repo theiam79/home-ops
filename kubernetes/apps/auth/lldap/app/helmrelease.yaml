@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: lldap/lldap
-              tag: v0.6.2
+              tag: v0.6.3
             env:
               TZ: America/Chicago
               LLDAP_LDAP_BASE_DN:
