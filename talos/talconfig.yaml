@@ -45,6 +45,13 @@ nodes:
         vlans:
           - vlanId: 70
             dhcp: false
+      - deviceSelector:
+          physical: true
+          hardwareAddr: "02:26:26:02:0d:7e"
+        dhcp: false
+        mtu: 9000
+        addresses:
+          - "10.10.10.20/24"
   - hostname: "dvergar-01"
     ipAddress: "192.168.100.21"
     installDiskSelector:
@@ -69,6 +76,13 @@ nodes:
         vlans:
           - vlanId: 70
             dhcp: false
+      - deviceSelector:
+          physical: true
+          hardwareAddr: "02:26:26:02:0d:d0"
+        dhcp: false
+        mtu: 9000
+        addresses:
+          - "10.10.10.21/24"
   - hostname: "dvergar-02"
     ipAddress: "192.168.100.22"
     installDiskSelector:
@@ -93,6 +107,13 @@ nodes:
         vlans:
           - vlanId: 70
             dhcp: false
+      - deviceSelector:
+          physical: true
+          hardwareAddr: "02:26:26:02:0d:20"
+        dhcp: false
+        mtu: 9000
+        addresses:
+          - "10.10.10.22/24"
   - hostname: "dvergar-03"
     ipAddress: "192.168.100.23"
     installDiskSelector:
@@ -115,6 +136,13 @@ nodes:
         vlans:
           - vlanId: 70
             dhcp: false
+      - deviceSelector:
+          physical: true
+          hardwareAddr: "02:26:26:02:0d:70"
+        dhcp: false
+        mtu: 9000
+        addresses:
+          - "10.10.10.23/24"
   - hostname: "dvergar-04"
     ipAddress: "192.168.100.24"
     installDiskSelector:
@@ -161,6 +189,13 @@ nodes:
         vlans:
           - vlanId: 70
             dhcp: false
+      - deviceSelector:
+          physical: true
+          hardwareAddr: "02:26:26:02:0d:ac"
+        dhcp: false
+        mtu: 9000
+        addresses:
+          - "10.10.10.25/24"
   - hostname: "dvergar-06"
     ipAddress: "192.168.100.26"
     installDiskSelector:
