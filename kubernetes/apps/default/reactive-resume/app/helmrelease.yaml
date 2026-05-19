@@ -17,7 +17,7 @@ spec:
           app:
             image:
               repository: ghcr.io/amruthpillai/reactive-resume
-              tag: v5.0.20
+              tag: v5.1.5
             env:
               TZ: America/Chicago
               NODE_ENV: production
