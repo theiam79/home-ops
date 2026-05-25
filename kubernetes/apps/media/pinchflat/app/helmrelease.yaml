@@ -80,10 +80,6 @@ spec:
         server: snotra.cluster
         path: /mnt/user/media
         globalMounts:
-          - path: /data/media
-      downloads:
-        type: emptyDir
-        globalMounts:
           - path: /downloads
       tmp:
         type: emptyDir
