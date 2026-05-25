@@ -23,6 +23,7 @@ resources:
   - ./maintainerr/ks.yaml
   - ./multi-scrobbler/ks.yaml
   - ./musicseerr/ks.yaml
+  - ./pinchflat/ks.yaml
   - ./slskd/ks.yaml
   - ./sonarr/ks.yaml
   - ./sonarr4k/ks.yaml
