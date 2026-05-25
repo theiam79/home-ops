@@ -18,7 +18,7 @@ spec:
           app:
             image:
               repository: ghcr.io/kieraneglin/pinchflat
-              tag: v2025.9.26
+              tag: v2025.6.6
             env:
               TZ: America/Chicago
               EXPOSED_PORT: &port 8945
