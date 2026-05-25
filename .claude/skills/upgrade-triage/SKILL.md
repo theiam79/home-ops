@@ -7,8 +7,12 @@ argument-hint: "[reference-repo]"
 # Upgrade Triage
 
 Assess all open dependency-update PRs, research upgrade risks, cross-reference
-against a reference repository's merge history, and produce a prioritized set of
-batch documents in `upgrade-triage/`.
+against a reference repository's merge history, and produce a prioritized set
+of batch documents for **same-session triage**.
+
+Batch documents are scratch artifacts written to a tmp directory — they are
+**not committed to the repo**. Anything that needs to outlive the session
+(holds, multi-step upgrade plans, blocked work) gets filed as a GitHub issue.
 
 ## Arguments
 
@@ -123,12 +127,13 @@ Assign each PR to a batch based on combined risk assessment:
 - Kubernetes version upgrades coupled with OS upgrades
 - Anything with open regressions — mark as HOLD with rationale
 
-## Phase 5: Write Batch Documents
+## Phase 5: Write Scratch Batch Documents
 
-Create `upgrade-triage/` directory with one file per batch:
+Write batch documents to a session-scoped tmp directory — **never** inside the
+repo working tree:
 
 ```
-upgrade-triage/
+/tmp/upgrade-triage-$(date +%Y%m%d-%H%M%S)/
   00-superseded-close.md
   01-batch-immediate.md
   02-batch-light-prep.md
@@ -136,6 +141,9 @@ upgrade-triage/
   04-batch-heavy-prep.md
   05-batch-critical-infrastructure.md
 ```
+
+Tell the user the tmp path so they can open the files alongside the
+conversation. These are scratch artifacts for **this session only**.
 
 Each batch document must include for every PR:
 
@@ -153,22 +161,42 @@ For the superseded file (`00-superseded-close.md`):
 - List PRs to close outright (not useful as intermediates)
 - List PRs rescued as intermediate steps, noting which batch they moved to
 
-## Phase 6: Commit and PR
+## Phase 6: Triage in Session, File Issues for Holds
 
-1. Create a branch: `docs/upgrade-triage`
-2. Commit all batch documents
-3. Open a PR with a summary table of all batches and key findings from the
-   cross-reference phase
+The batch documents drive triage **in this session**:
+
+1. Walk the user through batches in order (immediate → critical). For each PR
+   in a batch, either merge it now, close it (superseded), or defer it.
+2. For anything **deferred** — HOLDs, multi-step sequences waiting on prep
+   work, blocked upgrades — open a GitHub issue so the context survives the
+   session. Do not leave it only in the scratch docs.
+
+Use `gh issue create` for each held item. Include in the issue body:
+
+- PR number(s) being held and current → target versions
+- Risk rating and rationale (lift from the batch doc)
+- The specific blocker (upstream issue, required prep work, maintenance
+  window, missing CRDs, etc.) with links
+- Concrete unblock criteria — what condition lets us proceed
+- Any cross-reference repo signals (reverts, chore commits, incremental path)
+- Sequenced upgrades: spell out Step 1 / Step 2 with the wait condition
+
+Label issues `upgrade-hold` (create the label if it doesn't exist) so they're
+easy to surface on the next triage run.
+
+**Do not** commit the batch documents, create a `docs/upgrade-triage` branch,
+or open a PR with the scratch files. The repo is not the persistence layer —
+GitHub issues are.
 
 ## Notes
 
 - When multiple components are tightly coupled (e.g., Talos + kubelet, Rook
   operator + cluster), group them in the same batch entry and document the
-  sequencing.
+  sequencing. If deferred, file **one** issue covering the whole group.
 - If the reference repo uses a different tool for the same purpose (e.g.,
   grafana-operator vs grafana chart), note "no comparison available" rather
   than forcing a comparison.
-- Re-run this skill periodically as PRs accumulate. The batch documents are
-  point-in-time snapshots and should be replaced, not appended to.
-- If a PR in Batch 5 is marked HOLD, include the specific GitHub issue or
-  condition that must be resolved before proceeding.
+- On re-runs: before writing fresh batch docs, check existing `upgrade-hold`
+  issues (`gh issue list --label upgrade-hold`) so you can cross-reference,
+  update, or close them as conditions change. The scratch docs are
+  point-in-time — the issues are the durable record.
