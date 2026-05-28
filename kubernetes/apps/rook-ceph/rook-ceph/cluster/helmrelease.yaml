@@ -24,6 +24,24 @@ spec:
   chartRef:
     kind: OCIRepository
     name: rook-ceph-cluster
+  postRenderers:
+    # Strip CephNodeInconsistentMTU — upstream rule's scalar(max by(device)…)
+    # comparison fires false-positives on our cluster (heterogeneous NIC layouts
+    # across nodes). `test` ops fail loudly if Rook reorders rules so we re-pin.
+    - kustomize:
+        patches:
+          - target:
+              kind: PrometheusRule
+              name: prometheus-ceph-rules
+            patch: |
+              - op: test
+                path: /spec/groups/6/name
+                value: nodes
+              - op: test
+                path: /spec/groups/6/rules/5/alert
+                value: CephNodeInconsistentMTU
+              - op: remove
+                path: /spec/groups/6/rules/5
   values:
     monitoring:
       enabled: true
