@@ -99,9 +99,8 @@ cluster:
       enable-aggregator-routing: true
       feature-gates: MutatingAdmissionPolicy=true
       runtime-config: admissionregistration.k8s.io/v1beta1=true
-    admissionControl:
-      - name: PodSecurity
-        $$patch: delete
+    # PodSecurity admission removed (talhelper's old patch was a strategic-merge
+    # $$patch: delete directive; in the jinja path we just omit the entry).
   controllerManager:
     extraArgs:
       bind-address: 0.0.0.0
