@@ -1,0 +1,47 @@
+---
+machine:
+  type: worker
+  install:
+    diskSelector:
+      serial: IB25ZD0256*
+  nodeLabels:
+    clusterrole: highspeed
+---
+apiVersion: v1alpha1
+kind: HostnameConfig
+auto: "off"
+hostname: dvergar-05
+---
+apiVersion: v1alpha1
+kind: LinkConfig
+mtu: 1500
+name: mgmt0
+addresses:
+  - address: 192.168.100.25/25
+routes:
+  - gateway: 192.168.100.1
+---
+apiVersion: v1alpha1
+kind: LinkConfig
+mtu: 9000
+name: ceph0
+addresses:
+  - address: 10.10.10.25/24
+---
+apiVersion: v1alpha1
+kind: VLANConfig
+name: mgmt0.70
+parent: mgmt0
+vlanID: 70
+---
+apiVersion: v1alpha1
+kind: LinkAliasConfig
+name: mgmt0
+selector:
+  match: mac(link.permanent_addr) == "6c:2b:59:e4:ca:c8"
+---
+apiVersion: v1alpha1
+kind: LinkAliasConfig
+name: ceph0
+selector:
+  match: link.driver == "igc" && mac(link.permanent_addr).startsWith("02:26:26:02:0d:")

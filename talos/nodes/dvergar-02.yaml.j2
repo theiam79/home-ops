@@ -1,0 +1,52 @@
+---
+machine:
+  type: controlplane
+  install:
+    diskSelector:
+      serial: IB25ZD0256P00322
+  nodeLabels:
+    node.kubernetes.io/exclude-from-external-load-balancers: ""
+---
+apiVersion: v1alpha1
+kind: HostnameConfig
+auto: "off"
+hostname: dvergar-02
+---
+apiVersion: v1alpha1
+kind: Layer2VIPConfig
+link: mgmt0
+name: 192.168.100.5
+---
+apiVersion: v1alpha1
+kind: LinkConfig
+mtu: 1500
+name: mgmt0
+addresses:
+  - address: 192.168.100.22/24
+routes:
+  - gateway: 192.168.100.1
+---
+apiVersion: v1alpha1
+kind: LinkConfig
+mtu: 9000
+name: ceph0
+addresses:
+  - address: 10.10.10.22/24
+---
+apiVersion: v1alpha1
+kind: VLANConfig
+name: mgmt0.70
+parent: mgmt0
+vlanID: 70
+---
+apiVersion: v1alpha1
+kind: LinkAliasConfig
+name: mgmt0
+selector:
+  match: mac(link.permanent_addr) == "14:b3:1f:21:56:9c"
+---
+apiVersion: v1alpha1
+kind: LinkAliasConfig
+name: ceph0
+selector:
+  match: link.driver == "igc" && mac(link.permanent_addr).startsWith("02:26:26:02:0d:")

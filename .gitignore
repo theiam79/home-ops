@@ -13,6 +13,9 @@
 # Kubernetes
 kubeconfig
 talosconfig
+# Jinja-rendered Talos configs (contain secrets — talhelper's clusterconfig/
+# has its own auto-managed .gitignore; this directory needs an explicit one).
+talos/clusterconfig-jinja/
 # Misc.
 .private/
 .task/
