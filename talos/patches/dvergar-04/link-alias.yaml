@@ -1,0 +1,6 @@
+---
+apiVersion: v1alpha1
+kind: LinkAliasConfig
+name: mgmt0
+selector:
+  match: mac(link.permanent_addr) == "48:4d:7e:d8:83:c8"
