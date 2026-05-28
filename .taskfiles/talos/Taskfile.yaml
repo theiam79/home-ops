@@ -27,14 +27,14 @@ tasks:
       fi
       GLOBAL_TMP=$(mktemp) NODE_TMP=$(mktemp)
       trap "rm -f $GLOBAL_TMP $NODE_TMP" EXIT
-      python3 {{.SCRIPTS_DIR}}/render-talos-template.py {{.TALOS_DIR}}/machineconfig.yaml.j2 > "$GLOBAL_TMP"
-      python3 {{.SCRIPTS_DIR}}/render-talos-template.py "$NODE_FILE" > "$NODE_TMP"
+      minijinja-cli --env {{.TALOS_DIR}}/machineconfig.yaml.j2 > "$GLOBAL_TMP"
+      minijinja-cli --env "$NODE_FILE" > "$NODE_TMP"
       talosctl machineconfig patch "$GLOBAL_TMP" -p "@$NODE_TMP"
     requires:
       vars: [NODE]
     preconditions:
       - test -f {{.TALOS_DIR}}/machineconfig.yaml.j2
-      - which python3 talosctl
+      - which minijinja-cli talosctl
 
   render-all:
     desc: 'Render jinja Talos config for all nodes into clusterconfig-jinja/ — bws-required'
@@ -84,7 +84,7 @@ tasks:
     preconditions:
       - talosctl --nodes {{.IP}} get machineconfig
       - test -f {{.TALOSCONFIG}}
-      - which talosctl python3
+      - which talosctl minijinja-cli
 
   apply-node:
     desc: Apply Talos config to a node [IP=required]

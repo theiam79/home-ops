@@ -1,9 +1,9 @@
 # Jinja-templated Talos config — migration in progress
 
 The Talos machine config is migrating from `talhelper` (which renders
-`talconfig.yaml` + `patches/`) to Jinja2 templates rendered via a small Python
-wrapper around `jinja2.Environment` (`scripts/render-talos-template.py`),
-matching the pattern onedr0p uses with `minijinja-cli`.
+`talconfig.yaml` + `patches/`) to Jinja2 templates rendered with
+[`minijinja-cli`](https://github.com/mitsuhiko/minijinja/tree/main/minijinja-cli),
+matching the pattern onedr0p uses. Installed via `aqua:mitsuhiko/minijinja`.
 
 Both paths coexist during the migration. **talhelper remains the source of
 truth until every node has been validated against the new templates.**
