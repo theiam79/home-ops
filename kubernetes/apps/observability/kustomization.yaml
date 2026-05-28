@@ -12,3 +12,4 @@ resources:
   - ./opentelemetry-collector/ks.yaml
   - ./promtail/ks.yaml
   - ./tempo/ks.yaml
+  - ./victoria-logs/ks.yaml

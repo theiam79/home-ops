@@ -61,8 +61,8 @@ spec:
           endpoint: http://prometheus-operated.observability.svc.cluster.local:9090/api/v1/write
           tls:
             insecure: true
-        otlphttp/loki:
-          endpoint: http://loki-headless.observability.svc.cluster.local:3100/otlp
+        otlphttp/victorialogs:
+          logs_endpoint: http://victoria-logs.observability.svc.cluster.local:9428/insert/opentelemetry/v1/logs
           tls:
             insecure: true
       service:
@@ -75,4 +75,4 @@ spec:
             exporters: [prometheusremotewrite, otlp/aspire]
           logs:
             receivers: [otlp]
-            exporters: [otlphttp/loki, otlp/aspire]
+            exporters: [otlphttp/victorialogs, otlp/aspire]
