@@ -1,0 +1,26 @@
+---
+machine:
+  type: worker
+  install:
+    diskSelector:
+      serial: "S3X4NB0K407511H"
+  network:
+    hostname: dvergar-06
+    interfaces:
+      - interface: mgmt0
+        dhcp: false
+        addresses:
+          - 192.168.100.26/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 192.168.100.1
+        mtu: 1500
+        vlans:
+          - vlanId: 70
+            dhcp: false
+---
+apiVersion: v1alpha1
+kind: LinkAliasConfig
+name: mgmt0
+selector:
+  match: mac(link.permanent_addr) == "10:e7:c6:b1:1d:de"

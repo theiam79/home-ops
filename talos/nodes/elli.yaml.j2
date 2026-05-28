@@ -1,0 +1,28 @@
+---
+machine:
+  type: worker
+  install:
+    diskSelector:
+      model: "Samsung SSD 850"
+  network:
+    hostname: elli
+    interfaces:
+      - interface: mgmt0
+        dhcp: false
+        addresses:
+          - 192.168.100.30/25
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 192.168.100.1
+        mtu: 1500
+        vlans:
+          - vlanId: 70
+            dhcp: false
+  nodeLabels:
+    clusterrole: highspeed
+---
+apiVersion: v1alpha1
+kind: LinkAliasConfig
+name: mgmt0
+selector:
+  match: mac(link.permanent_addr) == "0c:9d:92:85:2a:66"

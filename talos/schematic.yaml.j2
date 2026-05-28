@@ -1,0 +1,15 @@
+---
+# Schematic for Talos factory image (factory.talos.dev).
+# For now this is documentation-only — the schematic ID is hardcoded in the
+# `talosImageURL` field of the rendered machineconfig via:
+#
+#   factory.talos.dev/installer/dc8730aa8cc7bfa5ef7e2b3284248f2631135b2faf4ae11aa997a0c1987b0eee
+#
+# A follow-up PR will switch the Taskfile to POST this document to
+# https://factory.talos.dev/schematics at render time and substitute the
+# returned ID into machineconfig.yaml.j2. See the jinja migration PR for context.
+customization:
+  systemExtensions:
+    officialExtensions:
+      - siderolabs/i915  # Intel iGPU passthrough for plex/jellyfin/etc.
+      - siderolabs/intel-ucode  # Intel CPU microcode updates

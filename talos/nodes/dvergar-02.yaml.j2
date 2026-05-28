@@ -1,0 +1,33 @@
+---
+machine:
+  type: controlplane
+  install:
+    diskSelector:
+      serial: "IB25ZD0256P00322"
+  network:
+    hostname: dvergar-02
+    interfaces:
+      - interface: mgmt0
+        dhcp: false
+        addresses:
+          - 192.168.100.22/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 192.168.100.1
+        mtu: 1500
+        vip:
+          ip: 192.168.100.5
+        vlans:
+          - vlanId: 70
+            dhcp: false
+      - interface: ceph0
+        dhcp: false
+        mtu: 9000
+        addresses:
+          - 10.10.10.22/24
+---
+apiVersion: v1alpha1
+kind: LinkAliasConfig
+name: mgmt0
+selector:
+  match: mac(link.permanent_addr) == "14:b3:1f:21:56:9c"

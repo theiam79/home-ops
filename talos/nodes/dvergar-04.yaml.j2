@@ -1,0 +1,26 @@
+---
+machine:
+  type: worker
+  install:
+    diskSelector:
+      model: KINGSTON*
+  network:
+    hostname: dvergar-04
+    interfaces:
+      - interface: mgmt0
+        dhcp: false
+        addresses:
+          - 192.168.100.24/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 192.168.100.1
+        mtu: 1500
+        vlans:
+          - vlanId: 70
+            dhcp: false
+---
+apiVersion: v1alpha1
+kind: LinkAliasConfig
+name: mgmt0
+selector:
+  match: mac(link.permanent_addr) == "48:4d:7e:d8:83:c8"
