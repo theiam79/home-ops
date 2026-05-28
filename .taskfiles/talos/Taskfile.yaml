@@ -20,21 +20,25 @@ tasks:
       set -euo pipefail
       NODE_FILE="{{.TALOS_DIR}}/nodes/{{.NODE}}.yaml.j2"
       test -f "$NODE_FILE" || { echo "no template for {{.NODE}}: $NODE_FILE" >&2; exit 1; }
-      if grep -q "type: controlplane" "$NODE_FILE"; then
+      # Detect CP vs worker by checking talconfig.yaml (canonical source).
+      if [ "$(yq '.nodes[] | select(.hostname == "{{.NODE}}") | .controlPlane' "{{.TALOS_DIR}}/talconfig.yaml")" = "true" ]; then
         export CONTROLPLANE=true
       else
         export CONTROLPLANE=false
       fi
+      export TALOS_VERSION="$(yq '.talosVersion' "{{.TALOS_DIR}}/talenv.yaml")"
+      export KUBERNETES_VERSION="$(yq '.kubernetesVersion' "{{.TALOS_DIR}}/talenv.yaml")"
       GLOBAL_TMP=$(mktemp) NODE_TMP=$(mktemp)
       trap "rm -f $GLOBAL_TMP $NODE_TMP" EXIT
-      minijinja-cli --env {{.TALOS_DIR}}/machineconfig.yaml.j2 > "$GLOBAL_TMP"
-      minijinja-cli --env "$NODE_FILE" > "$NODE_TMP"
+      minijinja-cli --env --autoescape none {{.TALOS_DIR}}/machineconfig.yaml.j2 > "$GLOBAL_TMP"
+      minijinja-cli --env --autoescape none "$NODE_FILE" > "$NODE_TMP"
       talosctl machineconfig patch "$GLOBAL_TMP" -p "@$NODE_TMP"
     requires:
       vars: [NODE]
     preconditions:
       - test -f {{.TALOS_DIR}}/machineconfig.yaml.j2
-      - which minijinja-cli talosctl
+      - test -f {{.TALOS_DIR}}/talenv.yaml
+      - which minijinja-cli talosctl yq
 
   render-all:
     desc: 'Render jinja Talos config for all nodes into clusterconfig-jinja/ — bws-required'
@@ -55,12 +59,13 @@ tasks:
     dir: '{{.TALOS_DIR}}'
     cmd: |
       set -euo pipefail
+      OLD={{.TALOS_DIR}}/clusterconfig/kubernetes-{{.NODE}}.yaml
       # Generate canonical reference output if not present
-      if [ ! -f {{.TALOS_DIR}}/clusterconfig/{{.NODE}}.yaml ]; then
+      if [ ! -f "$OLD" ]; then
         echo ">> running task talos:generate-config first" >&2
         task talos:generate-config
       fi
-      OLD={{.TALOS_DIR}}/clusterconfig/{{.NODE}}.yaml
+      test -f "$OLD" || { echo "no talhelper output at $OLD" >&2; exit 1; }
       NEW=$(mktemp); trap "rm -f $NEW" EXIT
       task talos:render-config NODE={{.NODE}} > "$NEW"
       echo ">> diff (sort_keys-normalized)"
@@ -68,7 +73,7 @@ tasks:
     requires:
       vars: [NODE]
     preconditions:
-      - which yq python3 talosctl talhelper
+      - which yq minijinja-cli talosctl talhelper
       - test -f {{.TALOS_DIR}}/talconfig.yaml
 
   apply-node-jinja:

@@ -47,12 +47,33 @@ normalizes both with `yq eval-all 'sort_keys(..)'`, and shows a unified diff.
 **Acceptance for cutover:** the diff is empty, or every line is in the
 documented allowlist (see below).
 
-### Expected-diff allowlist (TBD)
+### Expected-diff allowlist
 
-Will be populated during the diff-iteration loop. Document each accepted
-difference with rationale (e.g. "key ordering — semantically identical",
-"comment lines stripped by yq round-trip"). Treat unexplained diffs as bugs in
-the templates.
+After Phase-1 iteration, all 8 nodes are byte-equivalent under
+`yq eval-all 'sort_keys(..)'` normalization **except** for one intentional
+deviation:
+
+- **`ceph0` `LinkAliasConfig` is emitted only on storage nodes** (dvergar-00,
+  -01, -02, -03, -05). talhelper emitted it on every node because it was a
+  cluster-wide global patch; the jinja layout scopes it to the per-node
+  templates of nodes that actually have the I226-V card. Non-storage nodes
+  (dvergar-04, -06, elli) no longer get a no-op alias config. This is
+  cosmetic — Talos applies the alias only when the selector matches, so the
+  runtime behavior is unchanged.
+
+All other diffs were resolved by:
+- Switching from the legacy `machine.network.interfaces[]` block to the modern
+  standalone `LinkConfig` / `VLANConfig` / `Layer2VIPConfig` / `HostnameConfig`
+  documents that Talos v1.13 prefers.
+- Adding explicit Talos defaults that talhelper writes out (image refs,
+  audit policy, kube prism, discovery, install image, kubelet defaults, etc.).
+- Moving the CP-only `node.kubernetes.io/exclude-from-external-load-balancers`
+  label out of the global template and into the per-node templates of the
+  CPs that don't have their own `nodeLabels:`, matching talhelper's auto-add
+  behavior.
+- Gating `cluster.secretboxEncryptionSecret` to control planes only.
+- Adding `--autoescape none` to the `minijinja-cli` invocation so YAML-aware
+  autoescape doesn't quote string env var values.
 
 ## Apply
 

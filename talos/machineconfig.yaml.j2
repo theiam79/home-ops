@@ -14,8 +14,14 @@ machine:
     - 192.168.100.5
     - vidar.tylerhundley.dev
   features:
+    diskQuotaSupport: true
     hostDNS:
+      enabled: true
+      forwardKubeDNSToHost: true
       resolveMemberNames: true
+    kubePrism:
+      enabled: true
+      port: 7445
 {% if ENV.CONTROLPLANE == "true" %}
     kubernetesTalosAPIAccess:
       enabled: true
@@ -27,14 +33,21 @@ machine:
   files:
     - op: create
       path: /etc/cri/conf.d/20-customization.part
-      content: |
+      content: |-
         [plugins."io.containerd.cri.v1.images"]
           discard_unpacked_layers = false
         [plugins."io.containerd.cri.v1.runtime"]
           device_ownership_from_security_context = true
+  install:
+    grubUseUKICmdline: true
+    image: factory.talos.dev/installer/dc8730aa8cc7bfa5ef7e2b3284248f2631135b2faf4ae11aa997a0c1987b0eee:{{ ENV.TALOS_VERSION }}
+    wipe: false
   kubelet:
+    defaultRuntimeSeccompProfileEnabled: true
+    disableManifestsDirectory: true
     extraConfig:
       serializeImagePulls: false
+    image: ghcr.io/siderolabs/kubelet:{{ ENV.KUBERNETES_VERSION }}
     nodeIP:
       validSubnets:
         - 192.168.100.0/24
@@ -72,44 +85,58 @@ cluster:
   controlPlane:
     endpoint: https://192.168.100.5:6443
   clusterName: kubernetes
+  discovery:
+    enabled: true
+    registries:
+      kubernetes:
+        disabled: true
+      service: {}
   network:
     cni:
       name: none
+    dnsDomain: cluster.local
     podSubnets:
       - 10.42.0.0/16
     serviceSubnets:
       - 10.43.0.0/16
   token: {{ ENV.BOOTSTRAPTOKEN }}
-  secretboxEncryptionSecret: {{ ENV.AESCBCENCRYPTIONKEY }}
   ca:
     crt: {{ ENV.K8SCERT }}
 {% if ENV.CONTROLPLANE == "true" %}
     key: {{ ENV.K8SKEY }}
+  secretboxEncryptionSecret: {{ ENV.AESCBCENCRYPTIONKEY }}
   aggregatorCA:
     crt: {{ ENV.K8SAGGCERT }}
     key: {{ ENV.K8SAGGKEY }}
   serviceAccount:
     key: {{ ENV.K8SSAKEY }}
   apiServer:
+    image: registry.k8s.io/kube-apiserver:{{ ENV.KUBERNETES_VERSION }}
     certSANs:
       - 127.0.0.1
       - 192.168.100.5
       - vidar.tylerhundley.dev
     extraArgs:
-      enable-aggregator-routing: true
+      enable-aggregator-routing: "true"
       feature-gates: MutatingAdmissionPolicy=true
       runtime-config: admissionregistration.k8s.io/v1beta1=true
-    # PodSecurity admission removed (talhelper's old patch was a strategic-merge
-    # $$patch: delete directive; in the jinja path we just omit the entry).
+    auditPolicy:
+      apiVersion: audit.k8s.io/v1
+      kind: Policy
+      rules:
+        - level: Metadata
   controllerManager:
+    image: registry.k8s.io/kube-controller-manager:{{ ENV.KUBERNETES_VERSION }}
     extraArgs:
       bind-address: 0.0.0.0
   scheduler:
+    image: registry.k8s.io/kube-scheduler:{{ ENV.KUBERNETES_VERSION }}
     extraArgs:
       bind-address: 0.0.0.0
-  coreDNS:
-    disabled: true
   proxy:
+    disabled: true
+    image: registry.k8s.io/kube-proxy:{{ ENV.KUBERNETES_VERSION }}
+  coreDNS:
     disabled: true
   etcd:
     ca:
@@ -121,11 +148,3 @@ cluster:
       - 192.168.100.0/24
   allowSchedulingOnControlPlanes: true
 {% endif %}
----
-# Stable name for the 2.5G Intel I226-V card used as the Ceph cluster network.
-# Only the storage nodes have this card; non-storage nodes are an implicit no-op.
-apiVersion: v1alpha1
-kind: LinkAliasConfig
-name: ceph0
-selector:
-  match: link.driver == "igc" && mac(link.permanent_addr).startsWith("02:26:26:02:0d:")
