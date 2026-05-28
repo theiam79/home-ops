@@ -29,10 +29,10 @@ nodes:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/dc8730aa8cc7bfa5ef7e2b3284248f2631135b2faf4ae11aa997a0c1987b0eee
     controlPlane: true
+    patches:
+      - "@./patches/dvergar-00/link-alias.yaml"
     networkInterfaces:
-      - deviceSelector:
-          physical: true
-          hardwareAddr: "c0:25:a5:98:c0:f6"
+      - interface: mgmt0
         dhcp: false
         addresses:
           - "192.168.100.20/24"
@@ -45,9 +45,7 @@ nodes:
         vlans:
           - vlanId: 70
             dhcp: false
-      - deviceSelector:
-          physical: true
-          hardwareAddr: "02:26:26:02:0d:7e"
+      - interface: ceph0
         dhcp: false
         mtu: 9000
         addresses:
@@ -60,10 +58,10 @@ nodes:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/dc8730aa8cc7bfa5ef7e2b3284248f2631135b2faf4ae11aa997a0c1987b0eee
     controlPlane: true
+    patches:
+      - "@./patches/dvergar-01/link-alias.yaml"
     networkInterfaces:
-      - deviceSelector:
-          physical: true
-          hardwareAddr: "14:b3:1f:2a:ec:95"
+      - interface: mgmt0
         dhcp: false
         addresses:
           - "192.168.100.21/24"
@@ -76,9 +74,7 @@ nodes:
         vlans:
           - vlanId: 70
             dhcp: false
-      - deviceSelector:
-          physical: true
-          hardwareAddr: "02:26:26:02:0d:d0"
+      - interface: ceph0
         dhcp: false
         mtu: 9000
         addresses:
@@ -91,10 +87,10 @@ nodes:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/dc8730aa8cc7bfa5ef7e2b3284248f2631135b2faf4ae11aa997a0c1987b0eee
     controlPlane: true
+    patches:
+      - "@./patches/dvergar-02/link-alias.yaml"
     networkInterfaces:
-      - deviceSelector:
-          physical: true
-          hardwareAddr: "14:b3:1f:21:56:9c"
+      - interface: mgmt0
         dhcp: false
         addresses:
           - "192.168.100.22/24"
@@ -107,9 +103,7 @@ nodes:
         vlans:
           - vlanId: 70
             dhcp: false
-      - deviceSelector:
-          physical: true
-          hardwareAddr: "02:26:26:02:0d:20"
+      - interface: ceph0
         dhcp: false
         mtu: 9000
         addresses:
@@ -122,10 +116,10 @@ nodes:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/dc8730aa8cc7bfa5ef7e2b3284248f2631135b2faf4ae11aa997a0c1987b0eee
     controlPlane: false
+    patches:
+      - "@./patches/dvergar-03/link-alias.yaml"
     networkInterfaces:
-      - deviceSelector:
-          physical: true
-          hardwareAddr: "d8:9e:f3:9a:f8:4d"
+      - interface: mgmt0
         dhcp: false
         addresses:
           - "192.168.100.23/24"
@@ -136,9 +130,7 @@ nodes:
         vlans:
           - vlanId: 70
             dhcp: false
-      - deviceSelector:
-          physical: true
-          hardwareAddr: "02:26:26:02:0d:70"
+      - interface: ceph0
         dhcp: false
         mtu: 9000
         addresses:
@@ -151,10 +143,10 @@ nodes:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/dc8730aa8cc7bfa5ef7e2b3284248f2631135b2faf4ae11aa997a0c1987b0eee
     controlPlane: false
+    patches:
+      - "@./patches/dvergar-04/link-alias.yaml"
     networkInterfaces:
-      - deviceSelector:
-          physical: true
-          hardwareAddr: "48:4d:7e:d8:83:c8"
+      - interface: mgmt0
         dhcp: false
         addresses:
           - "192.168.100.24/24"
@@ -175,10 +167,10 @@ nodes:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/dc8730aa8cc7bfa5ef7e2b3284248f2631135b2faf4ae11aa997a0c1987b0eee
     controlPlane: false
+    patches:
+      - "@./patches/dvergar-05/link-alias.yaml"
     networkInterfaces:
-      - deviceSelector:
-          physical: true
-          hardwareAddr: "6c:2b:59:e4:ca:c8"
+      - interface: mgmt0
         dhcp: false
         addresses:
           - "192.168.100.25/25"
@@ -189,9 +181,7 @@ nodes:
         vlans:
           - vlanId: 70
             dhcp: false
-      - deviceSelector:
-          physical: true
-          hardwareAddr: "02:26:26:02:0d:ac"
+      - interface: ceph0
         dhcp: false
         mtu: 9000
         addresses:
@@ -204,10 +194,10 @@ nodes:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/dc8730aa8cc7bfa5ef7e2b3284248f2631135b2faf4ae11aa997a0c1987b0eee
     controlPlane: false
+    patches:
+      - "@./patches/dvergar-06/link-alias.yaml"
     networkInterfaces:
-      - deviceSelector:
-          physical: true
-          hardwareAddr: "10:e7:c6:b1:1d:de"
+      - interface: mgmt0
         dhcp: false
         addresses:
           - "192.168.100.26/24"
@@ -228,10 +218,10 @@ nodes:
       secureboot: true
     talosImageURL: factory.talos.dev/installer/dc8730aa8cc7bfa5ef7e2b3284248f2631135b2faf4ae11aa997a0c1987b0eee
     controlPlane: false
+    patches:
+      - "@./patches/elli/link-alias.yaml"
     networkInterfaces:
-      - deviceSelector:
-          physical: true
-          hardwareAddr: "0c:9d:92:85:2a:66"
+      - interface: mgmt0
         dhcp: false
         addresses:
           - "192.168.100.30/25"
@@ -251,6 +241,7 @@ patches:
   - "@./patches/global/machine-sysctls.yaml"
   - "@./patches/global/machine-time.yaml"
   - "@./patches/global/machine-storage.yaml"
+  - "@./patches/global/link-aliases.yaml"
 
 # Controller patches
 controlPlane:
