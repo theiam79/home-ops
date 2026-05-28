@@ -4,16 +4,30 @@ version: '3'
 tasks:
 
   talos:
-    desc: Bootstrap the Talos cluster
+    desc: Bootstrap the Talos cluster from scratch — bws-required
     dir: '{{.TALOS_DIR}}'
+    prompt: This will bootstrap the cluster. All nodes must be in maintenance mode. Continue?
     cmds:
-      - bws run -- talhelper genconfig
-      - talhelper gencommand apply --extra-flags="--insecure" | bash
-      - until talhelper gencommand bootstrap | bash; do sleep 10; done
-      - until talhelper gencommand kubeconfig --extra-flags="{{.ROOT_DIR}} --force" | bash; do sleep 10; done
+      - task: talos:generate-config
+      - task: talos:talosconfig
+        vars: { FORCE: 'true' }
+      - |
+        set -euo pipefail
+        for node_file in {{.TALOS_DIR}}/nodes/*.yaml.j2; do
+          node=$(basename "$node_file" .yaml.j2)
+          ip=$(grep -oE 'address: 192\.168\.100\.[0-9]+' "$node_file" | head -1 | awk '{print $NF}' | cut -d/ -f1)
+          echo ">> applying $node ($ip)"
+          until task talos:render-config NODE="$node" | talosctl --nodes "$ip" apply-config -f /dev/stdin --insecure; do
+            sleep 5
+          done
+        done
+      - until talosctl bootstrap; do sleep 10; done
+      - until talosctl kubeconfig {{.ROOT_DIR}} --force; do sleep 10; done
     preconditions:
-      - test -f {{.TALOS_DIR}}/talconfig.yaml
-      - which talhelper talosctl
+      - test -d {{.TALOS_DIR}}/nodes
+      - test -f {{.TALOS_DIR}}/machineconfig.yaml.j2
+      - test -f {{.TALOS_DIR}}/talsecret.yaml
+      - which talosctl minijinja-cli yq envsubst
 
   apps:
     desc: Bootstrap apps into the Talos cluster [ROOK_DISK=required]
