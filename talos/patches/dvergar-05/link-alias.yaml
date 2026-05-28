@@ -1,6 +1,0 @@
----
-apiVersion: v1alpha1
-kind: LinkAliasConfig
-name: mgmt0
-selector:
-  match: mac(link.permanent_addr) == "6c:2b:59:e4:ca:c8"

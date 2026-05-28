@@ -1,8 +1,0 @@
----
-# Stable name for the 2.5G Intel I226-V card used as the Ceph cluster network.
-# Only the storage nodes have this card; non-storage nodes are an implicit no-op.
-apiVersion: v1alpha1
-kind: LinkAliasConfig
-name: ceph0
-selector:
-  match: link.driver == "igc" && mac(link.permanent_addr).startsWith("02:26:26:02:0d:")

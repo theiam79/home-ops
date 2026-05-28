@@ -4,24 +4,29 @@ version: '3'
 tasks:
 
   generate-config:
-    desc: Generate Talos configuration (talhelper — legacy path during jinja migration)
+    desc: Render jinja Talos configs for all nodes into clusterconfig-jinja/ — bws-required
     dir: '{{.TALOS_DIR}}'
-    cmd: talhelper genconfig
+    cmd: |
+      set -euo pipefail
+      mkdir -p {{.TALOS_DIR}}/clusterconfig-jinja
+      for node_file in {{.TALOS_DIR}}/nodes/*.yaml.j2; do
+        node=$(basename "$node_file" .yaml.j2)
+        echo ">> rendering $node"
+        task talos:render-config NODE="$node" > "{{.TALOS_DIR}}/clusterconfig-jinja/$node.yaml"
+      done
     preconditions:
-      - test -f {{.TALOS_DIR}}/talconfig.yaml
-      # - test -f {{.ROOT_DIR}}/.sops.yaml
-      # - test -f {{.SOPS_AGE_KEY_FILE}}
-      - which talhelper
+      - test -d {{.TALOS_DIR}}/nodes
+      - test -f {{.TALOS_DIR}}/machineconfig.yaml.j2
 
   render-config:
-    desc: 'Render jinja Talos config for one node [NODE=hostname] — bws-required'
+    desc: 'Render jinja Talos config for one node to stdout [NODE=hostname] — bws-required'
     dir: '{{.TALOS_DIR}}'
     cmd: |
       set -euo pipefail
       NODE_FILE="{{.TALOS_DIR}}/nodes/{{.NODE}}.yaml.j2"
       test -f "$NODE_FILE" || { echo "no template for {{.NODE}}: $NODE_FILE" >&2; exit 1; }
-      # Detect CP vs worker by checking talconfig.yaml (canonical source).
-      if [ "$(yq '.nodes[] | select(.hostname == "{{.NODE}}") | .controlPlane' "{{.TALOS_DIR}}/talconfig.yaml")" = "true" ]; then
+      # Detect CP vs worker from the per-node template's machine.type field.
+      if [ "$(yq 'select(.machine.type) | .machine.type' "$NODE_FILE")" = "controlplane" ]; then
         export CONTROLPLANE=true
       else
         export CONTROLPLANE=false
@@ -40,61 +45,53 @@ tasks:
       - test -f {{.TALOS_DIR}}/talenv.yaml
       - which minijinja-cli talosctl yq
 
-  render-all:
-    desc: 'Render jinja Talos config for all nodes into clusterconfig-jinja/ — bws-required'
+  talosconfig:
+    desc: 'Materialize talosconfig from bws env vars — bws-required [FORCE=true to overwrite]'
     dir: '{{.TALOS_DIR}}'
     cmd: |
       set -euo pipefail
-      mkdir -p {{.TALOS_DIR}}/clusterconfig-jinja
-      for node_file in {{.TALOS_DIR}}/nodes/*.yaml.j2; do
-        node=$(basename "$node_file" .yaml.j2)
-        echo ">> rendering $node"
-        task talos:render-config NODE="$node" > "{{.TALOS_DIR}}/clusterconfig-jinja/$node.yaml"
-      done
-    preconditions:
-      - test -d {{.TALOS_DIR}}/nodes
-
-  diff-config:
-    desc: 'Diff jinja-rendered config against talhelper output [NODE=hostname] — bws-required'
-    dir: '{{.TALOS_DIR}}'
-    cmd: |
-      set -euo pipefail
-      OLD={{.TALOS_DIR}}/clusterconfig/kubernetes-{{.NODE}}.yaml
-      # Generate canonical reference output if not present
-      if [ ! -f "$OLD" ]; then
-        echo ">> running task talos:generate-config first" >&2
-        task talos:generate-config
+      mkdir -p {{.TALOS_DIR}}/clusterconfig
+      if [ -f {{.TALOSCONFIG}} ] && [ "{{.FORCE}}" != "true" ]; then
+        echo "talosconfig already exists at {{.TALOSCONFIG}} (pass FORCE=true to overwrite)" >&2
+        exit 0
       fi
-      test -f "$OLD" || { echo "no talhelper output at $OLD" >&2; exit 1; }
-      NEW=$(mktemp); trap "rm -f $NEW" EXIT
-      task talos:render-config NODE={{.NODE}} > "$NEW"
-      echo ">> diff (sort_keys-normalized)"
-      diff -u <(yq eval-all 'sort_keys(..)' "$OLD") <(yq eval-all 'sort_keys(..)' "$NEW") || true
-    requires:
-      vars: [NODE]
+      SECRETS_TMP=$(mktemp)
+      GEN_DIR=$(mktemp -d)
+      trap "rm -rf $SECRETS_TMP $GEN_DIR" EXIT
+      # talsecret.yaml uses ${VAR} placeholders; bws populates the env vars.
+      envsubst < {{.TALOS_DIR}}/talsecret.yaml > "$SECRETS_TMP"
+      talosctl gen config \
+        --with-secrets "$SECRETS_TMP" \
+        --output-dir "$GEN_DIR" \
+        --output-types talosconfig \
+        --force \
+        kubernetes https://192.168.100.5:6443
+      # Add every node IP to the talosconfig context so `talosctl --nodes …` works.
+      NODES=$(grep -hoE 'address: 192\.168\.100\.[0-9]+' {{.TALOS_DIR}}/nodes/*.yaml.j2 \
+              | awk '{print $NF}' | cut -d/ -f1 | sort -u | tr '\n' ' ')
+      talosctl --talosconfig "$GEN_DIR/talosconfig" config node $NODES
+      # Set endpoints to the control plane IPs (talosctl uses these for cluster-wide ops).
+      CP_IPS=$(for f in {{.TALOS_DIR}}/nodes/*.yaml.j2; do
+        if [ "$(yq 'select(.machine.type) | .machine.type' "$f")" = "controlplane" ]; then
+          grep -oE 'address: 192\.168\.100\.[0-9]+' "$f" | head -1 | awk '{print $NF}' | cut -d/ -f1
+        fi
+      done | tr '\n' ' ')
+      talosctl --talosconfig "$GEN_DIR/talosconfig" config endpoint $CP_IPS
+      cp "$GEN_DIR/talosconfig" {{.TALOSCONFIG}}
+      echo ">> wrote talosconfig to {{.TALOSCONFIG}} (nodes: $NODES; endpoints: $CP_IPS)"
     preconditions:
-      - which yq minijinja-cli talosctl talhelper
-      - test -f {{.TALOS_DIR}}/talconfig.yaml
-
-  apply-node-jinja:
-    desc: 'Apply jinja-rendered config to a node [IP=required, NODE=hostname required] — bws-required'
-    dir: '{{.TALOS_DIR}}'
-    cmd: |
-      set -euo pipefail
-      task talos:render-config NODE={{.NODE}} | talosctl --nodes {{.IP}} apply-config -f /dev/stdin --mode={{.MODE}}
-    vars:
-      MODE: '{{.MODE | default "auto"}}'
-    requires:
-      vars: [IP, NODE]
-    preconditions:
-      - talosctl --nodes {{.IP}} get machineconfig
-      - test -f {{.TALOSCONFIG}}
-      - which talosctl minijinja-cli
+      - test -f {{.TALOS_DIR}}/talsecret.yaml
+      - test -d {{.TALOS_DIR}}/nodes
+      - which talosctl envsubst yq
 
   apply-node:
-    desc: Apply Talos config to a node [IP=required]
+    desc: Apply Talos config to a node [IP=required] — bws-required
     dir: '{{.TALOS_DIR}}'
-    cmd: talhelper gencommand apply --node {{.IP}} --extra-flags '--mode={{.MODE}}' | bash
+    cmd: |
+      set -euo pipefail
+      NODE=$(grep -l "address: {{.IP}}/" {{.TALOS_DIR}}/nodes/*.yaml.j2 | head -1 | xargs -n1 -r basename | sed 's/\.yaml\.j2$//')
+      test -n "$NODE" || { echo "no node template matches IP={{.IP}}" >&2; exit 1; }
+      task talos:render-config NODE="$NODE" | talosctl --nodes {{.IP}} apply-config -f /dev/stdin --mode={{.MODE}}
     vars:
       MODE: '{{.MODE | default "auto"}}'
     requires:
@@ -103,57 +100,67 @@ tasks:
       - talosctl --nodes {{.IP}} get machineconfig
       - talosctl config info
       - test -f {{.TALOSCONFIG}}
-      - which talhelper talosctl yq
+      - which talosctl minijinja-cli yq
 
   join-node:
-    desc: Apply Talos config to a new node [IP=required]
+    desc: Apply Talos config to a new (maintenance-mode) node [IP=required] — bws-required
     dir: '{{.TALOS_DIR}}'
-    cmd: until talhelper gencommand apply --node {{.IP}} --extra-flags '--mode={{.MODE}} --insecure' | bash; do sleep 5; done
+    cmd: |
+      set -euo pipefail
+      NODE=$(grep -l "address: {{.IP}}/" {{.TALOS_DIR}}/nodes/*.yaml.j2 | head -1 | xargs -n1 -r basename | sed 's/\.yaml\.j2$//')
+      test -n "$NODE" || { echo "no node template matches IP={{.IP}}" >&2; exit 1; }
+      until task talos:render-config NODE="$NODE" | talosctl --nodes {{.IP}} apply-config -f /dev/stdin --mode={{.MODE}} --insecure; do sleep 5; done
     vars:
       MODE: '{{.MODE | default "auto"}}'
     requires:
       vars: [IP]
     preconditions:
-      - talosctl config info
       - test -f {{.TALOSCONFIG}}
-      - which talhelper talosctl yq
+      - which talosctl minijinja-cli yq
 
   upgrade-node:
-    desc: Upgrade Talos on a single node [IP=required]
+    desc: Upgrade Talos on a single node [IP=required] — bws-required
     dir: '{{.TALOS_DIR}}'
-    cmd: talhelper gencommand upgrade --node {{.IP}} --extra-flags "--image='{{.TALOS_IMAGE}}:{{.TALOS_VERSION}}' --timeout=10m --reboot-mode=powercycle" | bash
-    vars:
-      TALOS_IMAGE:
-        sh: yq '.nodes[] | select(.ipAddress == "{{.IP}}") | .talosImageURL' {{.TALOS_DIR}}/talconfig.yaml
-      TALOS_VERSION:
-        sh: yq '.talosVersion' {{.TALOS_DIR}}/talenv.yaml
+    cmd: |
+      set -euo pipefail
+      NODE=$(grep -l "address: {{.IP}}/" {{.TALOS_DIR}}/nodes/*.yaml.j2 | head -1 | xargs -n1 -r basename | sed 's/\.yaml\.j2$//')
+      test -n "$NODE" || { echo "no node template matches IP={{.IP}}" >&2; exit 1; }
+      # Pull the canonical install image straight from the rendered config so the
+      # schematic + version stay single-sourced in machineconfig.yaml.j2 + talenv.yaml.
+      IMAGE=$(task talos:render-config NODE="$NODE" | yq eval-all 'select(.machine.install.image) | .machine.install.image' - | head -1)
+      test -n "$IMAGE" || { echo "could not extract install.image for $NODE" >&2; exit 1; }
+      talosctl --nodes {{.IP}} upgrade --image "$IMAGE" --timeout=10m --reboot-mode=powercycle
     requires:
       vars: [IP]
     preconditions:
       - talosctl --nodes {{.IP}} get machineconfig
       - talosctl config info
       - test -f {{.TALOSCONFIG}}
-      - which kubectl talhelper talosctl yq
+      - which kubectl talosctl minijinja-cli yq
 
   upgrade-k8s:
     desc: Upgrade Kubernetes
     dir: '{{.TALOS_DIR}}'
-    cmd: talhelper gencommand upgrade-k8s --extra-flags "--to '{{.KUBERNETES_VERSION}}'" | bash
-    vars:
-      KUBERNETES_VERSION:
-        sh: yq '.kubernetesVersion' {{.TALOS_DIR}}/talenv.yaml
+    cmd: |
+      KUBERNETES_VERSION="$(yq '.kubernetesVersion' {{.TALOS_DIR}}/talenv.yaml)"
+      talosctl upgrade-k8s --to "$KUBERNETES_VERSION"
     preconditions:
       - talosctl config info
       - test -f {{.TALOSCONFIG}}
-      - which talhelper talosctl yq
+      - which talosctl yq
 
   reset:
     desc: Resets nodes back to maintenance mode
     dir: '{{.TALOS_DIR}}'
     prompt: This will destroy your cluster and reset the nodes back to maintenance mode... continue?
-    cmd: talhelper gencommand reset --extra-flags="--reboot {{- if eq .CLI_FORCE false }} --system-labels-to-wipe STATE --system-labels-to-wipe EPHEMERAL{{ end }} --graceful=false --wait=false" | bash
+    cmd: |
+      NODES=$(talosctl config info --output json | jq --exit-status --join-output '[.nodes[]] | join(",")')
+      talosctl --nodes "$NODES" reset --reboot \
+        {{if eq .CLI_FORCE false}}--system-labels-to-wipe STATE --system-labels-to-wipe EPHEMERAL{{end}} \
+        --graceful=false --wait=false
     preconditions:
-      - which talhelper
+      - test -f {{.TALOSCONFIG}}
+      - which talosctl jq
 
   shutdown-cluster:
     desc: Shutdown Talos across the whole cluster
