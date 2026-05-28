@@ -65,6 +65,11 @@ spec:
             url: http://loki-headless.observability.svc.cluster.local:3100
             jsonData:
               maxLines: 250
+          - name: VictoriaLogs
+            type: victoriametrics-logs-datasource
+            uid: vlogs
+            access: proxy
+            url: http://victoria-logs.observability.svc.cluster.local:9428
           - name: Tempo
             type: tempo
             uid: tempo
@@ -260,6 +265,7 @@ spec:
       - grafana-piechart-panel
       - grafana-worldmap-panel
       - pr0ps-trackmap-panel
+      - victoriametrics-logs-datasource
     serviceMonitor:
       enabled: true
     route:
