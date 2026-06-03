@@ -58,13 +58,6 @@ spec:
             access: proxy
             url: http://prometheus-operated.observability.svc.cluster.local:9090
             isDefault: true
-          - name: Loki
-            type: loki
-            uid: loki
-            access: proxy
-            url: http://loki-headless.observability.svc.cluster.local:3100
-            jsonData:
-              maxLines: 250
           - name: VictoriaLogs
             type: victoriametrics-logs-datasource
             uid: vlogs
@@ -77,7 +70,7 @@ spec:
             url: http://tempo.observability.svc.cluster.local:3200
             jsonData:
               tracesToLogsV2:
-                datasourceUid: loki
+                datasourceUid: vlogs
                 spanStartTimeShift: "-1h"
                 spanEndTimeShift: "1h"
                 filterByTraceID: true
