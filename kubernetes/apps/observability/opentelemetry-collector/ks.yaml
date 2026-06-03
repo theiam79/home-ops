@@ -10,8 +10,6 @@ spec:
       namespace: observability
     - name: kube-prometheus-stack
       namespace: observability
-    - name: loki
-      namespace: observability
     - name: aspire-dashboard
       namespace: hermod
   interval: 1h
