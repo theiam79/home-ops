@@ -99,7 +99,7 @@ spec:
     route:
       app:
         hostnames:
-          - "hass.${SECRET_DOMAIN}"
+          - "home.${SECRET_DOMAIN}"
         parentRefs:
           - name: envoy-internal
             namespace: network
@@ -110,7 +110,7 @@ spec:
                 port: *port
       code-server:
         hostnames:
-          - "hass-config.${SECRET_DOMAIN}"
+          - "home-code.${SECRET_DOMAIN}"
         parentRefs:
           - name: envoy-internal
             namespace: network
