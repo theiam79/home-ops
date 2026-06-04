@@ -38,8 +38,6 @@ spec:
               requests:
                 cpu: 50m
                 memory: 256Mi
-              limits:
-                memory: 2Gi
     defaultPodOptions:
       securityContext:
         # esphome compiles firmware (platformio) and writes build artifacts to

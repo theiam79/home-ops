@@ -51,8 +51,6 @@ spec:
               requests:
                 cpu: 100m
                 memory: 512Mi
-              limits:
-                memory: 2Gi
           # Replaces the HAOS "Studio Code Server" add-on; shares the /config PVC.
           code-server:
             image:
@@ -78,8 +76,6 @@ spec:
               requests:
                 cpu: 10m
                 memory: 64Mi
-              limits:
-                memory: 512Mi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
