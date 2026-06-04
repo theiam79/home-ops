@@ -97,7 +97,13 @@ spec:
         hostnames:
           - "home.${SECRET_DOMAIN}"
         parentRefs:
+          # Dual-homed: LAN path (works even if WAN/tunnel is down) + external
+          # for the mobile app and the Google Assistant integration. HA does its
+          # own auth — must NOT be placed behind forward-auth/SSO.
           - name: envoy-internal
+            namespace: network
+            sectionName: https
+          - name: envoy-external
             namespace: network
             sectionName: https
         rules:
