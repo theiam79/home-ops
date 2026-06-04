@@ -21,6 +21,9 @@ spec:
             env:
               TZ: America/Chicago
               ZIGBEE2MQTT_DATA: /data
+              # Z2M 2.x first-run onboarding server gates startup; skip it so Z2M
+              # boots headless straight from the env config below (GitOps).
+              Z2M_ONBOARD_NO_SERVER: "1"
               ZIGBEE2MQTT_CONFIG_FRONTEND_ENABLED: "true"
               ZIGBEE2MQTT_CONFIG_FRONTEND_PORT: "8080"
               ZIGBEE2MQTT_CONFIG_HOMEASSISTANT_ENABLED: "true"
