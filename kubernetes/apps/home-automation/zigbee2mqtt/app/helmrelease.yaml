@@ -32,6 +32,9 @@ spec:
               # DNS alias follows the device across its physical move (no IP to update).
               ZIGBEE2MQTT_CONFIG_SERIAL_PORT: tcp://slzb.internal:6638
               ZIGBEE2MQTT_CONFIG_SERIAL_ADAPTER: ember
+              # Zigbee channel 15 sits in the gap between WiFi ch 1/6. Set before
+              # pairing any devices — changing it later forces a full re-pair.
+              ZIGBEE2MQTT_CONFIG_ADVANCED_CHANNEL: "15"
             probes:
               liveness: &probes
                 enabled: true
