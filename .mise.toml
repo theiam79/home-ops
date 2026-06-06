@@ -22,7 +22,7 @@ TALOSCONFIG = "{{config_root}}/talos/clusterconfig/talosconfig"
 "aqua:kubernetes/kubectl" = "1.33.1"
 "aqua:mikefarah/yq" = "4.53.2"
 "aqua:siderolabs/talos" = "1.13.3"
-"aqua:yannh/kubeconform" = "0.7.0"
+"aqua:yannh/kubeconform" = "0.8.0"
 k9s = "latest"
 kompose = "latest"
 bitwarden-secrets-manager = { version = "latest", version_prefix = "bws-v" }
