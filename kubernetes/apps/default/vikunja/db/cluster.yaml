@@ -18,15 +18,21 @@ spec:
     requests:
       cpu: 50m
   bootstrap:
-    initdb:
-      database: vikunja
-      owner: vikunja
+    recovery:
+      source: vikunja-pg-v1
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true
       parameters:
         barmanObjectName: vikunja-pg-backup
         serverName: vikunja-pg-v1
+  externalClusters:
+    - name: vikunja-pg-v1
+      plugin:
+        name: barman-cloud.cloudnative-pg.io
+        parameters:
+          barmanObjectName: vikunja-pg-backup
+          serverName: vikunja-pg-v1
 ---
 apiVersion: barmancloud.cnpg.io/v1
 kind: ObjectStore
