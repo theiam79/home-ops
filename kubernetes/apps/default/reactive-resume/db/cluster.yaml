@@ -18,15 +18,21 @@ spec:
     requests:
       cpu: 50m
   bootstrap:
-    initdb:
-      database: reactive_resume
-      owner: reactive_resume
+    recovery:
+      source: reactive-resume-pg-v1
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true
       parameters:
         barmanObjectName: reactive-resume-pg-backup
         serverName: reactive-resume-pg-v1
+  externalClusters:
+    - name: reactive-resume-pg-v1
+      plugin:
+        name: barman-cloud.cloudnative-pg.io
+        parameters:
+          barmanObjectName: reactive-resume-pg-backup
+          serverName: reactive-resume-pg-v1
 ---
 apiVersion: barmancloud.cnpg.io/v1
 kind: ObjectStore
