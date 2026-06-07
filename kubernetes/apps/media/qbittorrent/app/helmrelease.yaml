@@ -98,6 +98,8 @@ spec:
               tag: 0.4.0
             env:
               TZ: America/Chicago
+              MOUSEHOLE_ALLOWED_HOSTS: "mousehole.${SECRET_DOMAIN}"
+              MOUSEHOLE_ALLOWED_ORIGINS: "https://mousehole.${SECRET_DOMAIN}"
               MOUSEHOLE_AUTH_PASSWORD:
                 valueFrom:
                   secretKeyRef:
