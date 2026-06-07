@@ -95,9 +95,14 @@ spec:
             dependsOn: gluetun
             image:
               repository: tmmrtn/mousehole
-              tag: latest
+              tag: 0.4.0
             env:
               TZ: America/Chicago
+              MOUSEHOLE_AUTH_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: qbittorrent-secret
+                    key: MOUSEHOLE_AUTH_PASSWORD
             ports:
               - containerPort: 5010
             probes:
