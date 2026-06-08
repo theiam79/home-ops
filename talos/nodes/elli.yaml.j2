@@ -4,8 +4,23 @@ machine:
   install:
     diskSelector:
       model: "Samsung SSD 850"
+    # elli carries an RTX 3080 — it needs a different factory image than the rest
+    # of the cluster (base schematic + the two NVIDIA extensions). Build the
+    # schematic at https://factory.talos.dev with the FOUR extensions documented
+    # in talos/schematic.yaml.j2 ("elli" block), then paste the returned ID below.
+    # Until then this still renders; just don't `upgrade-node` elli with a stale ID.
+    image: factory.talos.dev/installer/e321bc76be3bc9f170a6af44753f216f3ffaaa2874b7a2d055394df2e121ddeb:{{ ENV.TALOS_VERSION }}
+  # Load the NVIDIA kernel modules supplied by the schematic's
+  # nvidia-open-gpu-kernel-modules-production extension (Ampere/RTX 3080).
+  kernel:
+    modules:
+      - name: nvidia
+      - name: nvidia_uvm
+      - name: nvidia_drm
+      - name: nvidia_modeset
   nodeLabels:
     clusterrole: highspeed
+    nvidia.com/gpu.present: "true"
 ---
 apiVersion: v1alpha1
 kind: HostnameConfig

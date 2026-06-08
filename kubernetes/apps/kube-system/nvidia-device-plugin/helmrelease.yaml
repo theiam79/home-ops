@@ -1,0 +1,54 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: nvidia-device-plugin
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: nvidia-device-plugin
+      version: 0.19.2
+      reconcileStrategy: ChartVersion
+      sourceRef:
+        kind: HelmRepository
+        name: nvidia-device-plugin
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  values:
+    # Pods that request nvidia.com/gpu must run under the "nvidia" containerd
+    # runtime registered by the Talos nvidia-container-toolkit extension.
+    runtimeClassName: nvidia
+    # Time-slicing config (see config.yaml). One 3080 -> 4x nvidia.com/gpu.
+    config:
+      name: nvidia-device-plugin-configs
+      default: default
+    # The chart's default affinity already pins the DaemonSet to nodes carrying
+    # the NFD label feature.node.kubernetes.io/pci-10de.present=true (NVIDIA),
+    # which node-feature-discovery sets on elli once the 3080 is visible.
+  # --- Talos v1.13 CDI hook path fix --------------------------------------
+  # Talos v1.13 runs containerd with CDI enabled. If the nvidia-smi test pod
+  # cannot see the GPU (CreateContainerError / missing nvidia-cdi-hook), the
+  # plugin is looking for the hook in the wrong place — Talos installs extension
+  # binaries under /usr/local/bin. Uncomment the postRenderer below to point it
+  # there, then `flux reconcile hr nvidia-device-plugin -n kube-system`.
+  # Verify the container name first: kubectl -n kube-system get ds \
+  #   nvidia-device-plugin -o jsonpath='{.spec.template.spec.containers[0].name}'
+  #
+  # postRenderers:
+  #   - kustomize:
+  #       patches:
+  #         - target:
+  #             kind: DaemonSet
+  #             name: nvidia-device-plugin
+  #           patch: |
+  #             - op: add
+  #               path: /spec/template/spec/containers/0/env/-
+  #               value:
+  #                 name: NVIDIA_CDI_HOOK_PATH
+  #                 value: /usr/local/bin/nvidia-cdi-hook

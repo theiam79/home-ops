@@ -14,5 +14,6 @@ resources:
   - ./reflector/ks.yaml
   - ./netboot/ks.yaml
   - ./intel-device-plugin/ks.yaml
+  - ./nvidia-device-plugin/ks.yaml
   - ./node-feature-discovery/ks.yaml
   - ./snapshot-controller/ks.yaml
