@@ -49,6 +49,12 @@ spec:
     toolbox:
       enabled: true
     cephClusterSpec:
+      # Pin daemon image explicitly (chart default for rook 1.19.5 is v19.2.3).
+      # 19.2.4 carries msgr-v2 / MonClient fixes for the recurring ceph-mon
+      # SIGSEGV in the connection-reset path, plus the bluestore data-corruption
+      # patch. Decoupled from the held rook operator 1.20 upgrade (#367).
+      cephVersion:
+        image: quay.io/ceph/ceph:v19.2.4
       cephConfig:
         global:
           bdev_enable_discard: "true" # quote
