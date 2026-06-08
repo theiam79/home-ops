@@ -1,0 +1,23 @@
+---
+# Time-slicing: one physical 3080 (no MIG on consumer Ampere) is advertised as
+# 4x nvidia.com/gpu so Ollama and (later) wyoming-whisper can co-schedule on it.
+# CAVEAT: replicas share the SAME 10GB VRAM — no memory isolation. Size the
+# resident models to fit together (e.g. an 8B Q4 LLM + a small Whisper).
+# For the eval phase only one model runs at a time, so this is purely
+# forward-looking; lower `replicas` to 1 to disable sharing.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nvidia-device-plugin-configs
+data:
+  default: |-
+    version: v1
+    flags:
+      migStrategy: none
+    sharing:
+      timeSlicing:
+        renameByDefault: false
+        failRequestsGreaterThanOne: false
+        resources:
+          - name: nvidia.com/gpu
+            replicas: 4

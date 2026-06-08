@@ -13,3 +13,15 @@ customization:
     officialExtensions:
       - siderolabs/i915  # Intel iGPU passthrough for plex/jellyfin/etc.
       - siderolabs/intel-ucode  # Intel CPU microcode updates
+#
+# elli-only schematic (RTX 3080). elli's machine.install.image
+# (talos/nodes/elli.yaml.j2) points at a SEPARATE schematic built from the base
+# extensions above PLUS the two NVIDIA extensions below. Build it at
+# https://factory.talos.dev for the current talenv.yaml Talos version and paste
+# the returned ID into elli.yaml.j2. Both NVIDIA extensions must stay on the same
+# driver branch (-production). Open kernel modules are correct for Ampere.
+#
+#   - siderolabs/i915
+#   - siderolabs/intel-ucode
+#   - siderolabs/nvidia-open-gpu-kernel-modules-production
+#   - siderolabs/nvidia-container-toolkit-production
