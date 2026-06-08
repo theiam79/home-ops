@@ -14,7 +14,9 @@ spec:
         type: cronjob
         cronjob:
           schedule: "0 5 * * *"
-          backoffLimit: 0
+          # retry transient failures (e.g. DNS blips resolving github.com
+          # for the TRaSH-Guides fetch); recyclarr sync is idempotent
+          backoffLimit: 3
           concurrencyPolicy: Forbid
           successfulJobsHistory: 1
           failedJobsHistory: 1
