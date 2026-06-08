@@ -108,15 +108,16 @@ spec:
             ports:
               - containerPort: 5010
             probes:
-              liveness: &mouseholeProbes
+              # liveness is TCP-only: /ok and /health both report MAM
+              # reachability (isOnline), so an HTTP probe restarts the
+              # container on every VPN/MAM blip. TCP only trips on real death.
+              liveness:
                 enabled: true
                 custom: true
                 spec:
-                  httpGet:
-                    path: /ok
+                  tcpSocket:
                     port: 5010
                   periodSeconds: 30
-                  timeoutSeconds: 5
                   failureThreshold: 5
               readiness:
                 enabled: false
