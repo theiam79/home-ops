@@ -1,0 +1,77 @@
+---
+# yaml-language-server: $schema=https://github.com/datreeio/CRDs-catalog/raw/refs/heads/main/postgresql.cnpg.io/cluster_v1.json
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: mealie-pg
+  annotations:
+    cnpg.io/skipEmptyWalArchiveCheck: "enabled"
+spec:
+  instances: 2
+  imageName: ghcr.io/cloudnative-pg/postgresql:17
+  storage:
+    size: 5Gi
+    storageClass: ceph-block
+  resources:
+    requests:
+      cpu: 50m
+  # First deploy: initdb. After the first successful backup lands in
+  # s3://cnpg/mealie/, switch bootstrap to recovery (source: mealie-pg-v1)
+  # to match the disaster-recovery posture of the other clusters.
+  bootstrap:
+    initdb:
+      database: mealie
+      owner: mealie
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: mealie-pg-backup
+        serverName: mealie-pg-v1
+  externalClusters:
+    - name: mealie-pg-v1
+      plugin:
+        name: barman-cloud.cloudnative-pg.io
+        parameters:
+          barmanObjectName: mealie-pg-backup
+          serverName: mealie-pg-v1
+---
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: mealie-pg-backup
+spec:
+  retentionPolicy: "15d"
+  configuration:
+    destinationPath: "s3://cnpg/mealie/"
+    endpointURL: "http://garage.internal:3900"
+    s3Credentials:
+      region:
+        name: mealie-cnpg-secret
+        key: AWS_REGION
+      accessKeyId:
+        name: mealie-cnpg-secret
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKey:
+        name: mealie-cnpg-secret
+        key: AWS_SECRET_ACCESS_KEY
+  instanceSidecarConfiguration:
+    env:
+      - name: AWS_REQUEST_CHECKSUM_CALCULATION
+        value: when_required
+      - name: AWS_RESPONSE_CHECKSUM_VALIDATION
+        value: when_required
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: mealie-pg
+spec:
+  backupOwnerReference: self
+  cluster:
+    name: mealie-pg
+  schedule: "0 0 3 * * *"
+  immediate: true
+  method: plugin
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io
