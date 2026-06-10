@@ -205,3 +205,18 @@ identity_providers:
           - email
         redirect_uris:
           - 'https://tasks.${SECRET_DOMAIN}/auth/openid/authelia'
+      - client_id: mealie
+        client_name: Mealie
+        client_secret: '{{ secret "/secrets/authelia/MEALIE_CLIENT_SECRET_DIGEST" }}'
+        public: false
+        authorization_policy: two_factor
+        consent_mode: implicit
+        token_endpoint_auth_method: client_secret_basic
+        scopes:
+          - openid
+          - profile
+          - email
+          - groups
+        redirect_uris:
+          - 'https://recipes.${SECRET_DOMAIN}/login'
+          - 'https://recipes.${SECRET_DOMAIN}/login?direct=1'

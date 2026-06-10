@@ -10,3 +10,4 @@ resources:
   - ./spoolman/ks.yaml
   - ./reactive-resume/ks.yaml
   - ./vikunja/ks.yaml
+  - ./mealie/ks.yaml
