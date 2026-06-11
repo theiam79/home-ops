@@ -20,15 +20,20 @@ meal-driven items go to Hy-Vee/Target.
 
 - URL: `https://recipes.${SECRET_DOMAIN}` (envoy-external)
 - DB: CNPG `mealie-pg` (2 instances, barman → `s3://cnpg/mealie/` on Garage).
-  First deploy bootstraps with `initdb`; a follow-up PR flips to `recovery`
-  after the first backup lands (same convention as the other clusters).
+  Bootstrapped with `initdb` on first deploy; flipped to `recovery` after the
+  first backup landed (#379, same convention as the other clusters).
 - Auth: OIDC against Authelia. `OIDC_ADMIN_GROUP: admins` → LLDAP admins land as
   Mealie admins. `OIDC_AUTO_REDIRECT: false` keeps the local login form as
   break-glass. Optional: create an LLDAP group `mealie` and set
   `OIDC_USER_GROUP: mealie` to gate access.
 - AI: `OPENAI_*` env vars point at Gemini's OpenAI-compat endpoint. Since
-  Mealie v3.19 these only **seed** the provider — manage/verify it afterwards in
-  Admin → Settings → AI Providers.
+  Mealie v3.19 AI providers are managed **per group** in the UI (Group
+  Settings → AI Providers — there is no admin site-settings page for this;
+  upstream PR mealie-recipes/mealie#7650). The env vars are a deprecated
+  import-only seed applied on upgrade — on a fresh install, configure the
+  provider in the group settings: base URL
+  `https://generativelanguage.googleapis.com/v1beta/openai/`, the Gemini API
+  key, model `gemini-flash-latest`.
 
 ## Bitwarden entries (Step 0)
 
@@ -42,14 +47,17 @@ meal-driven items go to Hy-Vee/Target.
 
 1. Log in at `https://recipes.${SECRET_DOMAIN}` via Authelia (admins-group user
    lands as admin).
-2. Admin → AI Providers: confirm the seeded Gemini provider; test with an AI
-   recipe URL import.
-3. Create a `homeassistant` user; generate an API token (profile → API tokens).
+2. Group Settings → AI Providers: configure/confirm the Gemini provider (see
+   above); test with an AI recipe URL or image import.
+3. Generate an API token for HA (Profile → Manage → API Tokens). A dedicated
+   `homeassistant` user is optional — everything the integration touches is
+   household-scoped, so a token from your own account sees the same data; a
+   separate user only buys independent revocation and audit clarity.
 4. Create shopping list(s) and labels `Costco`, `Hy-Vee`, `Target`.
 5. Recipe curation (drives planner quality): tag recipes with effort level
    (`weeknight`/`weekend`), `kid-friendly`, season; fill prep/total times.
 
-## Home Assistant wiring (PR 3 — planner package)
+## Home Assistant wiring (planner package)
 
 Manual integrations (HA UI):
 
@@ -61,23 +69,37 @@ Manual integrations (HA UI):
 3. **Google Generative AI**: same Gemini key; creates the `ai_task` entity —
    set it as preferred AI Task entity in Settings.
 
-Planner package (`/config/packages/mealie_meal_planner.yaml`, via code-server —
-prereq `homeassistant: packages: !include_dir_named packages`):
+The full planner package lives at [`mealie_meal_planner.yaml`](mealie_meal_planner.yaml).
+Copy it to `/config/packages/mealie_meal_planner.yaml` (code-server at
+`home-code.${SECRET_DOMAIN}`), fill the `REPLACE_*` markers, ensure
+`configuration.yaml` has `homeassistant: packages: !include_dir_named
+packages`, then restart HA.
+
+What it contains:
 
 - `script.generate_weekly_meal_plan` — gathers calendar events (next 8 days),
-  weather forecast, Mealie recipes (dinner-tagged), recent plans →
+  weather forecast, the Mealie recipe catalog, last 14 days of plans →
   `ai_task.generate_data` with a JSON schema
   `{days: [{date, meal, recipe_slug, note}], shopping_list: [{item, store}]}`.
   Prompt rules: busy evenings (events 17:00–20:00) get quick/slow-cooker/
-  leftover meals; plan cook-once-eat-twice pairs; tag items by store.
+  leftover meals; plan cook-once-eat-twice pairs; weather-aware meals; tag
+  items by store; no repeats from the last two weeks.
 - `sensor.proposed_meal_plan` — trigger-based template sensor holding the
   proposal for the approval flow.
-- Approval automation — Friday 16:00: generate → actionable phone notification
-  (Approve / Regenerate) → on approve, `mealie.set_mealplan` per day and
-  `todo.add_item` per shopping item.
+- Automations — Friday 16:00 generate → actionable phone notification; Approve
+  writes each day via `mealie.set_mealplan` and each item via `todo.add_item`
+  (with the store in parentheses); Regenerate reruns the script.
 
-**→ Full package YAML lands with PR 3** (entity IDs and the Mealie
-`config_entry_id` get filled in after the integrations above exist).
+Where to find each `REPLACE_*` value (after the integrations exist):
+
+| Marker | Where to find it |
+|---|---|
+| `REPLACE_MEALIE_CONFIG_ENTRY` | Settings → Devices & Services → Mealie → the `config_entry` ID in the page URL (or Download diagnostics → `entry_id`) |
+| `REPLACE_CALENDAR_ENTITIES` | Developer Tools → States, filter `calendar.` — YAML list of the family calendars |
+| `REPLACE_WEATHER_ENTITY` | Developer Tools → States, filter `weather.` (e.g. `weather.forecast_home`) |
+| `REPLACE_AI_TASK_ENTITY` | Developer Tools → States, filter `ai_task.` (from Google Generative AI) |
+| `REPLACE_SHOPPING_TODO` | Developer Tools → States, filter `todo.` — the Mealie shopping list entity |
+| `REPLACE_NOTIFY_SERVICE` | Developer Tools → Actions, search `notify.mobile_app` |
 
 ## Verification
 
@@ -96,9 +118,11 @@ prereq `homeassistant: packages: !include_dir_named packages`):
 - Mealie image historically used root entrypoint + PUID/PGID; manifest runs it
   as `runAsNonRoot: 1000`. If it crash-loops on permissions, drop
   `runAsNonRoot` and set `PUID`/`PGID: "1000"` instead.
-- `OPENAI_MODEL: gemini-2.5-flash` — Google deprecates models on the
-  OpenAI-compat endpoint periodically; the in-app AI provider setting is
-  authoritative after first boot.
+- Google deprecates models on the OpenAI-compat endpoint periodically
+  (`gemini-2.5-flash` retires 2026-06-17). Use the `gemini-flash-latest`
+  rolling alias — it tracks the newest stable Flash release (currently
+  3.5) — both in the env seed and the in-app provider, which is the
+  authoritative setting.
 
 ## Future phases (tracking issues)
 

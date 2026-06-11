@@ -1,0 +1,200 @@
+# /config/packages/mealie_meal_planner.yaml
+# Prereq in configuration.yaml:
+#   homeassistant:
+#     packages: !include_dir_named packages
+#
+# REPLACE_ME markers (filled after integrations exist):
+#   REPLACE_MEALIE_CONFIG_ENTRY  — Mealie integration config_entry_id
+#   REPLACE_CALENDAR_ENTITIES    — family calendar entities, e.g. [calendar.tyler, calendar.spouse]
+#   REPLACE_WEATHER_ENTITY       — e.g. weather.forecast_home
+#   REPLACE_AI_TASK_ENTITY       — e.g. ai_task.google_ai_task
+#   REPLACE_SHOPPING_TODO        — e.g. todo.mealie_shopping_list
+#   REPLACE_NOTIFY_SERVICE       — e.g. notify.mobile_app_tylers_phone
+
+template:
+  - triggers:
+      - trigger: event
+        event_type: meal_plan_proposed
+    sensor:
+      - name: Proposed meal plan
+        unique_id: proposed_meal_plan
+        state: "{{ trigger.event.data.generated_at }}"
+        attributes:
+          days: "{{ trigger.event.data.days }}"
+          shopping_list: "{{ trigger.event.data.shopping_list }}"
+
+script:
+  generate_weekly_meal_plan:
+    alias: Generate weekly meal plan
+    mode: restart
+    sequence:
+      - alias: Family calendar events, next 8 days
+        action: calendar.get_events
+        target:
+          entity_id: REPLACE_CALENDAR_ENTITIES
+        data:
+          start_date_time: "{{ today_at() }}"
+          duration:
+            days: 8
+        response_variable: events
+      - alias: Daily forecast
+        action: weather.get_forecasts
+        target:
+          entity_id: REPLACE_WEATHER_ENTITY
+        data:
+          type: daily
+        response_variable: forecast
+      - alias: Recipe catalog (slug + name)
+        action: mealie.get_recipes
+        data:
+          config_entry_id: REPLACE_MEALIE_CONFIG_ENTRY
+        response_variable: catalog
+      - alias: Last 2 weeks of dinners (avoid repeats)
+        action: mealie.get_mealplan
+        data:
+          config_entry_id: REPLACE_MEALIE_CONFIG_ENTRY
+          start_date: "{{ (now() - timedelta(days=14)).date() }}"
+          end_date: "{{ now().date() }}"
+        response_variable: recent
+      - alias: Ask Gemini for the plan
+        action: ai_task.generate_data
+        data:
+          entity_id: REPLACE_AI_TASK_ENTITY
+          task_name: weekly_meal_plan
+          instructions: >-
+            You are planning family dinners for the 7 days starting
+            {{ now().date() }}. Rules:
+
+            - Busy evenings (any calendar event overlapping 17:00-20:00) get a
+              quick (<30 min), slow-cooker, or leftovers meal.
+            - Plan deliberate cook-once-eat-twice pairs: a larger weekend or
+              free-evening cook followed by a leftovers night on the busiest
+              evening.
+            - Use the weather: grilling/lighter meals on warm dry days, soups,
+              stews and oven meals on cold or rainy days.
+            - Prefer recipes from the catalog below; return their exact slug in
+              recipe_slug. If you propose something not in the catalog, leave
+              recipe_slug empty and describe the meal in note.
+            - Do not repeat anything from the recent dinners list.
+            - Produce a consolidated shopping list for the week. Tag each item
+              with the store it should come from: Hy-Vee or Target for
+              meal-driven items (groceries vs household goods), Costco only for
+              bulk staples.
+
+            Calendar events:
+            {{ events | tojson }}
+
+            Daily forecast:
+            {{ forecast | tojson }}
+
+            Recipe catalog (slug — name):
+            {% for r in catalog.recipes %}
+            {{ r.slug }} — {{ r.name }}
+            {% endfor %}
+
+            Recent dinners (avoid):
+            {{ recent.mealplan | map(attribute='recipe.name', default='') | select('ne', '') | list | tojson }}
+          structure:
+            days:
+              description: >-
+                One entry per day: date (YYYY-MM-DD), meal (short title),
+                recipe_slug (exact slug from catalog or empty string), note
+                (why this fits the day, or the full description for
+                non-catalog meals).
+              required: true
+              selector:
+                object:
+            shopping_list:
+              description: >-
+                Consolidated list. Each entry: item (string), store (one of
+                Costco, Hy-Vee, Target).
+              required: true
+              selector:
+                object:
+        response_variable: plan
+      - alias: Publish proposal for the approval flow
+        event: meal_plan_proposed
+        event_data:
+          generated_at: "{{ now().isoformat() }}"
+          days: "{{ plan.data.days }}"
+          shopping_list: "{{ plan.data.shopping_list }}"
+      - alias: Ask for approval
+        action: REPLACE_NOTIFY_SERVICE
+        data:
+          title: "Meal plan for week of {{ now().date() }}"
+          message: >-
+            {% for d in plan.data.days %}
+            {{ d.date }}: {{ d.meal }}
+            {% endfor %}
+          data:
+            actions:
+              - action: MEAL_PLAN_APPROVE
+                title: Approve
+              - action: MEAL_PLAN_REDO
+                title: Regenerate
+
+automation:
+  - alias: Weekly meal plan generation
+    id: weekly_meal_plan_generation
+    triggers:
+      - trigger: time
+        at: "16:00:00"
+    conditions:
+      - condition: time
+        weekday: [fri]
+    actions:
+      - action: script.generate_weekly_meal_plan
+
+  - alias: Meal plan approved
+    id: meal_plan_approved
+    triggers:
+      - trigger: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: MEAL_PLAN_APPROVE
+    actions:
+      - alias: Write each day into Mealie
+        repeat:
+          for_each: "{{ state_attr('sensor.proposed_meal_plan', 'days') }}"
+          sequence:
+            - choose:
+                - conditions: "{{ repeat.item.recipe_slug | default('') != '' }}"
+                  sequence:
+                    - action: mealie.set_mealplan
+                      data:
+                        config_entry_id: REPLACE_MEALIE_CONFIG_ENTRY
+                        date: "{{ repeat.item.date }}"
+                        entry_type: dinner
+                        recipe_id: "{{ repeat.item.recipe_slug }}"
+              default:
+                - action: mealie.set_mealplan
+                  data:
+                    config_entry_id: REPLACE_MEALIE_CONFIG_ENTRY
+                    date: "{{ repeat.item.date }}"
+                    entry_type: dinner
+                    note_title: "{{ repeat.item.meal }}"
+                    note_text: "{{ repeat.item.note | default('') }}"
+      - alias: Add shopping items (store in parentheses)
+        repeat:
+          for_each: "{{ state_attr('sensor.proposed_meal_plan', 'shopping_list') }}"
+          sequence:
+            - action: todo.add_item
+              target:
+                entity_id: REPLACE_SHOPPING_TODO
+              data:
+                item: "{{ repeat.item.item }} ({{ repeat.item.store }})"
+      - action: REPLACE_NOTIFY_SERVICE
+        data:
+          message: "Meal plan committed to Mealie — shopping list updated."
+
+  - alias: Meal plan regenerate
+    id: meal_plan_regenerate
+    triggers:
+      - trigger: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: MEAL_PLAN_REDO
+    actions:
+      - action: script.turn_on
+        target:
+          entity_id: script.generate_weekly_meal_plan
