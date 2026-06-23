@@ -13,10 +13,9 @@ spec:
     size: 5Gi
     storageClass: ceph-block
   resources:
-    limits:
-      memory: 256Mi
     requests:
       cpu: 50m
+      memory: 256Mi
   bootstrap:
     recovery:
       source: reactive-resume-pg-v1
