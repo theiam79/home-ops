@@ -11,6 +11,8 @@ spec:
   values:
     controllers:
       home-assistant:
+        # Fixed IoT-VLAN IP + RWO PVC — no two pods at once. See ../README.md.
+        strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -77,6 +79,10 @@ spec:
                 cpu: 10m
                 memory: 64Mi
     defaultPodOptions:
+      annotations:
+        # net1 on the IoT VLAN for Google Cast — see ../README.md.
+        k8s.v1.cni.cncf.io/networks: |
+          [{"name":"iot","namespace":"home-automation","ips":["10.1.30.5/24"]}]
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
