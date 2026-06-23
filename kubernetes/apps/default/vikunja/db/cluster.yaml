@@ -13,10 +13,9 @@ spec:
     size: 5Gi
     storageClass: ceph-block
   resources:
-    limits:
-      memory: 512Mi
     requests:
       cpu: 50m
+      memory: 512Mi
   bootstrap:
     recovery:
       source: vikunja-pg-v1
