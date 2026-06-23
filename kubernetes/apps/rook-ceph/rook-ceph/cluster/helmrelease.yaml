@@ -82,6 +82,17 @@ spec:
         addressRanges:
           cluster:
             - "10.10.10.0/24"
+      placement:
+        # Temporary workaround — remove once elli's system SSD is replaced. See #424.
+        mon:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: kubernetes.io/hostname
+                      operator: NotIn
+                      values:
+                        - elli
       storage:
         useAllNodes: true
         useAllDevices: false
