@@ -98,6 +98,7 @@ spec:
               tag: 0.5.0
             env:
               TZ: America/Chicago
+              MOUSEHOLE_STATE_DIR_PATH: /srv/mousehole  # 0.5.0 default moved to /var/lib; pin to existing PVC mount
               MOUSEHOLE_ALLOWED_HOSTS: "mousehole.${SECRET_DOMAIN}"
               MOUSEHOLE_ALLOWED_ORIGINS: "https://mousehole.${SECRET_DOMAIN}"
               MOUSEHOLE_AUTH_PASSWORD:
