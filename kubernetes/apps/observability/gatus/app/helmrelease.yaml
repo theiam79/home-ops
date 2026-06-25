@@ -68,6 +68,7 @@ spec:
         serviceAccount:
           identifier: gatus
     defaultPodOptions:
+      automountServiceAccountToken: true  # app-template 5.0 defaults false; gatus ClusterRole needs the SA token
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
