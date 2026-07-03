@@ -5,6 +5,7 @@ resources:
   - ./certificate.yaml
   - ./clustersecretstore.yaml
   - ./helmrelease.yaml
+  - ./prometheusrule.yaml
 configMapGenerator:
   - name: external-secrets-values
     files:
