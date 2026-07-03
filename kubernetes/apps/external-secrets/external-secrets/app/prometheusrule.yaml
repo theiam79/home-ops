@@ -1,0 +1,28 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: external-secrets
+spec:
+  groups:
+    - name: external-secrets.rules
+      rules:
+        - alert: ExternalSecretsComponentAbsent
+          expr: |
+            absent(up{job="external-secrets-metrics"})
+          annotations:
+            summary: >-
+              external-secrets has disappeared from Prometheus target discovery
+          for: 15m
+          labels:
+            severity: critical
+
+        - alert: ExternalSecretNotSynced
+          expr: |
+            externalsecret_status_condition{condition="Ready", status="False"} == 1
+          annotations:
+            summary: >-
+              ExternalSecret {{ $labels.exported_namespace }}/{{ $labels.name }} has not synced for over an hour
+          for: 1h
+          labels:
+            severity: critical

@@ -1,0 +1,18 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: flux-instance
+spec:
+  groups:
+    - name: flux-instance.rules
+      rules:
+        - alert: FluxResourceNotReady
+          expr: |
+            flux_resource_info{kind=~"Kustomization|HelmRelease", ready!="True", suspended="False"}
+          annotations:
+            summary: >-
+              Flux {{ $labels.kind }} {{ $labels.exported_namespace }}/{{ $labels.name }} has not been Ready for over an hour
+          for: 1h
+          labels:
+            severity: critical
