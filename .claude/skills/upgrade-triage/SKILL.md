@@ -151,7 +151,36 @@ this session — never leave it in limbo:
 Keep the user in the loop: announce each tier, and for any merge that mutates
 cluster state or any close, confirm intent before acting unless the user has
 said to proceed autonomously. Patches and clean minors can be merged in a batch
-with a summary rather than one-by-one prompts.
+with a summary rather than one-by-one prompts — but pace the batch per the
+rollout-safety rules below.
+
+### Merge pacing & rollout safety
+
+Do **not** fire every approved merge at once. Mass-simultaneous merges make
+Flux restart many pods in the same window, which storms RWO/RBD volume
+detach-attach. On a cluster with any flaky storage, a single slow or crashing
+Ceph mon during that storm is enough to blow Helm's 5-minute upgrade timeout —
+producing failed upgrades *and* failed rollbacks across the fleet. (Observed:
+batch-merging an `app-template` major alongside ~36 other PRs tipped over a
+known-recurring ceph-mon crash; data stayed safe but a dozen HelmReleases timed
+out.) Pace it:
+
+1. **Isolate fleet-wide / shared-dependency upgrades — merge each ALONE.** Any
+   PR that re-renders many apps at once is the single biggest blast radius:
+   - a shared library chart (e.g. bjw-s `app-template` / `common`)
+   - an `OCIRepository`/`HelmRepository` tag referenced by many HelmReleases
+   - CNI (Cilium), CSI / storage drivers, cert-manager, external-secrets
+   Merge it by itself, then wait for Flux to fully reconcile and pods to settle
+   (and storage to stay healthy) **before** merging anything else. Never stack
+   other merges on top of one of these.
+2. **Merge the rest in waves, not all at once.** Group safe patches/minors into
+   modest batches (~8–12). Spread stateful / persistent-volume apps across
+   waves so you don't restart many RBD-backed pods simultaneously.
+3. **Health-gate between waves.** Before the next wave confirm: all HelmReleases
+   Ready (`flux get hr -A`), no pods stuck `Terminating`/`ContainerCreating`/
+   `Pending`, and storage healthy (`ceph status` → `HEALTH_OK`, PGs
+   `active+clean`). If not, stop and let it recover (or remediate) first — a
+   stalled wave is a pacing problem to settle, **not** a reason to file a hold.
 
 ### Filing a hold issue
 
