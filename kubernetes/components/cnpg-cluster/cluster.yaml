@@ -20,10 +20,9 @@ spec:
     size: "${CNPG_CAPACITY:=5Gi}"
     storageClass: "${CNPG_STORAGECLASS:=ceph-block}"
   resources:
-    limits:
-      memory: "${CNPG_MEMORY_LIMIT:=256Mi}"
     requests:
       cpu: "${CNPG_CPU_REQUEST:=50m}"
+      memory: "${CNPG_MEMORY_REQUEST:=256Mi}"
   # For first deploy (no backup exists yet), temporarily change to:
   #   bootstrap:
   #     initdb:
