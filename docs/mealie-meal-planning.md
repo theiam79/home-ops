@@ -69,26 +69,42 @@ Manual integrations (HA UI):
 3. **Google Generative AI**: same Gemini key; creates the `ai_task` entity —
    set it as preferred AI Task entity in Settings.
 
-The full planner package lives at [`mealie_meal_planner.yaml`](mealie_meal_planner.yaml).
-Copy it to `/config/packages/mealie_meal_planner.yaml` (code-server at
-`home-code.${SECRET_DOMAIN}`), fill the `REPLACE_*` markers, ensure
-`configuration.yaml` has `homeassistant: packages: !include_dir_named
-packages`, then restart HA.
+**UI-native build (no /config package).** The runtime lives in HA's UI
+editors + helpers (scripts.yaml / automations.yaml, Kopia-backed), not a
+package file — so it's maintainable directly in the UI with no edit-reload
+loop. [`mealie_meal_planner.yaml`](mealie_meal_planner.yaml) is the reference
+source you paste in. Steps:
 
-What it contains:
+1. **Helpers** (Settings → Devices & Services → Helpers → Create Helper):
+   - Number `Meal plan household size` → `input_number.meal_plan_household_size`
+   - Text `Meal plan notes` → `input_text.meal_plan_notes` (free-text AI steering)
+   - Text `Meal plan store preferences` → `input_text.meal_plan_store_prefs`
+2. **The script** (Settings → Automations & Scenes → Scripts → Add → ⋮ → Edit
+   in YAML): paste BLOCK 1, fill the `REPLACE_*` markers (including
+   `REPLACE_ROSTER` — which calendar belongs to whom), save. Note its
+   `entity_id`.
+3. **The trigger** (optional): paste BLOCK 2 into a new Automation (Edit in
+   YAML) for the Friday 16:00 run, or just add a dashboard button that calls
+   the script.
 
-- `script.generate_weekly_meal_plan` — gathers calendar events (next 8 days),
-  weather forecast, the Mealie recipe catalog, last 14 days of plans →
-  `ai_task.generate_data` with a JSON schema
-  `{days: [{date, meal, recipe_slug, note}], shopping_list: [{item, store}]}`.
-  Prompt rules: busy evenings (events 17:00–20:00) get quick/slow-cooker/
-  leftover meals; plan cook-once-eat-twice pairs; weather-aware meals; tag
-  items by store; no repeats from the last two weeks.
-- `sensor.proposed_meal_plan` — trigger-based template sensor holding the
-  proposal for the approval flow.
-- Automations — Friday 16:00 generate → actionable phone notification; Approve
-  writes each day via `mealie.set_mealplan` and each item via `todo.add_item`
-  (with the store in parentheses); Regenerate reruns the script.
+What the single script does: gathers family calendars, weather, the Mealie
+recipe catalog, and the last 14 days of plans → `ai_task.generate_data` →
+normalizes Gemini's output into clean lists → resolves each slug to a Mealie
+`recipe_id` → sends an actionable notification → **waits in-script
+(`wait_for_trigger`)** for Approve/Regenerate so no template sensor is needed →
+on Approve writes each day via `mealie.set_mealplan` and each item via
+`todo.add_item`; Regenerate loops; 12h timeout drops it.
+
+Occupancy is read from the **primary calendars by event location + time**: an
+event whose location is outside Kansas overlapping the 17:00–19:30 dinner window
+means that person is away that night (multi-day out-of-state events span every
+dinner); a local dinner-time event means home-but-busy → a quick meal. The
+`meal_plan_notes` helper overrides it (e.g. *"Tyler away Wed–Sat"*). No
+dedicated travel calendar needed.
+
+Other prompt rules: catalog-only recipe selection (no invented meals, empty slug
+only for leftovers / no-dinner); cook-once-eat-twice pairs; weather-aware; store
+tagging from the prefs helper; no repeats from the last two weeks.
 
 Where to find each `REPLACE_*` value (after the integrations exist):
 
@@ -96,6 +112,7 @@ Where to find each `REPLACE_*` value (after the integrations exist):
 |---|---|
 | `REPLACE_MEALIE_CONFIG_ENTRY` | Settings → Devices & Services → Mealie → the `config_entry` ID in the page URL (or Download diagnostics → `entry_id`) |
 | `REPLACE_CALENDAR_ENTITIES` | Developer Tools → States, filter `calendar.` — YAML list of the family calendars |
+| `REPLACE_ROSTER` | one line mapping each calendar to a person, e.g. `calendar.tyler = Tyler; calendar.sarah = Sarah; kids always home` |
 | `REPLACE_WEATHER_ENTITY` | Developer Tools → States, filter `weather.` (e.g. `weather.forecast_home`) |
 | `REPLACE_AI_TASK_ENTITY` | Developer Tools → States, filter `ai_task.` (from Google Generative AI) |
 | `REPLACE_SHOPPING_TODO` | Developer Tools → States, filter `todo.` — the Mealie shopping list entity |
@@ -110,8 +127,11 @@ Where to find each `REPLACE_*` value (after the integrations exist):
    `kubectl get replicationsource mealie -n default` syncing.
 3. Gatus `recipes` green; Authelia SSO round-trip works; admin role applied.
 4. AI recipe import works (exercises the Gemini path).
-5. (PR 3) `ai_task.generate_data` returns structured data; full planner run:
-   script → phone approval → plan visible in Mealie calendar + items on list.
+5. `ai_task.generate_data` returns structured data; full planner run: run the
+   script → actionable notification → tap Approve → plan visible in Mealie
+   calendar + items on the shopping list. Regenerate re-runs; an out-of-state
+   calendar event over dinner correctly drops that person from that night's
+   portions.
 
 ## Known risks
 
