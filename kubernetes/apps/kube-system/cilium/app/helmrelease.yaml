@@ -14,6 +14,8 @@ spec:
       masquerade: true
       # Ref: https://github.com/siderolabs/talos/issues/10002
       hostLegacyRouting: true
+      # Multus VLAN secondary networks — see ../README.md. 30=IoT/Cast, 70=VPN.
+      vlanBypass: [30, 70]
     cni:
       # Required for pairing with Multus CNI
       exclusive: false

@@ -1,18 +1,20 @@
 ---
 name: upgrade-triage
-description: Triage open Renovate/dependency PRs by risk, cross-reference against a reference repo, and produce batched upgrade documents
+description: Triage open Renovate/dependency PRs by risk, cross-reference against a reference repo, and work through them in-session — merging, closing, or filing hold issues
 argument-hint: "[reference-repo]"
 ---
 
 # Upgrade Triage
 
-Assess all open dependency-update PRs, research upgrade risks, cross-reference
-against a reference repository's merge history, and produce a prioritized set
-of batch documents for **same-session triage**.
+Assess all open dependency-update PRs, research upgrade risks, optionally
+cross-reference against a reference repository's merge history, then **work
+through every PR in this session** — merging the safe ones, closing the
+superseded ones, and filing a GitHub issue for anything postponed or held.
 
-Batch documents are scratch artifacts written to a tmp directory — they are
-**not committed to the repo**. Anything that needs to outlive the session
-(holds, multi-step upgrade plans, blocked work) gets filed as a GitHub issue.
+There are **no batch documents and no scratch files**. The risk analysis lives
+in the conversation; the durable record is the set of merged PRs, closed PRs,
+and `upgrade-hold` GitHub issues this run produces. Nothing is left dangling in
+a tmp directory or committed to the repo.
 
 ## Arguments
 
@@ -21,21 +23,35 @@ Batch documents are scratch artifacts written to a tmp directory — they are
   and open PRs for the same components to identify real-world issues, reverts,
   and supporting chore commits. If omitted, skip the cross-reference phase.
 
+## Phase 0: Check existing holds
+
+Before triaging anything new, list the holds from prior runs so you can update,
+close, or unblock them instead of re-deriving the same context:
+
+```
+gh issue list --label upgrade-hold --state open \
+  --json number,title,body --limit 100
+```
+
+For each existing hold, check whether its unblock criteria are now met (the
+upstream fix shipped, the maintenance window arrived, the blocking PR merged).
+If so, fold it back into this run's worklist and close the issue when done.
+
 ## Phase 1: Inventory
 
 1. List all open PRs:
    ```
    gh pr list --state open --limit 100 \
-     --json number,title,author,headRefName,additions,deletions
+     --json number,title,author,headRefName,additions,deletions,labels
    ```
 2. For each PR, extract:
    - Component name and current → target version
-   - Whether the version bump is patch, minor, or major (use semver and the
-     `!` convention in commit titles)
+   - Whether the bump is patch, minor, or major (use semver, the `type/*`
+     labels, and the `!` convention in commit titles)
    - Whether another open PR targets the same component at a higher version
      (marks the lower one as **superseded**)
-3. Group superseded PRs. For each pair, determine whether the superseded PR is
-   a useful **intermediate step** (see criteria below).
+3. Group superseded PRs. For each pair, decide whether the superseded PR is a
+   useful **intermediate step** (see criteria below) or should just be closed.
 
 ### Intermediate step criteria
 
@@ -45,17 +61,16 @@ A superseded PR is a useful intermediate step if ALL of:
   (e.g., CRD schema changes, API version migrations, deprecation removals)
 - Merging incrementally reduces the blast radius of each individual step
 
-If it qualifies, keep it and sequence it before the target PR in the same batch.
-If not, mark it for closing.
+If it qualifies, keep it and sequence it before the target PR. If not, close it.
 
 ## Phase 2: Risk Research
 
 For each unique component upgrade (skip superseded-only PRs), research risks
-using web search and GitHub API. Prioritize major version bumps and
-infrastructure-critical components (CNI, storage, OS, k8s).
+using web search and GitHub. Prioritize major bumps and infrastructure-critical
+components (CNI, storage, OS, k8s).
 
-Use parallel Task agents (subagent_type: `general-purpose`) to research
-batches of 5-8 components simultaneously. Each agent should search for:
+Use parallel Task agents (subagent_type: `general-purpose`) to research batches
+of 5-8 components simultaneously. Each agent should search for:
 
 1. **Breaking changes**: Official migration guides, upgrade notes, changelogs
 2. **Known issues**: GitHub issues filed against the target version
@@ -81,122 +96,126 @@ gh pr list --repo <reference-repo> --state all --limit 300 \
 For each component in your PR list:
 1. Find matching merged PRs (same component, similar version range)
 2. Find any **reverts** (PRs with "Revert" in title referencing the component)
-3. Find **chore/manual commits** around the merge date (prep work, config
-   changes, fixups)
+3. Find **chore/manual commits** around the merge date (prep work, fixups)
 4. Note the **upgrade path** taken (incremental vs. direct jump)
 5. Note anything they have **not yet done** or have **open/stalled**
 
-Key signals to extract:
+Key signals:
 - **Reverts** = confirmed problems. Note what broke and whether it was resolved.
-- **Chore commits** near the merge = extra manual work was needed. Document what.
-- **Incremental path** = they considered the direct jump too risky. Match their
-  sequencing.
+- **Chore commits** near the merge = extra manual work was needed.
+- **Incremental path** = they considered the direct jump too risky; match it.
 - **Not yet merged** = they may be waiting for a fix. Check for open issues.
 
-## Phase 4: Classify into Batches
+## Phase 4: Risk-order the worklist
 
-Assign each PR to a batch based on combined risk assessment:
+Sort the PRs into risk tiers — this is an **in-memory ordering** to drive the
+work-through, not a set of documents. Work the tiers from safest to riskiest so
+the easy wins land first and the risky ones get full attention.
 
-### Batch 1 — Immediate (no prep)
-- All patches
-- Minors with no breaking changes
-- Cosmetic major bumps (major version with no actual code changes)
-- CI/CD action updates with no API changes
-
-### Batch 2 — Light prep (minor config or verification)
-- PRs needing a small values tweak before or after merge
-- PRs needing SHA verification (supply-chain-sensitive actions)
-- Community PRs requiring manual code review
-- Minors where a new default must be explicitly overridden
-
-### Batch 3 — Moderate prep (config changes and testing)
-- Major version bumps with known config migration
-- PRs requiring plugin replacement or feature removal
-- Sequenced upgrades where Step 1 is low-risk but Step 2 needs prep
-- Local tooling upgrades that affect bootstrap workflows
-
-### Batch 4 — Heavy prep (CRD/bootstrap changes, coordinated upgrades)
-- Multi-step sequenced upgrades spanning 2+ major versions
-- PRs requiring bootstrap CRD updates before the chart upgrade
-- Upgrades where the reference repo took an incremental path
-
-### Batch 5 — Critical infrastructure (maintenance window)
-- CNI upgrades (Cilium, Calico, etc.)
-- Storage layer upgrades (Rook Ceph, OpenEBS, etc.) requiring version stepping
-- OS/kernel upgrades (Talos, Flatcar, etc.)
-- Kubernetes version upgrades coupled with OS upgrades
-- Anything with open regressions — mark as HOLD with rationale
-
-## Phase 5: Write Scratch Batch Documents
-
-Write batch documents to a session-scoped tmp directory — **never** inside the
-repo working tree:
-
-```
-/tmp/upgrade-triage-$(date +%Y%m%d-%H%M%S)/
-  00-superseded-close.md
-  01-batch-immediate.md
-  02-batch-light-prep.md
-  03-batch-moderate-prep.md
-  04-batch-heavy-prep.md
-  05-batch-critical-infrastructure.md
-```
-
-Tell the user the tmp path so they can open the files alongside the
-conversation. These are scratch artifacts for **this session only**.
-
-Each batch document must include for every PR:
-
-- **PR number and title** with version range
+For each PR, hold in mind:
 - **Risk rating** (Negligible / Low / Low-Medium / Medium / Medium-High / High / Critical)
-- **Rating rationale**: Why this rating — reference specific breaking changes,
-  CRD concerns, or behavioral changes
-- **Reference repo status** (if cross-referenced): What they did, any reverts,
-  any manual chore commits, whether their starting version differs from ours
-- **Extra steps**: Exact commands or config changes needed before/after merge.
-  Include `kubectl`, `grep`, and verification commands. For sequenced upgrades,
-  clearly label Step 1 and Step 2 with wait periods between them.
+- **Rationale**: the specific breaking change, CRD concern, or behavioral change
+- **Reference-repo signal** (if cross-referenced): what they did, reverts, chores
+- **Extra steps**: exact commands / config edits needed before or after merge
 
-For the superseded file (`00-superseded-close.md`):
-- List PRs to close outright (not useful as intermediates)
-- List PRs rescued as intermediate steps, noting which batch they moved to
+Tiers, safest first:
 
-## Phase 6: Triage in Session, File Issues for Holds
+1. **Immediate** — patches, clean minors, cosmetic majors, CI actions with no
+   API change. Merge directly.
+2. **Light prep** — small values tweak, SHA verification, community PR needing
+   manual review, a new default to override.
+3. **Moderate prep** — major bumps with known config migration, plugin
+   replacement, sequenced upgrade where Step 2 needs prep.
+4. **Heavy prep** — multi-step sequences spanning 2+ majors, bootstrap CRD
+   updates before a chart upgrade, paths the reference repo took incrementally.
+5. **Critical infrastructure** — CNI (Cilium), storage (Rook Ceph), OS/kernel
+   (Talos), k8s version bumps, anything with open regressions. Maintenance
+   window only.
 
-The batch documents drive triage **in this session**:
+## Phase 5: Work through every PR in session
 
-1. Walk the user through batches in order (immediate → critical). For each PR
-   in a batch, either merge it now, close it (superseded), or defer it.
-2. For anything **deferred** — HOLDs, multi-step sequences waiting on prep
-   work, blocked upgrades — open a GitHub issue so the context survives the
-   session. Do not leave it only in the scratch docs.
+Go tier by tier, safest first. For **each** PR take exactly one terminal action
+this session — never leave it in limbo:
 
-Use `gh issue create` for each held item. Include in the issue body:
+- **Merge** — when it's safe (or safe after a documented small step). Do any
+  required prep first (values edit, SHA pin), then merge. State what you did.
+- **Close** — superseded PRs that aren't useful intermediates; obsolete or
+  rejected upgrades. Say why in the close comment.
+- **Hold / postpone → file an issue** — anything that can't merge now: needs a
+  maintenance window, blocked on an upstream fix, awaiting prep work, or a
+  sequenced upgrade waiting on Step 1. File a GitHub issue (below) so the
+  reasoning and the unblock condition survive the session, then leave the PR
+  open (Renovate will keep it fresh) or close it if the issue fully supersedes
+  it — state which and why.
+
+Keep the user in the loop: announce each tier, and for any merge that mutates
+cluster state or any close, confirm intent before acting unless the user has
+said to proceed autonomously. Patches and clean minors can be merged in a batch
+with a summary rather than one-by-one prompts — but pace the batch per the
+rollout-safety rules below.
+
+### Merge pacing & rollout safety
+
+Do **not** fire every approved merge at once. Mass-simultaneous merges make
+Flux restart many pods in the same window, which storms RWO/RBD volume
+detach-attach. On a cluster with any flaky storage, a single slow or crashing
+Ceph mon during that storm is enough to blow Helm's 5-minute upgrade timeout —
+producing failed upgrades *and* failed rollbacks across the fleet. (Observed:
+batch-merging an `app-template` major alongside ~36 other PRs tipped over a
+known-recurring ceph-mon crash; data stayed safe but a dozen HelmReleases timed
+out.) Pace it:
+
+1. **Isolate fleet-wide / shared-dependency upgrades — merge each ALONE.** Any
+   PR that re-renders many apps at once is the single biggest blast radius:
+   - a shared library chart (e.g. bjw-s `app-template` / `common`)
+   - an `OCIRepository`/`HelmRepository` tag referenced by many HelmReleases
+   - CNI (Cilium), CSI / storage drivers, cert-manager, external-secrets
+   Merge it by itself, then wait for Flux to fully reconcile and pods to settle
+   (and storage to stay healthy) **before** merging anything else. Never stack
+   other merges on top of one of these.
+2. **Merge the rest in waves, not all at once.** Group safe patches/minors into
+   modest batches (~8–12). Spread stateful / persistent-volume apps across
+   waves so you don't restart many RBD-backed pods simultaneously.
+3. **Health-gate between waves.** Before the next wave confirm: all HelmReleases
+   Ready (`flux get hr -A`), no pods stuck `Terminating`/`ContainerCreating`/
+   `Pending`, and storage healthy (`ceph status` → `HEALTH_OK`, PGs
+   `active+clean`). If not, stop and let it recover (or remediate) first — a
+   stalled wave is a pacing problem to settle, **not** a reason to file a hold.
+
+### Filing a hold issue
+
+For every postponed/held PR (or coupled group), `gh issue create` with body:
 
 - PR number(s) being held and current → target versions
-- Risk rating and rationale (lift from the batch doc)
-- The specific blocker (upstream issue, required prep work, maintenance
-  window, missing CRDs, etc.) with links
-- Concrete unblock criteria — what condition lets us proceed
-- Any cross-reference repo signals (reverts, chore commits, incremental path)
+- **Risk rating and rationale** — the concrete reason it's held
+- **The blocker** — upstream issue, required prep, maintenance window, missing
+  CRDs, etc., with links
+- **Change criteria** — the explicit condition(s) that let us proceed, written
+  so a future run can check them mechanically (e.g. "upstream issue #1234
+  closed", "Rook 1.20.2 released", "next maintenance window")
+- Any cross-reference signals (reverts, chore commits, incremental path)
 - Sequenced upgrades: spell out Step 1 / Step 2 with the wait condition
 
-Label issues `upgrade-hold` (create the label if it doesn't exist) so they're
-easy to surface on the next triage run.
+Label issues `upgrade-hold` (create the label if it doesn't exist) so the next
+run's Phase 0 finds them. If a hold issue already exists for the component,
+update it instead of opening a duplicate.
 
-**Do not** commit the batch documents, create a `docs/upgrade-triage` branch,
-or open a PR with the scratch files. The repo is not the persistence layer —
-GitHub issues are.
+## Phase 6: Wrap up
+
+End with a short summary of what happened this session:
+- Merged (count + notable ones)
+- Closed (with reason)
+- Held (PR → issue number → change criteria, one line each)
+
+That summary plus the GitHub state is the entire record — no files to clean up.
 
 ## Notes
 
-- When multiple components are tightly coupled (e.g., Talos + kubelet, Rook
-  operator + cluster), group them in the same batch entry and document the
-  sequencing. If deferred, file **one** issue covering the whole group.
+- When components are tightly coupled (Talos + kubelet, Rook operator +
+  cluster), handle them together and, if held, file **one** issue for the group.
 - If the reference repo uses a different tool for the same purpose (e.g.,
-  grafana-operator vs grafana chart), note "no comparison available" rather
-  than forcing a comparison.
-- On re-runs: before writing fresh batch docs, check existing `upgrade-hold`
-  issues (`gh issue list --label upgrade-hold`) so you can cross-reference,
-  update, or close them as conditions change. The scratch docs are
-  point-in-time — the issues are the durable record.
+  grafana-operator vs grafana chart), note "no comparison available" rather than
+  forcing a comparison.
+- The repo is never the persistence layer for triage state — merged/closed PRs
+  and `upgrade-hold` issues are. Do not create triage branches, docs, or
+  scratch files.

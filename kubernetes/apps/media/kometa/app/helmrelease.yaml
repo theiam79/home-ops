@@ -22,13 +22,13 @@ spec:
           copy-config:
             image:
               repository: ghcr.io/home-operations/busybox
-              tag: 1.37.0
+              tag: 1.38.0
             command: ["sh", "-c", "cp /configmap/config.yml /config/config.yml"]
         containers:
           app:
             image:
               repository: kometateam/kometa
-              tag: v2.3.1
+              tag: v2.4.4
             env:
               TZ: America/Chicago
               KOMETA_RUN: "true"
