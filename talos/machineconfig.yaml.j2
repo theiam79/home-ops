@@ -47,6 +47,10 @@ machine:
     disableManifestsDirectory: true
     extraConfig:
       serializeImagePulls: false
+      # GC unused images at 60% disk instead of the 85% default — ceph mons
+      # warn at 70% (MON_DISK_LOW), so default GC never runs before the alert
+      imageGCHighThresholdPercent: 60
+      imageGCLowThresholdPercent: 50
     image: ghcr.io/siderolabs/kubelet:{{ ENV.KUBERNETES_VERSION }}
     nodeIP:
       validSubnets:
