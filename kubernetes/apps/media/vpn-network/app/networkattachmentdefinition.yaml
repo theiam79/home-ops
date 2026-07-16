@@ -1,0 +1,26 @@
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: vpn-vlan70
+spec:
+  config: |-
+    {
+      "cniVersion": "1.0.0",
+      "name": "vpn-vlan70",
+      "plugins": [
+        {
+          "type": "ipvlan",
+          "master": "mgmt0.70",
+          "mode": "l2",
+          "capabilities": { "ips": true },
+          "ipam": {
+            "type": "static",
+            "routes": [
+              { "dst": "0.0.0.0/0", "gw": "192.168.70.1" }
+            ]
+          }
+        },
+        { "type": "sbr" }
+      ]
+    }

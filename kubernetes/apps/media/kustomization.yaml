@@ -12,6 +12,7 @@ resources:
   - ./plex/ks.yaml
   - ./prowlarr/ks.yaml
   - ./qbittorrent/ks.yaml
+  - ./vpn-network/ks.yaml
   - ./radarr/ks.yaml
   - ./radarr4k/ks.yaml
   - ./recyclarr/ks.yaml
