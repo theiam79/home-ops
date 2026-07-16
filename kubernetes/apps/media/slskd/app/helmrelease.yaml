@@ -14,9 +14,41 @@ spec:
       slskd:
         annotations:
           reloader.stakater.com/auto: "true"
+        pod:
+          annotations:
+            k8s.v1.cni.cncf.io/networks: |
+              [{
+                "name": "vpn-vlan70",
+                "namespace": "media",
+                "ips": ["192.168.70.33/24"]
+              }]
+        initContainers:
+          # slskd can't bind outbound soulseek traffic to an address, so route
+          # all non-cluster egress via the VPN VLAN — see ../vpn-network/README.md
+          routing:
+            image:
+              repository: ghcr.io/nicolaka/netshoot
+              tag: v0.16@sha256:b09d9b21381f47a79b3cbcb30da25266dc17186ea00ae65e99fdc51396f48e70
+            command:
+              - /bin/bash
+              - -c
+              - |
+                set -e
+                GW=$(ip route show default dev eth0 | awk '{print $3}')
+                ip route add 10.42.0.0/15 via "$GW" dev eth0
+                ip route replace default via 192.168.70.1 dev net1
+                ip route show
+            securityContext:
+              runAsNonRoot: false
+              runAsUser: 0
+              capabilities:
+                add: ["NET_ADMIN"]
+            resources:
+              requests:
+                cpu: 5m
+                memory: 16Mi
         containers:
           app:
-            dependsOn: gluetun
             image:
               repository: ghcr.io/slskd/slskd
               tag: 0.25.1
@@ -24,6 +56,7 @@ spec:
               TZ: America/Chicago
               SLSKD_REMOTE_CONFIGURATION: "true"
               SLSKD_HTTP_PORT: &port 5030
+              SLSKD_SLSK_LISTEN_IP_ADDRESS: 192.168.70.33
             envFrom:
               - secretRef:
                   name: slskd-secret
@@ -42,53 +75,6 @@ spec:
                   timeoutSeconds: 5
                   failureThreshold: 5
               readiness: *probes
-            resources:
-              requests:
-                cpu: 10m
-                memory: 256Mi
-          gluetun:
-            image:
-              repository: ghcr.io/qdm12/gluetun
-              tag: v3.39.1
-            env:
-              TZ: America/Chicago
-              VPN_TYPE: wireguard
-              DOT: "off"
-              DNS_KEEP_NAMESERVER: "on"
-              HEALTH_SERVER_ADDRESS: "0.0.0.0:9999"
-              HEALTH_VPN_DURATION_INITIAL: "15s"
-              FIREWALL_INPUT_PORTS: "5030,9999"
-              FIREWALL_OUTBOUND_SUBNETS: "10.42.0.0/15,192.168.100.0/24"
-            envFrom:
-              - secretRef:
-                  name: slskd-secret
-            probes:
-              startup:
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /
-                    port: 9999
-                  initialDelaySeconds: 10
-                  periodSeconds: 10
-                  timeoutSeconds: 10
-                  failureThreshold: 30
-              liveness:
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /
-                    port: 9999
-                  periodSeconds: 30
-                  timeoutSeconds: 10
-                  failureThreshold: 5
-            securityContext:
-              runAsNonRoot: false
-              runAsUser: 0
-              capabilities:
-                add: ["NET_ADMIN", "MKNOD", "NET_RAW"]
             resources:
               requests:
                 cpu: 10m
@@ -143,12 +129,6 @@ spec:
           slskd:
             app:
               - path: /data/downloads
-      gluetun-data:
-        type: emptyDir
-        advancedMounts:
-          slskd:
-            gluetun:
-              - path: /tmp/gluetun
       tmp:
         type: emptyDir
         advancedMounts:
