@@ -16,6 +16,8 @@ spec:
   commonName: cert-manager-bitwarden-tls
   isCA: true
   secretName: bitwarden-ca-certs
+  # Long-lived pinned-key CA — see README.md (CA/leaf rotation skew)
+  duration: 87600h
   subject:
     organizations:
       - external-secrets.io
@@ -32,6 +34,7 @@ spec:
     algorithm: RSA
     encoding: PKCS8
     size: 2048
+    rotationPolicy: Never
   issuerRef:
     name: bitwarden-bootstrap-issuer
     kind: Issuer
