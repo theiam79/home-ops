@@ -41,6 +41,7 @@ spec:
         nodePort: 30565
         annotations:
           external-dns.alpha.kubernetes.io/hostname: mc.${SECRET_DOMAIN}, *.mc.${SECRET_DOMAIN}
+          lbipam.cilium.io/ips: 192.168.100.36
     minecraftRouter:
       debug:
         enabled: true

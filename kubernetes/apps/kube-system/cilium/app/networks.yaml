@@ -5,8 +5,14 @@ metadata:
   name: pool
 spec:
   allowFirstLastIPs: "No"
+  # Exclude node IPs (.20-.30) and the control-plane VIP (.5): a full-/24 pool
+  # let LB-IPAM assign a node's own IP to a Service, and the L2 announcer then
+  # ARP-hijacked that node (2026-07-16 incident: mc-router got dvergar-00's .20).
   blocks:
-    - cidr: "192.168.100.0/24"
+    - start: "192.168.100.10"
+      stop: "192.168.100.19"
+    - start: "192.168.100.32"
+      stop: "192.168.100.63"
 ---
 apiVersion: cilium.io/v2alpha1
 kind: CiliumL2AnnouncementPolicy
