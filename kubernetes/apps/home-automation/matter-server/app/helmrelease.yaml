@@ -33,23 +33,18 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/home-assistant-libs/python-matter-server
-              tag: 8.1.0@sha256:170aa093ce91c76cde4cc390918307590f0f5558fcec93f913af3cb019e6562a
-            args:
-              - --storage-path
-              - /data
-              - --paa-root-cert-dir
-              - /data/credentials
-              - --primary-interface
-              - net1
+              repository: ghcr.io/matter-js/matterjs-server
+              tag: 1.2.7@sha256:3f2b19c26fa21f9a855fd1e31cc8e1b174e8fcece881ab4ac7f56b5d828446a6
             env:
               TZ: America/Chicago
+              PRIMARY_INTERFACE: net1
             probes:
               liveness: &probes
                 enabled: true
                 custom: true
                 spec:
-                  tcpSocket:
+                  httpGet:
+                    path: /health
                     port: &port 5580
                   initialDelaySeconds: 0
                   periodSeconds: 10

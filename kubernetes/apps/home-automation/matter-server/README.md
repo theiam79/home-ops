@@ -1,10 +1,13 @@
 # matter-server
 
-[python-matter-server](https://github.com/home-assistant-libs/python-matter-server) —
-the Matter controller for Home Assistant. HA runs as Core in a container (no
-Supervisor), so the "official Matter Server add-on" path doesn't exist here;
-this deployment is its replacement. HA connects via the Matter integration
-with the add-on checkbox **unchecked** and the URL
+[matterjs-server](https://github.com/matter-js/matterjs-server) — the Open
+Home Foundation Matter controller for Home Assistant, successor to
+[python-matter-server](https://github.com/home-assistant-libs/python-matter-server)
+(8.1.2 was that project's final release; this is the matter.js rewrite with a
+compatible WebSocket API). HA runs as Core in a container (no Supervisor), so
+the "official Matter Server add-on" path doesn't exist here; this deployment
+is its replacement. HA connects via the Matter integration with the add-on
+checkbox **unchecked** and the URL
 `ws://matter-server.home-automation.svc.cluster.local:5580/ws`.
 
 The Thread radio side is the SMLIGHT SM Hub Nano (`smhub.internal`) running
@@ -27,7 +30,8 @@ NetworkAttachmentDefinition (ipvlan L2 on `mgmt0.30`, owned by the
 home-assistant app — hence the `dependsOn` in `ks.yaml`) with the static IP
 `10.1.30.6/24`, right next to HA's `10.1.30.5`. Both sit outside the dnsmasq
 DHCP pool (.10–.254) because CNI static IPAM is not a DHCP client.
-`--primary-interface net1` points the SDK at the IoT-VLAN interface.
+`PRIMARY_INTERFACE=net1` points the SDK at the IoT-VLAN interface (the image
+is configured entirely through env vars; `STORAGE_PATH=/data` is its default).
 
 ## The sysctl initContainer
 
@@ -52,18 +56,19 @@ kubectl -n home-automation exec deploy/matter-server -- ip -6 route show dev net
 
 `/data` holds the **Matter fabric credentials** — losing it means
 re-commissioning every Matter device. It's a volsync-backed PVC (1Gi,
-ceph-block) so it rides the normal kopia backup schedule. PAA root
-certificates are fetched from the DCL into `/data/credentials` at startup.
+ceph-block) so it rides the normal kopia backup schedule. The image bakes in
+`USER 1000:1000`, matching the pod securityContext/fsGroup.
 
 ## No route / no auth
 
-The websocket API on 5580 is unauthenticated by design (the add-on relies on
-the Supervisor network for isolation). ClusterIP only — never expose it via
-HTTPRoute.
+The websocket API and dashboard on 5580 are unauthenticated by design (the
+add-on relies on the Supervisor network for isolation). ClusterIP only —
+never expose it via HTTPRoute. Reach the dashboard with a port-forward when
+needed.
 
-## Image tag note
+## Version note
 
-Upstream releases 8.1.1/8.1.2 exist as git tags only — **no container images
-were published** for them (verified against ghcr directly); 8.1.0 is the
-newest image, and `stable` points at it. Renovate will pick up the next
-published image.
+matterjs-server is beta (not yet CSA re-certified) but is the only maintained
+line — upstream declared python-matter-server end-of-life and its 8.1.1/8.1.2
+releases never even shipped container images. Drop-in WS-API replacement,
+supports Matter 1.4.2.
