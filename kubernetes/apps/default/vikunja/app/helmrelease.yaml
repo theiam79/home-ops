@@ -17,7 +17,7 @@ spec:
           app:
             image:
               repository: vikunja/vikunja
-              tag: 2.3.0
+              tag: 2.4.0
             env:
               TZ: America/Chicago
               VIKUNJA_CONFIG_PATH: /etc/vikunja
