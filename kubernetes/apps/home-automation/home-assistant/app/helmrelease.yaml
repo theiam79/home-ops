@@ -136,3 +136,9 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
+      # Rebuild the runtime venv per pod: persisted integration deps shadow the
+      # image's site-packages after core upgrades (home-operations/containers#1260)
+      venv:
+        type: emptyDir
+        globalMounts:
+          - path: /config/.venv
