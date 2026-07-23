@@ -3,7 +3,7 @@ machine:
   type: worker
   install:
     diskSelector:
-      serial: IB25ZD0256*  # hand-me-down Inland TN320 (replaced failing 850 EVO, issue #424)
+      model: INTEL*  # Intel DC S3510 480GB (PLP, ex-HA box; replaced failing 850 EVO, issue #424)
     # elli carries an RTX 3080 — it needs a different factory image than the rest
     # of the cluster (base schematic + the two NVIDIA extensions). Build the
     # schematic at https://factory.talos.dev with the FOUR extensions documented
