@@ -1,27 +1,44 @@
 ---
 name: upgrade-triage
-description: Triage open Renovate/dependency PRs by risk, cross-reference against a reference repo, and work through them in-session — merging, closing, or filing hold issues
-argument-hint: "[reference-repo]"
+description: Triage open Renovate/dependency PRs by risk, cross-reference against a reference repo, then either work through them in-session (merge/close/hold) or, with --report, publish a read-only risk dashboard for review
+argument-hint: "[--report] [reference-repo|none]"
 ---
 
 # Upgrade Triage
 
-Assess all open dependency-update PRs, research upgrade risks, optionally
-cross-reference against a reference repository's merge history, then **work
-through every PR in this session** — merging the safe ones, closing the
-superseded ones, and filing a GitHub issue for anything postponed or held.
+Assess all open dependency-update PRs, research upgrade risks, cross-reference
+against a reference repository's merge history, then finish in one of two modes:
+
+- **Interactive mode** (default): **work through every PR in this session** —
+  merging the safe ones, closing the superseded ones, and filing a GitHub issue
+  for anything postponed or held.
+- **Report mode** (`--report`): stop after the assessment and **publish it as a
+  dashboard** for human review. Strictly read-only against GitHub.
 
 There are **no batch documents and no scratch files**. The risk analysis lives
-in the conversation; the durable record is the set of merged PRs, closed PRs,
-and `upgrade-hold` GitHub issues this run produces. Nothing is left dangling in
-a tmp directory or committed to the repo.
+in the conversation; the durable record is GitHub state (merged/closed PRs and
+`upgrade-hold` issues) in interactive mode, or the published dashboard artifact
+in report mode. Nothing is left dangling in a tmp directory or committed to the
+repo.
 
 ## Arguments
 
+- **`--report`** (optional flag): run in report mode.
 - **reference-repo** (optional): A GitHub `owner/repo` to cross-reference
-  against (e.g., `onedr0p/home-ops`). When provided, search that repo's merged
-  and open PRs for the same components to identify real-world issues, reverts,
-  and supporting chore commits. If omitted, skip the cross-reference phase.
+  against. **Defaults to `onedr0p/home-ops`.** Pass `none` to skip the
+  cross-reference phase. When provided, search that repo's merged and open PRs
+  for the same components to identify real-world issues, reverts, and
+  supporting chore commits.
+
+## Report mode ground rules
+
+Report mode performs **no writes to GitHub**: no merging, no closing, no
+comments, no labels, no issue creation or edits. Allowed actions are `gh`
+reads, web research, and publishing the dashboard artifact. Every PR still
+receives exactly one terminal **recommendation** — the difference from
+interactive mode is that recommendations are published for review, not
+executed. Phases 0–4 run with the report-mode notes inline below; Phases 5–6
+are replaced by Phase 5R.
 
 ## Phase 0: Check existing holds
 
@@ -35,7 +52,14 @@ gh issue list --label upgrade-hold --state open \
 
 For each existing hold, check whether its unblock criteria are now met (the
 upstream fix shipped, the maintenance window arrived, the blocking PR merged).
-If so, fold it back into this run's worklist and close the issue when done.
+
+- **Interactive mode:** if criteria are met, fold the hold back into this run's
+  worklist and close the issue when done.
+- **Report mode:** do **not** close or edit any issue. Record a status for each
+  hold instead — `ready` (criteria appear met; cite the evidence, e.g. the
+  released version or closed upstream issue) or `blocked` (name which
+  criterion still fails). Ready holds are surfaced prominently on the
+  dashboard so the reviewer sees what can be actioned.
 
 ## Phase 1: Inventory
 
@@ -52,6 +76,8 @@ If so, fold it back into this run's worklist and close the issue when done.
      (marks the lower one as **superseded**)
 3. Group superseded PRs. For each pair, decide whether the superseded PR is a
    useful **intermediate step** (see criteria below) or should just be closed.
+   In report mode, nothing is closed here — a non-intermediate superseded PR
+   gets the recommendation `close-superseded`.
 
 ### Intermediate step criteria
 
@@ -61,7 +87,8 @@ A superseded PR is a useful intermediate step if ALL of:
   (e.g., CRD schema changes, API version migrations, deprecation removals)
 - Merging incrementally reduces the blast radius of each individual step
 
-If it qualifies, keep it and sequence it before the target PR. If not, close it.
+If it qualifies, keep it and sequence it before the target PR. If not, close it
+(interactive) or recommend closing it (report).
 
 ## Phase 2: Risk Research
 
@@ -84,7 +111,7 @@ Focus research effort proportionally to risk:
 - **Infrastructure** (CNI, storage, OS): Most thorough — include issue trackers,
   community forums, and check for open regressions
 
-## Phase 3: Cross-Reference (if reference repo provided)
+## Phase 3: Cross-Reference (unless reference repo is `none`)
 
 Search the reference repo for matching component upgrades:
 
@@ -109,8 +136,9 @@ Key signals:
 ## Phase 4: Risk-order the worklist
 
 Sort the PRs into risk tiers — this is an **in-memory ordering** to drive the
-work-through, not a set of documents. Work the tiers from safest to riskiest so
-the easy wins land first and the risky ones get full attention.
+work-through (interactive) or the dashboard sections (report), not a set of
+documents. Work the tiers from safest to riskiest so the easy wins land first
+and the risky ones get full attention.
 
 For each PR, hold in mind:
 - **Risk rating** (Negligible / Low / Low-Medium / Medium / Medium-High / High / Critical)
@@ -132,7 +160,7 @@ Tiers, safest first:
    (Talos), k8s version bumps, anything with open regressions. Maintenance
    window only.
 
-## Phase 5: Work through every PR in session
+## Phase 5 (interactive mode): Work through every PR in session
 
 Go tier by tier, safest first. For **each** PR take exactly one terminal action
 this session — never leave it in limbo:
@@ -151,36 +179,7 @@ this session — never leave it in limbo:
 Keep the user in the loop: announce each tier, and for any merge that mutates
 cluster state or any close, confirm intent before acting unless the user has
 said to proceed autonomously. Patches and clean minors can be merged in a batch
-with a summary rather than one-by-one prompts — but pace the batch per the
-rollout-safety rules below.
-
-### Merge pacing & rollout safety
-
-Do **not** fire every approved merge at once. Mass-simultaneous merges make
-Flux restart many pods in the same window, which storms RWO/RBD volume
-detach-attach. On a cluster with any flaky storage, a single slow or crashing
-Ceph mon during that storm is enough to blow Helm's 5-minute upgrade timeout —
-producing failed upgrades *and* failed rollbacks across the fleet. (Observed:
-batch-merging an `app-template` major alongside ~36 other PRs tipped over a
-known-recurring ceph-mon crash; data stayed safe but a dozen HelmReleases timed
-out.) Pace it:
-
-1. **Isolate fleet-wide / shared-dependency upgrades — merge each ALONE.** Any
-   PR that re-renders many apps at once is the single biggest blast radius:
-   - a shared library chart (e.g. bjw-s `app-template` / `common`)
-   - an `OCIRepository`/`HelmRepository` tag referenced by many HelmReleases
-   - CNI (Cilium), CSI / storage drivers, cert-manager, external-secrets
-   Merge it by itself, then wait for Flux to fully reconcile and pods to settle
-   (and storage to stay healthy) **before** merging anything else. Never stack
-   other merges on top of one of these.
-2. **Merge the rest in waves, not all at once.** Group safe patches/minors into
-   modest batches (~8–12). Spread stateful / persistent-volume apps across
-   waves so you don't restart many RBD-backed pods simultaneously.
-3. **Health-gate between waves.** Before the next wave confirm: all HelmReleases
-   Ready (`flux get hr -A`), no pods stuck `Terminating`/`ContainerCreating`/
-   `Pending`, and storage healthy (`ceph status` → `HEALTH_OK`, PGs
-   `active+clean`). If not, stop and let it recover (or remediate) first — a
-   stalled wave is a pacing problem to settle, **not** a reason to file a hold.
+with a summary rather than one-by-one prompts.
 
 ### Filing a hold issue
 
@@ -200,7 +199,7 @@ Label issues `upgrade-hold` (create the label if it doesn't exist) so the next
 run's Phase 0 finds them. If a hold issue already exists for the component,
 update it instead of opening a duplicate.
 
-## Phase 6: Wrap up
+## Phase 6 (interactive mode): Wrap up
 
 End with a short summary of what happened this session:
 - Merged (count + notable ones)
@@ -209,13 +208,90 @@ End with a short summary of what happened this session:
 
 That summary plus the GitHub state is the entire record — no files to clean up.
 
+## Phase 5R (report mode): Publish the dashboard
+
+1. **Assemble the report** as a single JSON object matching the schema below.
+   This is the rendering contract, not a deliverable — build it in memory (or
+   a job tmp dir), never in the repo.
+2. **Render the dashboard** by filling the marked data regions of
+   `dashboard-template.html` in this skill's directory. Replace **only** the
+   content between `data:*` marker comment pairs; the tokens, CSS, structure,
+   `<title>`, and chip/tier mappings (documented in the template's contract
+   comment) stay identical run-to-run so the dashboard reads the same every
+   week.
+3. **Publish as an artifact.** First call `Artifact` with `action: "list"` and
+   look for an existing artifact titled **"Upgrade Triage — home-ops"**; if
+   found, republish with `url` set to it so the URL stays stable. Otherwise
+   publish new with favicon `🧭` and a one-line description. Keep title and
+   favicon identical across runs.
+4. **Fallback:** if artifact publishing is unavailable or fails, emit the full
+   report as markdown tables in the final message instead — never end a report
+   run without its output somewhere reviewable.
+5. **Summarize:** end with PR counts per tier, the list of `ready` holds, the
+   top three recommended actions, and the dashboard link.
+
+### Report schema
+
+```json
+{
+  "generated": "<ISO 8601 UTC>",
+  "repo": "<owner/repo>",
+  "reference_repo": "<owner/repo, or null if skipped>",
+  "prs": [
+    {
+      "number": 519,
+      "component": "musicseerr",
+      "current": "1.8.2",
+      "target": "2.0.0",
+      "bump": "major",
+      "tier": 4,
+      "risk": "Medium-High",
+      "recommendation": "hold",
+      "rationale": "One or two sentences: the concrete breaking change or concern.",
+      "reference_signal": "What the reference repo did, or null.",
+      "prep_steps": ["exact command or config edit, if any"],
+      "superseded_by": null,
+      "coupled_with": [],
+      "hold_issue": 519
+    }
+  ],
+  "holds": [
+    {
+      "issue": 368,
+      "title": "Hold: talos 1.13.6",
+      "components": ["talos"],
+      "prs": [368],
+      "blocker": "Why it is held, one line.",
+      "criteria": "The mechanical unblock condition from the issue body.",
+      "status": "ready",
+      "evidence": "Why it is ready (or which criterion still fails)."
+    }
+  ]
+}
+```
+
+Field constraints:
+- `bump`: `patch` | `minor` | `major` | `digest` | `other`
+- `tier`: 1–5 per Phase 4
+- `risk`: Negligible | Low | Low-Medium | Medium | Medium-High | High | Critical
+- `recommendation`: `merge` | `merge-after-prep` | `close-superseded` | `hold`
+  (file/keep an upgrade-hold issue) | `needs-window` (safe but maintenance
+  window only)
+- Every open dependency PR appears exactly once in `prs`. `holds` includes
+  every open `upgrade-hold` issue, whether or not a PR is currently open for
+  it.
+
 ## Notes
 
 - When components are tightly coupled (Talos + kubelet, Rook operator +
-  cluster), handle them together and, if held, file **one** issue for the group.
+  cluster), handle them together and, if held, file **one** issue for the group
+  (interactive) or mark them `coupled_with` each other (report).
 - If the reference repo uses a different tool for the same purpose (e.g.,
   grafana-operator vs grafana chart), note "no comparison available" rather than
   forcing a comparison.
 - The repo is never the persistence layer for triage state — merged/closed PRs
   and `upgrade-hold` issues are. Do not create triage branches, docs, or
   scratch files.
+- The weekly scheduled routine invokes `/upgrade-triage --report`. An
+  interactive run may use the latest dashboard as its starting worklist, but
+  must re-verify live PR/issue state before acting on it.
