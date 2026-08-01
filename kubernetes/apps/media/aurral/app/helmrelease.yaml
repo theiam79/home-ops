@@ -30,6 +30,12 @@ spec:
               requests:
                 cpu: 10m
                 memory: 512Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
+                # entrypoint runs as root, chowns /config, then gosu's to the app user
+                add: ["CHOWN", "DAC_OVERRIDE", "FOWNER", "SETGID", "SETUID"]
     defaultPodOptions:
       securityContext:
         fsGroup: 1000
@@ -67,6 +73,7 @@ spec:
         path: /mnt/user/media
         globalMounts:
           - path: /data/media
+            readOnly: true
       downloads:
         type: nfs
         server: snotra.cluster

@@ -1,0 +1,22 @@
+---
+# Aurral trusts Remote-User/Remote-Groups on any request it receives, so the
+# ext-authz SecurityPolicy at the gateway is only a real control if the pod is
+# unreachable by everything else. See ../README.md.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: aurral
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: aurral
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+      ports:
+        - protocol: TCP
+          port: 3001
