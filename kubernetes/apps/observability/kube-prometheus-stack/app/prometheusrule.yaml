@@ -1,0 +1,41 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: node-thermals
+spec:
+  groups:
+    - name: node-thermals.rules
+      rules:
+        - alert: NodeNVMeTempWarning
+          expr: |
+            (node_hwmon_temp_celsius{chip=~"nvme.*", sensor="temp1"}
+              * on (instance) group_left (nodename) node_uname_info) >= 72
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              NVMe composite temp on {{ $labels.nodename }} at {{ $value }}°C
+              (>=72°C warn threshold for 10m)
+            description: >-
+              The system NVMe on {{ $labels.nodename }} has been at or above the
+              72°C smart warn threshold for 10 minutes. Sustained operation here
+              risks reaching the 76°C critical threshold, where the drive
+              rejects I/O and the node stalls.
+        - alert: NodeNVMeTempCritical
+          expr: |
+            (node_hwmon_temp_celsius{chip=~"nvme.*", sensor="temp1"}
+              * on (instance) group_left (nodename) node_uname_info) >= 75
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              NVMe composite temp on {{ $labels.nodename }} at {{ $value }}°C —
+              1°C from the 76°C critical threshold
+            description: >-
+              The system NVMe on {{ $labels.nodename }} is within 1°C of its
+              76°C critical threshold. Above critical the drive rejects I/O
+              (observed on this fleet as installer failures and node stalls).
+              Shed heat now: point a fan at the node or drain and shut it down.
