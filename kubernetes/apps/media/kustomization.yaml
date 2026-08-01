@@ -7,6 +7,7 @@ components:
 resources:
   - ./mariadb/ks.yaml
   - ./audiobookshelf/ks.yaml
+  - ./aurral/ks.yaml
   - ./grimmory/ks.yaml
   - ./booksync/ks.yaml
   - ./plex/ks.yaml
