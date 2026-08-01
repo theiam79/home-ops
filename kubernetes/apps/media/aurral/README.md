@@ -12,7 +12,21 @@ does ext-authz against Authelia's built-in `/api/authz/ext-authz` endpoint, and
 configured for proxy auth (`AUTH_PROXY_ENABLED`). Admin comes from the `admins`
 LDAP group via `Remote-Groups`, so no usernames are hardcoded.
 
-Three constraints follow from this, and breaking any one of them silently turns
+Two things about the Envoy side had to be discovered empirically, and both
+present as "SSO is just broken" rather than as an error anywhere obvious:
+
+- **`headersToExtAuth` is mandatory.** An HTTP ext-authz service receives only
+  `Host`, `Method`, `Path`, `Content-Length` and `Authorization` by default — no
+  `cookie`, so Authelia can never see a session and nobody can ever authenticate;
+  and no `x-forwarded-proto`, so it builds `http://` redirects.
+- **Use `pathOverride`, never `path`.** `path` appends the original request path,
+  so `/` becomes `/api/authz/ext-authz/` and Authelia answers with a
+  trailing-slash 301 built from the Host header. The cost of `pathOverride` is
+  that Authelia always sees the request as the site root, so a post-login
+  redirect returns to `/` rather than a deep link, and path-scoped access-control
+  rules would not work for this host (the rule covering it is domain-level).
+
+Three further constraints follow, and breaking any one of them silently turns
 external SSO into an open admin door:
 
 1. **The NetworkPolicy is a security control, not tidiness.** Aurral trusts

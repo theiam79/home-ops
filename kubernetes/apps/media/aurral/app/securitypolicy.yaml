@@ -26,7 +26,13 @@ spec:
         - name: authelia
           namespace: auth
           port: 9091
-      path: /api/authz/ext-authz
+      # pathOverride, not path: `path` APPENDS the original request path, so a
+      # visit to "/" becomes "/api/authz/ext-authz/" and Authelia answers with a
+      # trailing-slash 301 (built from the Host header and plain http) instead of
+      # a portal redirect. Verified against Authelia directly:
+      #   /api/authz/ext-authz/ -> 301 http://aurral.<domain>/api/authz/ext-authz
+      #   /api/authz/ext-authz  -> 302 https://auth.<domain>/?rd=...  (correct)
+      pathOverride: /api/authz/ext-authz
       headersToBackend:
         - Remote-User
         - Remote-Groups
