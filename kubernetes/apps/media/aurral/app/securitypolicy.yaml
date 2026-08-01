@@ -9,6 +9,18 @@ spec:
       kind: HTTPRoute
       name: aurral
   extAuth:
+    # An HTTP ext-authz service otherwise receives only Host, Method, Path,
+    # Content-Length and Authorization — no cookie (Authelia could never see a
+    # session) and no x-forwarded-proto (it built http:// redirect URLs).
+    headersToExtAuth:
+      - accept
+      - cookie
+      - proxy-authorization
+      - x-forwarded-for
+      - x-forwarded-host
+      - x-forwarded-method
+      - x-forwarded-proto
+      - x-forwarded-uri
     http:
       backendRefs:
         - name: authelia
