@@ -12,7 +12,26 @@ does ext-authz against Authelia's built-in `/api/authz/ext-authz` endpoint, and
 configured for proxy auth (`AUTH_PROXY_ENABLED`). Admin comes from the `admins`
 LDAP group via `Remote-Groups`, so no usernames are hardcoded.
 
-Three constraints follow from this, and breaking any one of them silently turns
+Two Envoy-side details had to be found the hard way, and both present as "SSO is
+just broken" rather than as an error anywhere obvious:
+
+- **`path` must keep its trailing slash** (`/api/authz/ext-authz/`). Envoy
+  Gateway concatenates the original request path onto it, and Authelia's
+  ExtAuthz handler recovers the original path from whatever follows the
+  endpoint — it ignores `X-Forwarded-Uri` entirely. With the slash, `/` arrives
+  as `…/ext-authz//` and deep links as `…/ext-authz//settings/general`, both of
+  which resolve correctly. Drop the slash and a deep link arrives without its
+  leading slash (400) while `/` 301s to a bogus `http://` URL. `pathOverride`
+  also "works" for `/` but throws away the original path, so every post-login
+  redirect lands on the site root — avoid it.
+- **`headersToExtAuth` is mandatory.** An HTTP ext-authz service otherwise
+  receives only `Host`, `Method`, `Path`, `Content-Length` and `Authorization` —
+  no `cookie`, so Authelia can never see a session and *nobody* can authenticate,
+  and no `x-forwarded-proto`, so it builds `http://` redirects. Note
+  `x-forwarded-uri`/`-host`/`-method` are pointless here: Envoy doesn't generate
+  them and the ExtAuthz handler ignores them.
+
+Three further constraints follow, and breaking any one of them silently turns
 external SSO into an open admin door:
 
 1. **The NetworkPolicy is a security control, not tidiness.** Aurral trusts

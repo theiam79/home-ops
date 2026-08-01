@@ -17,16 +17,18 @@ spec:
       - cookie
       - proxy-authorization
       - x-forwarded-for
-      - x-forwarded-host
-      - x-forwarded-method
       - x-forwarded-proto
-      - x-forwarded-uri
     http:
       backendRefs:
         - name: authelia
           namespace: auth
           port: 9091
-      path: /api/authz/ext-authz
+      # Trailing slash is required. Envoy Gateway concatenates the original
+      # request path onto this one, and Authelia's ExtAuthz handler recovers the
+      # original path from whatever follows the endpoint — so "/" must survive
+      # as a leading slash. Without it, Authelia sees "settings/general" (no
+      # leading slash) and 400s, and a bare "/" 301s to a bogus http:// URL.
+      path: /api/authz/ext-authz/
       headersToBackend:
         - Remote-User
         - Remote-Groups
