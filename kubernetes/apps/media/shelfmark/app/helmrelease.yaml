@@ -16,10 +16,14 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/theiam79/shelfmark
-              tag: audiobookshelf-scan@sha256:f7e5115fdb1c1e284a87a2e85f0517b6ae78380f4102839e9a9a74df08dd5dc2
+              repository: ghcr.io/calibrain/shelfmark
+              tag: v1.3.5
             env:
               TZ: America/Chicago
+              CUSTOM_SCRIPT: /scripts/abs-scan.py
+              AUDIOBOOKSHELF_URL: "http://audiobookshelf"
+              AUDIOBOOKSHELF_LIBRARY_ID: f02cdd94-9d7b-4767-a054-ded8a648df58
+              AUDIOBOOKSHELF_SCAN_PREFIX: /data/media/audiobooks
             envFrom:
               - secretRef:
                   name: shelfmark-secret
@@ -69,11 +73,51 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
+    configMaps:
+      scripts:
+        data:
+          # Post-download hook (Settings -> Advanced -> Custom Script): triggers an
+          # Audiobookshelf library scan after audiobook imports, since ABS can't
+          # inotify-watch files written by other NFS clients. Replaces the
+          # theiam79/shelfmark fork's built-in scan trigger. Fails open: a scan
+          # failure must not mark the download task as errored.
+          abs-scan.py: |
+            #!/usr/bin/env python3
+            import os
+            import sys
+            import urllib.request
+
+            target = sys.argv[1] if len(sys.argv) > 1 else ""
+            prefix = os.environ.get("AUDIOBOOKSHELF_SCAN_PREFIX", "")
+            if prefix and not target.startswith(prefix):
+                sys.exit(0)
+
+            url = "{}/api/libraries/{}/scan".format(
+                os.environ["AUDIOBOOKSHELF_URL"].rstrip("/"),
+                os.environ["AUDIOBOOKSHELF_LIBRARY_ID"],
+            )
+            req = urllib.request.Request(
+                url,
+                method="POST",
+                headers={"Authorization": "Bearer " + os.environ["AUDIOBOOKSHELF_TOKEN"]},
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=30) as resp:
+                    print("audiobookshelf scan triggered: HTTP %d" % resp.status, file=sys.stderr)
+            except Exception as exc:
+                print("audiobookshelf scan failed: %s" % exc, file=sys.stderr)
     persistence:
       config:
         existingClaim: shelfmark
         globalMounts:
           - path: /config
+      scripts:
+        type: configMap
+        identifier: scripts
+        defaultMode: 0o755
+        globalMounts:
+          - path: /scripts
+            readOnly: true
       media:
         type: nfs
         server: snotra.cluster
@@ -92,8 +136,4 @@ spec:
         path: /mnt/disks/85AAZU6GS/cluster/imports/books
         globalMounts:
           - path: /bookdrop
-      gunicorn:
-        type: emptyDir
-        globalMounts:
-          - path: /app/.gunicorn
 
