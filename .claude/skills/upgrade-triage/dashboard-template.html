@@ -1,0 +1,315 @@
+<!--
+  TEMPLATE CONTRACT — upgrade-triage report dashboard
+  ===================================================
+  This file is the fixed shell for the weekly report. A report run may ONLY
+  replace content between paired markers:
+
+    data:meta   — the generated/repo/cross-ref line in the header
+    data:tiles  — the five stat tiles (keep the five-tile order and labels)
+    data:tiers  — one <section class="tier tier-N"> per non-empty tier,
+                  ascending; omit empty tiers entirely
+    data:holds  — the hold rows; if no holds exist, replace the table with
+                  <p class="empty">No open upgrade-hold issues.</p>
+
+  Everything else — tokens, CSS, structure, <title>, this contract — stays
+  byte-identical run-to-run. Publish with title "Upgrade Triage — home-ops"
+  and favicon 🧭, updating the existing artifact URL when one exists.
+
+  Chip mappings (fixed):
+    bump:  patch/digest/other → chip-neutral · minor → chip-accent · major → chip-serious
+    risk:  Negligible, Low → chip-good · Low-Medium, Medium → chip-warn
+           Medium-High, High → chip-serious · Critical → chip-crit
+    rec:   merge → chip-good · merge-after-prep → chip-accent
+           close-superseded → chip-neutral · hold → chip-warn
+           needs-window → chip-serious
+    tier accents (dot + count): 1 good · 2 accent · 3 warn · 4 serious · 5 crit
+    holds: status ready → row class "ready" + chip-warn "READY"
+           status blocked → chip-neutral "Blocked"
+  Tiles: give the "Holds ready" tile class "tile-alert" when its value > 0.
+  Chips always carry their text label — state is never color alone.
+-->
+<title>Upgrade Triage — home-ops</title>
+<style>
+  :root {
+    --bg: #f2f4f6;
+    --surface: #ffffff;
+    --ink: #1b2733;
+    --ink-2: #4e5d6c;
+    --muted: #7d8b99;
+    --line: #dfe5ea;
+    --accent: #38618f;
+    --accent-bg: #e4ecf5;
+    --good: #257a46;
+    --good-bg: #e2f1e8;
+    --warn: #8a6100;
+    --warn-bg: #f8eed2;
+    --serious: #a84f10;
+    --serious-bg: #f9e7d8;
+    --crit: #b42318;
+    --crit-bg: #f9e2e0;
+    --chip-neutral-bg: #eaeef2;
+    --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --font-data: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12161b;
+      --surface: #1a2027;
+      --ink: #e8edf2;
+      --ink-2: #a7b4c0;
+      --muted: #6e7e8d;
+      --line: #2a333d;
+      --accent: #7fa6d9;
+      --accent-bg: #223041;
+      --good: #57c078;
+      --good-bg: #1c3226;
+      --warn: #dcae45;
+      --warn-bg: #372c14;
+      --serious: #e8834a;
+      --serious-bg: #3a2617;
+      --crit: #f07168;
+      --crit-bg: #3d1d1b;
+      --chip-neutral-bg: #262e37;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f2f4f6; --surface: #ffffff; --ink: #1b2733; --ink-2: #4e5d6c;
+    --muted: #7d8b99; --line: #dfe5ea; --accent: #38618f; --accent-bg: #e4ecf5;
+    --good: #257a46; --good-bg: #e2f1e8; --warn: #8a6100; --warn-bg: #f8eed2;
+    --serious: #a84f10; --serious-bg: #f9e7d8; --crit: #b42318; --crit-bg: #f9e2e0;
+    --chip-neutral-bg: #eaeef2;
+  }
+  :root[data-theme="dark"] {
+    --bg: #12161b; --surface: #1a2027; --ink: #e8edf2; --ink-2: #a7b4c0;
+    --muted: #6e7e8d; --line: #2a333d; --accent: #7fa6d9; --accent-bg: #223041;
+    --good: #57c078; --good-bg: #1c3226; --warn: #dcae45; --warn-bg: #372c14;
+    --serious: #e8834a; --serious-bg: #3a2617; --crit: #f07168; --crit-bg: #3d1d1b;
+    --chip-neutral-bg: #262e37;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+    padding: 32px 20px 56px;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+
+  header .eyebrow {
+    font-family: var(--font-data);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 6px;
+  }
+  header h1 { font-size: 26px; font-weight: 650; margin: 0 0 6px; text-wrap: balance; }
+  header .meta { color: var(--muted); font-size: 13px; margin: 0; }
+  header .meta code { font-family: var(--font-data); font-size: 12px; color: var(--ink-2); }
+
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+  .tile {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .tile .label {
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 4px;
+  }
+  .tile .value {
+    font-family: var(--font-data); font-variant-numeric: tabular-nums;
+    font-size: 28px; font-weight: 600; line-height: 1.1; margin: 0;
+  }
+  .tile .sub { font-size: 12px; color: var(--ink-2); margin: 4px 0 0; }
+  .tile-alert { border-color: var(--warn); background: var(--warn-bg); }
+  .tile-alert .value, .tile-alert .label { color: var(--warn); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .card-head {
+    display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    padding: 14px 18px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .card-head h2 { font-size: 15px; font-weight: 650; margin: 0; }
+  .card-head .count {
+    font-family: var(--font-data); font-variant-numeric: tabular-nums;
+    font-size: 12px; color: var(--ink-2);
+  }
+  .card-head .hint { font-size: 12px; color: var(--muted); margin-left: auto; }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 2px; }
+  .tier-1 .dot { background: var(--good); }
+  .tier-2 .dot { background: var(--accent); }
+  .tier-3 .dot { background: var(--warn); }
+  .tier-4 .dot { background: var(--serious); }
+  .tier-5 .dot { background: var(--crit); }
+
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; min-width: 720px; }
+  th {
+    text-align: left; font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase;
+    font-weight: 600; color: var(--muted);
+    padding: 9px 12px; border-bottom: 1px solid var(--line); white-space: nowrap;
+  }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 13px; }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: color-mix(in srgb, var(--line) 35%, transparent); }
+  td.num, td.ver {
+    font-family: var(--font-data); font-variant-numeric: tabular-nums;
+    font-size: 12.5px; white-space: nowrap;
+  }
+  td.comp { font-weight: 600; white-space: nowrap; }
+  td.why { color: var(--ink-2); min-width: 260px; }
+  td.why .ref { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover, a:focus-visible { text-decoration: underline; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+  .chip {
+    display: inline-block; font-family: var(--font-data); font-size: 11px;
+    padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+  }
+  .chip-neutral { background: var(--chip-neutral-bg); color: var(--ink-2); }
+  .chip-accent { background: var(--accent-bg); color: var(--accent); }
+  .chip-good { background: var(--good-bg); color: var(--good); }
+  .chip-warn { background: var(--warn-bg); color: var(--warn); }
+  .chip-serious { background: var(--serious-bg); color: var(--serious); }
+  .chip-crit { background: var(--crit-bg); color: var(--crit); }
+
+  .holds tr.ready td:first-child { box-shadow: inset 3px 0 0 var(--warn); }
+  .holds td.crit-cell { color: var(--ink-2); min-width: 220px; }
+  .empty { color: var(--muted); font-size: 13px; padding: 16px 18px; margin: 0; }
+
+  details.prep { margin-top: 4px; }
+  details.prep summary { cursor: pointer; font-size: 12px; color: var(--accent); }
+  details.prep li { font-family: var(--font-data); font-size: 12px; }
+
+  footer { color: var(--muted); font-size: 12px; }
+  footer .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 0 0 8px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">home-ops · weekly upgrade triage</p>
+    <h1>Upgrade Triage</h1>
+    <p class="meta">
+      <!-- data:meta:start -->
+      Generated <strong>2026-08-01 14:00 UTC</strong> ·
+      repo <code>theiam79/home-ops</code> ·
+      cross-ref <code>onedr0p/home-ops</code>
+      <!-- data:meta:end -->
+    </p>
+  </header>
+
+  <section class="tiles" aria-label="Summary">
+    <!-- data:tiles:start -->
+    <div class="tile">
+      <p class="label">Open PRs</p>
+      <p class="value">14</p>
+      <p class="sub">dependency updates</p>
+    </div>
+    <div class="tile">
+      <p class="label">Merge-ready</p>
+      <p class="value">8</p>
+      <p class="sub">tier 1 · immediate</p>
+    </div>
+    <div class="tile">
+      <p class="label">Needs prep</p>
+      <p class="value">3</p>
+      <p class="sub">tiers 2–4</p>
+    </div>
+    <div class="tile">
+      <p class="label">Window-only</p>
+      <p class="value">2</p>
+      <p class="sub">tier 5 · critical infra</p>
+    </div>
+    <div class="tile tile-alert">
+      <p class="label">Holds ready</p>
+      <p class="value">1</p>
+      <p class="sub">criteria appear met</p>
+    </div>
+    <!-- data:tiles:end -->
+  </section>
+
+  <!-- data:tiers:start -->
+  <section class="card tier tier-1">
+    <div class="card-head">
+      <h2><span class="dot"></span> Tier 1 · Immediate</h2>
+      <span class="count">8 PRs</span>
+      <span class="hint">patches and clean minors — merge directly</span>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>PR</th><th>Component</th><th>Version</th><th>Bump</th><th>Risk</th><th>Recommendation</th><th>Why</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="num"><a href="https://github.com/theiam79/home-ops/pull/446">#446</a></td>
+            <td class="comp">helmfile</td>
+            <td class="ver">1.5.5 → 1.6.0</td>
+            <td><span class="chip chip-accent">minor</span></td>
+            <td><span class="chip chip-good">Low</span></td>
+            <td><span class="chip chip-good">merge</span></td>
+            <td class="why">Routine minor; changelog is fixes only.
+              <span class="ref">ref: merged same bump 07-28, no chores</span>
+              <details class="prep"><summary>Prep steps</summary><ul><li>only when prep_steps is non-empty</li></ul></details>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <!-- data:tiers:end -->
+
+  <section class="card holds">
+    <div class="card-head">
+      <h2>Upgrade holds</h2>
+      <span class="count">3 open</span>
+      <span class="hint">from prior runs — READY rows can be actioned</span>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>Issue</th><th>Components</th><th>Blocker</th><th>Unblock criteria</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <!-- data:holds:start -->
+          <tr class="ready">
+            <td class="num"><a href="https://github.com/theiam79/home-ops/issues/368">#368</a></td>
+            <td class="comp">talos</td>
+            <td class="crit-cell">Awaiting maintenance window.</td>
+            <td class="crit-cell">Next maintenance window — evidence: v1.13.6 shipped, no open regressions.</td>
+            <td><span class="chip chip-warn">READY</span></td>
+          </tr>
+          <tr>
+            <td class="num"><a href="https://github.com/theiam79/home-ops/issues/367">#367</a></td>
+            <td class="comp">rook-ceph</td>
+            <td class="crit-cell">Upstream regression in 1.20.x.</td>
+            <td class="crit-cell">Upstream issue closed and fix released — still open.</td>
+            <td><span class="chip chip-neutral">Blocked</span></td>
+          </tr>
+          <!-- data:holds:end -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <p class="legend">
+      <span><strong>Tiers</strong> 1 immediate · 2 light prep · 3 moderate prep · 4 heavy prep · 5 critical infra (window only)</span>
+      <span><strong>Recommendations</strong> merge · merge-after-prep · close-superseded · hold · needs-window</span>
+    </p>
+    <p>Generated by <code>/upgrade-triage --report</code> · durable record lives in GitHub (PRs + upgrade-hold issues)</p>
+  </footer>
+</div>
