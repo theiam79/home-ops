@@ -116,6 +116,15 @@ identity_providers:
         - 'introspection'
         - 'userinfo'
       allowed_origins_from_client_redirect_uris: true
+    claims_policies:
+      # for clients that read claims from the ID token only and never call userinfo
+      id_token_claims:
+        id_token:
+          - email
+          - email_verified
+          - preferred_username
+          - name
+          - groups
     clients:
       - client_id: audiobookshelf
         client_name: audiobookshelf
@@ -158,6 +167,7 @@ identity_providers:
         client_secret: '{{ secret "/secrets/authelia/BOOKSYNC_CLIENT_SECRET" }}'
         public: false
         authorization_policy: two_factor
+        claims_policy: id_token_claims
         consent_mode: implicit
         scopes:
           - openid
