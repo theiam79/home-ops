@@ -22,6 +22,9 @@ spec:
               TZ: America/Chicago
               BASE_URL: "https://multi-scrobbler.${SECRET_DOMAIN}"
               PLEX_URL: "http://plex.media:32400"
+              # 0.16.x enforces explicit ids on ENV-defined components
+              PLEX_ID: plex
+              LZ_ID: listenbrainz
             envFrom:
               - secretRef:
                   name: multi-scrobbler-secret
