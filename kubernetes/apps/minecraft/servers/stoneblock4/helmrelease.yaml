@@ -1,0 +1,91 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP}-mc
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: minecraft
+  values:
+    image:
+      tag: java21
+    resources:
+      requests:
+        cpu: 1000m
+        memory: 8Gi
+    workloadAsStatefulSet: true
+    strategyType: RollingUpdate
+    serviceAnnotations:
+      mc-router.itzg.me/externalServerName: ${APP}.mc.${SECRET_DOMAIN}
+      reloader.stakater.com/auto: "true"
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: clusterrole
+              operator: In
+              values:
+              - highspeed
+    livenessProbe:
+      command:
+        - mc-health
+      initialDelaySeconds: 300
+    readinessProbe:
+      command:
+        - mc-health
+      initialDelaySeconds: 300
+    minecraftServer:
+      eula: "TRUE"
+      type: "FTBA"
+      ftbModpackId: "130"
+      ftbModpackVersionId: "100462"
+      forcegameMode: true
+      gameMode: survival
+      difficulty: normal
+      memory: "8g"
+      whitelist: ${WHITELIST}
+      ops: ${OPS}
+      modrinth:
+        projects:
+          - bluemap
+          - chunky
+      extraPorts:
+        - name: map
+          containerPort: 8100
+          protocol: TCP
+          service:
+            enabled: true
+            type: ClusterIP
+            port: 8100
+    extraEnv:
+      DEBUG: true
+      EXISTING_OPS_FILE: SKIP
+      EXISTING_WHITELIST_FILE: SKIP
+      MODRINTH_LOADER: neoforge
+    persistence:
+      dataDir:
+        enabled: true
+        existingClaim: ${APP}
+    extraVolumes:
+      - volumeMounts:
+          - name: bluemap-config
+            mountPath: /data/config/bluemap/core.conf
+            subPath: core.conf
+        volumes:
+          - name: bluemap-config
+            configMap:
+              name: bluemap-config
+    extraDeploy:
+      - |
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: bluemap-config # Will be prefixed
+        data:
+          core.conf: |
+            accept-download: true
+            data: "/data/bluemap/web"
+            render-thread-count: 2
