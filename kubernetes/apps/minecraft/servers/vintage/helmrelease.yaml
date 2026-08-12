@@ -6,6 +6,11 @@ metadata:
 spec:
   driftDetection:
     mode: enabled
+    ignore:
+      # mc-router autoscale-down scales this to 0 when idle
+      - paths: ["/spec/replicas"]
+        target:
+          kind: StatefulSet
   interval: 1h
   chartRef:
     kind: OCIRepository
