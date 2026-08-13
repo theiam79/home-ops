@@ -50,6 +50,6 @@ spec:
           enabled: true
         down:
           enabled: true
-          after: 90m
+          after: 36h
     metrics:
       backend: prometheus
