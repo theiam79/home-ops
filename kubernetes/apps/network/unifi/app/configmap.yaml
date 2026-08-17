@@ -1,0 +1,23 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: unifi-init-mongo
+data:
+  # Runs once, on first start with an empty /data/db — see ../README.md
+  init-mongo.sh: |
+    #!/bin/bash
+    mongosh <<EOF
+    use ${MONGO_DBNAME}
+    db.createUser({
+      user: "${MONGO_USER}",
+      pwd: "${MONGO_PASS}",
+      roles: [
+        { db: "${MONGO_DBNAME}", role: "dbOwner" },
+        { db: "${MONGO_DBNAME}_stat", role: "dbOwner" },
+        { db: "${MONGO_DBNAME}_audit", role: "dbOwner" },
+        { db: "${MONGO_DBNAME}_restore", role: "dbOwner" },
+        { db: "admin", role: "clusterMonitor" }
+      ]
+    })
+    EOF

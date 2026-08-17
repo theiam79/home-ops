@@ -1,0 +1,146 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: unifi
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  interval: 1h
+  values:
+    controllers:
+      unifi:
+        # Two RWO PVCs — no two pods at once.
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: lscr.io/linuxserver/unifi-network-application
+              tag: 10.5.67
+            env:
+              TZ: America/Chicago
+              PUID: "1000"
+              PGID: "1000"
+              MONGO_HOST: 127.0.0.1
+              MONGO_PORT: "27017"
+              MONGO_DBNAME: &dbname unifi
+              MONGO_AUTHSOURCE: *dbname
+              MONGO_USER:
+                valueFrom:
+                  secretKeyRef:
+                    name: unifi-secret
+                    key: MONGO_USER
+              MONGO_PASS:
+                valueFrom:
+                  secretKeyRef:
+                    name: unifi-secret
+                    key: MONGO_PASS
+              # Java heap (MB), not a cgroup limit
+              MEM_LIMIT: "1024"
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /status
+                    port: &port 8443
+                    scheme: HTTPS
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /status
+                    port: *port
+                    scheme: HTTPS
+                  initialDelaySeconds: 15
+                  periodSeconds: 5
+                  failureThreshold: 60
+            resources:
+              requests:
+                cpu: 100m
+                memory: 1Gi
+          mongo:
+            image:
+              repository: docker.io/library/mongo
+              tag: 8.0.29
+            # Same-pod access only; also keeps the kubelet's pod-IP probes honest
+            args: ["--bind_ip", "127.0.0.1"]
+            env:
+              MONGO_DBNAME: *dbname
+            envFrom:
+              - secretRef:
+                  name: unifi-secret
+            probes:
+              liveness: &mongoProbes
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command:
+                      - mongosh
+                      - --quiet
+                      - --eval
+                      - "db.adminCommand('ping')"
+                  initialDelaySeconds: 10
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *mongoProbes
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+    service:
+      app:
+        controller: unifi
+        type: LoadBalancer
+        externalTrafficPolicy: Local
+        annotations:
+          lbipam.cilium.io/ips: "192.168.100.37"
+          external-dns.alpha.kubernetes.io/hostname: unifi.${SECRET_DOMAIN}
+        ports:
+          https:
+            primary: true
+            port: *port
+          inform:
+            port: 8080
+          stun:
+            port: 3478
+            protocol: UDP
+          discovery:
+            port: 10001
+            protocol: UDP
+          speedtest:
+            port: 6789
+    persistence:
+      config:
+        existingClaim: unifi
+        advancedMounts:
+          unifi:
+            app:
+              - path: /config
+      mongo-data:
+        existingClaim: unifi-mongo-data
+        advancedMounts:
+          unifi:
+            mongo:
+              - path: /data/db
+      init-mongo:
+        type: configMap
+        name: unifi-init-mongo
+        advancedMounts:
+          unifi:
+            mongo:
+              - path: /docker-entrypoint-initdb.d/init-mongo.sh
+                subPath: init-mongo.sh
+                readOnly: true
