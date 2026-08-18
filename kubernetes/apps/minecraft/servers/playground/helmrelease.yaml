@@ -21,6 +21,7 @@ spec:
     minecraftServer:
       eula: "TRUE"
       type: "FABRIC"
+      # renovate: datasource=custom.modrinth-game-versions packageName=bluemap
       version: "26.2"
       difficulty: normal
       forcegameMode: true
