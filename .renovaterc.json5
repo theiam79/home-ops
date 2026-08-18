@@ -137,6 +137,16 @@
       matchDatasources: ["github-releases"],
       addLabels: ["renovate/github-release"],
     },
+    {
+      description: "Minecraft: stable releases only, gated on mod support",
+      matchDatasources: ["custom.modrinth-game-versions"],
+      allowedVersions: "/^\\d+\\.\\d+(\\.\\d+)?$/",
+      semanticCommitScope: "minecraft",
+      commitMessageTopic: "minecraft ({{packageName}}-gated)",
+      prBodyNotes: [
+        "Version proposed from the Minecraft versions `{{packageName}}` supports on Modrinth. Before merging, confirm the server's other mods also list this version.",
+      ],
+    },
   ],
   customManagers: [
     {
@@ -161,5 +171,26 @@
       ],
       datasourceTemplate: "{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}",
     },
+    {
+      description: "Minecraft server version pinned to what a gating Modrinth mod supports",
+      customType: "regex",
+      managerFilePatterns: ["/(^|/)kubernetes/apps/minecraft/.+\\.ya?ml$/"],
+      matchStrings: [
+        // # renovate: datasource=custom.modrinth-game-versions packageName=bluemap
+        // version: "26.2"
+        'datasource=(?<datasource>\\S+) packageName=(?<packageName>\\S+)\\n\\s+version: "(?<currentValue>[^"]+)"',
+      ],
+      depNameTemplate: "minecraft",
+      versioningTemplate: "loose",
+    },
   ],
+  customDatasources: {
+    "modrinth-game-versions": {
+      defaultRegistryUrlTemplate: "https://api.modrinth.com/v2/project/{{packageName}}/version?loaders=%5B%22fabric%22%5D",
+      format: "json",
+      transformTemplates: [
+        '{ "releases": [$distinct($.game_versions) ~> $map(function($v) { { "version": $v } })] }',
+      ],
+    },
+  },
 }
