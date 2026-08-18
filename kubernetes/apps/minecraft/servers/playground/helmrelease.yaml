@@ -48,6 +48,23 @@ spec:
       dataDir:
         enabled: true
         existingClaim: ${APP}
+    # bluemap regenerates these as current-format defaults each start; custom settings belong in the bluemap-config configmap (see servers/README.md)
+    initContainers:
+      - name: bluemap-config-reset
+        image: busybox:stable
+        command:
+          - sh
+          - -c
+          - >-
+            rm -f
+            /data/config/bluemap/maps/*.conf
+            /data/config/bluemap/plugin.conf
+            /data/config/bluemap/webapp.conf
+            /data/config/bluemap/webserver.conf
+            /data/bluemap/web/index.html
+        volumeMounts:
+          - name: datadir
+            mountPath: /data
     extraVolumes:
       - volumeMounts:
           - name: bluemap-config
