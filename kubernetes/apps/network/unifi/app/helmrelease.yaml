@@ -104,7 +104,8 @@ spec:
       app:
         controller: unifi
         type: LoadBalancer
-        externalTrafficPolicy: Local
+        # NOT Local: cilium L2-announce leader election ignores backend
+        # placement, so eTP Local blackholes when the lease lands elsewhere
         annotations:
           lbipam.cilium.io/ips: "192.168.100.37"
           external-dns.alpha.kubernetes.io/hostname: unifi.${SECRET_DOMAIN}
