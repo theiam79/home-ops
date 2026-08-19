@@ -4,20 +4,22 @@ kind: ConfigMap
 metadata:
   name: unifi-init-mongo
 data:
-  # Runs once, on first start with an empty /data/db — see ../README.md
+  # Runs once, on first start with an empty /data/db — see ../README.md.
+  # process.env (not shell ${VAR}) on purpose: Flux postBuild substitution
+  # blanks any ${VAR} it doesn't know.
   init-mongo.sh: |
     #!/bin/bash
-    mongosh <<EOF
-    use ${MONGO_DBNAME}
-    db.createUser({
-      user: "${MONGO_USER}",
-      pwd: "${MONGO_PASS}",
+    mongosh <<'EOF'
+    const dbname = process.env.MONGO_DBNAME;
+    db.getSiblingDB(dbname).createUser({
+      user: process.env.MONGO_USER,
+      pwd: process.env.MONGO_PASS,
       roles: [
-        { db: "${MONGO_DBNAME}", role: "dbOwner" },
-        { db: "${MONGO_DBNAME}_stat", role: "dbOwner" },
-        { db: "${MONGO_DBNAME}_audit", role: "dbOwner" },
-        { db: "${MONGO_DBNAME}_restore", role: "dbOwner" },
+        { db: dbname, role: "dbOwner" },
+        { db: dbname + "_stat", role: "dbOwner" },
+        { db: dbname + "_audit", role: "dbOwner" },
+        { db: dbname + "_restore", role: "dbOwner" },
         { db: "admin", role: "clusterMonitor" }
       ]
-    })
+    });
     EOF
