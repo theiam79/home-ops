@@ -98,6 +98,14 @@ spec:
         globalMounts:
           - path: /data/media
             readOnly: true
+      # same container path as aurral so playlist/scan paths line up
+      aurral-weekly-flow:
+        type: nfs
+        server: snotra.cluster
+        path: /mnt/disks/85AAZU6GS/cluster/downloads/aurral/aurral-weekly-flow
+        globalMounts:
+          - path: /data/downloads/aurral/aurral-weekly-flow
+            readOnly: true
       tmp:
         type: emptyDir
         globalMounts:
