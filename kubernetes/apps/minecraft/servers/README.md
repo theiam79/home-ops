@@ -22,15 +22,21 @@ broke playground's June-2025 configs during the 26.2 upgrade — map load fails 
 The `bluemap-config-reset` init container deletes the generated configs (and the webapp's
 `<webroot>/index.html`, which BlueMap's upgrade notes say to delete on update) at every pod
 start, so BlueMap regenerates current-format defaults for whatever version it resolves.
-Rendered map tiles are **not** touched — map IDs come from the config filenames, which
-regenerate identically, so renders carry over.
+It removes the whole `maps` **folder**, not just the files in it — BlueMap only regenerates
+map configs when the folder is absent (`Files.exists(mapConfigFolder)` check). Rendered map
+tiles are **not** touched — map IDs come from the config filenames, and the auto-config
+naming reproduces the same ids for a given set of worlds (`world`, `world_the_nether`, …),
+so renders carry over.
 
 ### Customizing a generated setting
 
 Never hand-edit the generated files on the PVC — the reset wipes them. Instead add the file to
-the server's `bluemap-config` ConfigMap and subPath-mount it next to `core.conf`
-(e.g. `/data/config/bluemap/maps/world.conf`); the mount masks whatever the reset does to the
-underlying PVC path. Same applies to marker-sets, which live in `maps/*.conf`.
+the server's `bluemap-config` ConfigMap and subPath-mount it next to `core.conf`; the mount
+masks whatever the reset does to the underlying PVC path. Caveat for files under `maps/`
+(including marker-sets): a subPath mount there makes the kubelet recreate the `maps` dir
+root-owned (the fresh-PVC ownership trap), so BlueMap can't write the *other* map configs —
+if you go that route, mount **all** map configs, or fix ownership per the runbook in
+[minecraft-fresh-pvc-config-mount-trap].
 
 Servers pinned to old modpack/MC versions are capped at correspondingly old BlueMap builds, so
 they don't hit format breaks until their MC version moves — copy the init container to a server
