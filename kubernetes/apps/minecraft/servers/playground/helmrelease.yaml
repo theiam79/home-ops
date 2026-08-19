@@ -57,8 +57,8 @@ spec:
           - sh
           - -c
           - >-
-            rm -f
-            /data/config/bluemap/maps/*.conf
+            rm -rf
+            /data/config/bluemap/maps
             /data/config/bluemap/plugin.conf
             /data/config/bluemap/webapp.conf
             /data/config/bluemap/webserver.conf
