@@ -17,7 +17,7 @@ spec:
           app:
             image:
               repository: ghcr.io/calibrain/shelfmark
-              tag: v1.3.9@sha256:1a23ba495cc7a0284276aa510664dfd276854f7d5264acfa1e8e1015f9cc0b20
+              tag: v1.3.12@sha256:e22413551ab647388f0279f1d7b7db3ff4a6fe1151337b5b234d3747cc09f5a3
             env:
               TZ: America/Chicago
               CUSTOM_SCRIPT: /scripts/abs-scan.py
