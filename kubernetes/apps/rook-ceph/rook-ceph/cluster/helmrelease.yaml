@@ -93,6 +93,18 @@ spec:
                       operator: NotIn
                       values:
                         - elli
+      security:
+        cephx:
+          # CVE-2025-30156 remediation: rotate daemon keys to the aes256k type
+          # introduced in Ceph 19.2.6. Expect ~90min of benign HEALTH_ERR while
+          # daemons restart with new keys (blocks dependent Kustomizations only).
+          daemon:
+            keyRotationPolicy: KeyGeneration
+            keyGeneration: 2
+          # aes256k CSI keys need kernel 7.0+ (Talos is on 6.x) — pin aes.
+          # Leaves residual AUTH_INSECURE_* warnings; that's expected.
+          csi:
+            keyType: aes
       storage:
         useAllNodes: true
         useAllDevices: false
