@@ -1,0 +1,89 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: actual
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  interval: 1h
+  values:
+    controllers:
+      actual:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/actualbudget/actual
+              tag: 26.8.1@sha256:6478d9ddfc0924479c09e6699c205e354c6f2216dfe7de3c0fb7b590d6edcdc5
+            env:
+              TZ: America/Chicago
+              ACTUAL_DATA_DIR: /data
+              ACTUAL_LOGIN_METHOD: openid
+              ACTUAL_ALLOWED_LOGIN_METHODS: openid
+              ACTUAL_OPENID_ENFORCE: "true"
+              ACTUAL_OPENID_DISCOVERY_URL: "https://auth.${SECRET_DOMAIN}/.well-known/openid-configuration"
+              ACTUAL_OPENID_CLIENT_ID: actual
+              ACTUAL_OPENID_CLIENT_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: actual-secret
+                    key: OIDC_CLIENT_SECRET
+              ACTUAL_OPENID_SERVER_HOSTNAME: "https://budget.${SECRET_DOMAIN}"
+              # Authelia's finance-group policy is the access gate; authorized
+              # users get a Basic account on first login (first login = owner)
+              ACTUAL_USER_CREATION_MODE: login
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: &port 5006
+                  initialDelaySeconds: 10
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              readiness: *probes
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+    defaultPodOptions:
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
+    service:
+      app:
+        controller: actual
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        hostnames:
+          - "budget.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      data:
+        existingClaim: actual
+        globalMounts:
+          - path: /data
