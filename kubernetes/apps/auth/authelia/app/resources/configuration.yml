@@ -48,6 +48,11 @@ access_control:
         - 'group:books'
       policy: two_factor
     - domain:
+        - 'budget.${SECRET_DOMAIN}'
+      subject:
+        - 'group:finance'
+      policy: two_factor
+    - domain:
         - '${SECRET_DOMAIN}'
         - '*.${SECRET_DOMAIN}'
       subject:
@@ -116,6 +121,16 @@ identity_providers:
         - 'introspection'
         - 'userinfo'
       allowed_origins_from_client_redirect_uris: true
+    authorization_policies:
+      # OIDC-level group gate: unlike the books apps (which map groups themselves),
+      # Actual ignores OIDC group claims, so Authelia must enforce membership
+      finance:
+        default_policy: deny
+        rules:
+          - policy: two_factor
+            subject:
+              - 'group:finance'
+              - 'group:admins'
     claims_policies:
       # for clients that read claims from the ID token only and never call userinfo
       id_token_claims:
@@ -230,3 +245,18 @@ identity_providers:
         redirect_uris:
           - 'https://recipes.${SECRET_DOMAIN}/login'
           - 'https://recipes.${SECRET_DOMAIN}/login?direct=1'
+      - client_id: actual
+        client_name: Actual Budget
+        client_secret: '{{ secret "/secrets/authelia/ACTUAL_CLIENT_SECRET_DIGEST" }}'
+        public: false
+        authorization_policy: finance
+        require_pkce: true
+        pkce_challenge_method: S256
+        consent_mode: implicit
+        token_endpoint_auth_method: client_secret_basic
+        scopes:
+          - openid
+          - profile
+          - email
+        redirect_uris:
+          - 'https://budget.${SECRET_DOMAIN}/openid/callback'
