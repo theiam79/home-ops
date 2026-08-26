@@ -9,7 +9,7 @@ spec:
     mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
     operation: copy
   ref:
-    tag: v1.19.10
+    tag: v1.20.6
   url: oci://ghcr.io/rook/rook-ceph
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
@@ -25,12 +25,10 @@ spec:
     kind: OCIRepository
     name: rook-ceph
   values:
+    # v1.20: CSI driver settings moved to the ceph-csi-drivers chart
+    # (../csi-drivers); only the csi-operator subchart toggle, CSI images,
+    # and the CSI metrics ServiceMonitor remain here.
     csi:
-      cephFSKernelMountOptions: ms_mode=prefer-crc
-      # NOTE: Enable the driver and shapshotter if you want to use CephFS
-      enableCephfsDriver: false
-      enableCephfsSnapshotter: false
-      enableLiveness: true
       serviceMonitor:
         enabled: true
     enableDiscoveryDaemon: true
