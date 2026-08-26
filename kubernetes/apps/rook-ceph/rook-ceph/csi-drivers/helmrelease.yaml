@@ -1,0 +1,52 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: ceph-csi-operator
+spec:
+  interval: 1h
+  url: https://ceph.github.io/ceph-csi-operator
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ceph-csi-drivers
+spec:
+  driftDetection:
+    mode: enabled
+  interval: 1h
+  timeout: 15m
+  chart:
+    spec:
+      chart: ceph-csi-drivers
+      version: 1.0.4
+      reconcileStrategy: ChartVersion
+      sourceRef:
+        kind: HelmRepository
+        name: ceph-csi-operator
+  values:
+    # Rook-compatible values per deploy/charts/ceph-csi-drivers/values.yaml
+    # at rook v1.20.6. Driver names MUST keep the rook-ceph namespace prefix —
+    # they are the provisioner names in our existing StorageClasses.
+    operatorConfig:
+      namespace: rook-ceph
+      driverSpecDefaults:
+        imageSet:
+          name: rook-csi-operator-image-set-configmap
+        nodePlugin:
+          priorityClassName: system-node-critical
+        controllerPlugin:
+          priorityClassName: system-cluster-critical
+    drivers:
+      rbd:
+        enabled: true
+        name: rook-ceph.rbd.csi.ceph.com
+      cephfs:
+        enabled: false
+        name: rook-ceph.cephfs.csi.ceph.com
+      nfs:
+        enabled: false
+        name: rook-ceph.nfs.csi.ceph.com
+      nvmeof:
+        enabled: false
+        name: rook-ceph.nvmeof.csi.ceph.com

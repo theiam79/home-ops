@@ -9,7 +9,7 @@ spec:
     mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
     operation: copy
   ref:
-    tag: v1.19.10
+    tag: v1.20.6
   url: oci://ghcr.io/rook/rook-ceph-cluster
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
@@ -48,6 +48,12 @@ spec:
       createPrometheusRules: true
     toolbox:
       enabled: true
+    # Pin Ceph so the 1.20 chart migration doesn't simultaneously pull the
+    # Squid→Tentacle major (1.20.6 chart defaults to v20.2.4). Unpin in a
+    # separate follow-up once the chart migration has soaked.
+    cephImage:
+      repository: quay.io/ceph/ceph
+      tag: v19.2.6
     cephClusterSpec:
       cephConfig:
         global:
