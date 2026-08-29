@@ -53,7 +53,7 @@ spec:
     # separate follow-up once the chart migration has soaked.
     cephImage:
       repository: quay.io/ceph/ceph
-      tag: v19.2.6
+      tag: v21.1.0
     cephClusterSpec:
       cephConfig:
         global:
