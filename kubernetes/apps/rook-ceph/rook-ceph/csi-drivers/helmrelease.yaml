@@ -41,6 +41,13 @@ spec:
       rbd:
         enabled: true
         name: rook-ceph.rbd.csi.ceph.com
+        # Chart defaults regress what rook v1.19 ran live: snapshotPolicy "none"
+        # drops the csi-snapshotter sidecar (breaks all VolSync Snapshot movers),
+        # grpcTimeout 30 vs 150, ctrlplugin replicas 1 vs 2.
+        snapshotPolicy: volumeSnapshot
+        grpcTimeout: 150
+        controllerPlugin:
+          replicas: 2
       cephfs:
         enabled: false
         name: rook-ceph.cephfs.csi.ceph.com
