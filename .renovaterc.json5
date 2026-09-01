@@ -147,6 +147,18 @@
         "Version proposed from the Minecraft versions `{{packageName}}` supports on Modrinth. Before merging, confirm the server's other mods also list this version.",
       ],
     },
+    {
+      description: "Ceph: stable releases only (x.2.z) — x.0.z are dev builds, x.1.z are RCs",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["quay.io/ceph/ceph"],
+      allowedVersions: "/^v\\d+\\.2\\.\\d+$/",
+    },
+    {
+      description: "Mongo: cap at 8.0.x — UniFi Network Application supports the 8.0 line only",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["docker.io/library/mongo"],
+      allowedVersions: "<8.1",
+    },
   ],
   customManagers: [
     {
