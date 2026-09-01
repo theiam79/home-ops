@@ -5,6 +5,9 @@ metadata:
   name: ${APP}-mc
 spec:
   interval: 1h
+  # SB4 boots slower than helm's default 5m wait, so any chart bump times out,
+  # rolls back, and re-times-out in a loop that restarts the boot each cycle.
+  timeout: 15m
   chartRef:
     kind: OCIRepository
     name: minecraft
