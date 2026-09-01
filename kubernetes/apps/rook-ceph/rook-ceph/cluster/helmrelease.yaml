@@ -48,12 +48,12 @@ spec:
       createPrometheusRules: true
     toolbox:
       enabled: true
-    # Pin Ceph so the 1.20 chart migration doesn't simultaneously pull the
-    # Squid→Tentacle major (1.20.6 chart defaults to v20.2.4). Unpin in a
-    # separate follow-up once the chart migration has soaked.
+    # Explicit Ceph pin (matches the 1.20.6 chart default) so version moves are
+    # deliberate; Renovate is gated to stable x.2.z builds. Squid→Tentacle and
+    # later majors are maintenance-window merges.
     cephImage:
       repository: quay.io/ceph/ceph
-      tag: v19.2.6
+      tag: v20.2.4
     cephClusterSpec:
       cephConfig:
         global:
