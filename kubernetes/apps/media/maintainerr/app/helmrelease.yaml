@@ -18,6 +18,7 @@ spec:
               tag: 3.26.0
             env:
               TZ: America/Chicago
+              TELEMETRY: "off"
             probes:
               liveness: &probes
                 enabled: true
