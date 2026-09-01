@@ -29,12 +29,14 @@ spec:
               - secretRef:
                   name: multi-scrobbler-secret
             probes:
+              # tcpSocket, not /api/health: that endpoint returns 500 whenever an
+              # upstream scrobble target (e.g. ListenBrainz) is unreachable, so an
+              # external outage would crashloop the pod via the liveness probe.
               liveness: &probes
                 enabled: true
                 custom: true
                 spec:
-                  httpGet:
-                    path: /api/health
+                  tcpSocket:
                     port: &port 9078
                   initialDelaySeconds: 0
                   periodSeconds: 10
