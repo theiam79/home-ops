@@ -20,14 +20,14 @@ spec:
               repository: docker.io/netbirdio/netbird-server
               tag: 0.77.1
             args: ["--config", "/etc/netbird/config.yaml"]
+            # TCP, not /health: see README "Gotchas" (self-check deadlock)
             probes:
               liveness: &probes
                 enabled: true
                 custom: true
                 spec:
-                  httpGet:
-                    path: /health
-                    port: 9000
+                  tcpSocket:
+                    port: 8080
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 3
@@ -37,9 +37,8 @@ spec:
                 enabled: true
                 custom: true
                 spec:
-                  httpGet:
-                    path: /health
-                    port: 9000
+                  tcpSocket:
+                    port: 8080
                   initialDelaySeconds: 5
                   periodSeconds: 5
                   failureThreshold: 30
