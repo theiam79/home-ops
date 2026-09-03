@@ -1,0 +1,180 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: netbird
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  interval: 1h
+  values:
+    controllers:
+      netbird:
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          server:
+            image:
+              repository: docker.io/netbirdio/netbird-server
+              tag: 0.77.1
+            args: ["--config", "/etc/netbird/config.yaml"]
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: 9000
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 3
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: 9000
+                  initialDelaySeconds: 5
+                  periodSeconds: 5
+                  failureThreshold: 30
+            securityContext:
+              runAsUser: 1000
+              runAsGroup: 1000
+              runAsNonRoot: true
+              allowPrivilegeEscalation: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+          dashboard:
+            image:
+              repository: docker.io/netbirdio/dashboard
+              tag: v2.91.1
+            env:
+              NETBIRD_MGMT_API_ENDPOINT: https://netbird.${SECRET_DOMAIN}
+              NETBIRD_MGMT_GRPC_API_ENDPOINT: https://netbird.${SECRET_DOMAIN}
+              AUTH_AUTHORITY: https://netbird.${SECRET_DOMAIN}/oauth2
+              AUTH_AUDIENCE: netbird-dashboard
+              AUTH_CLIENT_ID: netbird-dashboard
+              AUTH_CLIENT_SECRET: ""
+              AUTH_SUPPORTED_SCOPES: openid profile email groups
+              AUTH_REDIRECT_URI: /nb-auth
+              AUTH_SILENT_REDIRECT_URI: /nb-silent-auth
+              USE_AUTH0: "false"
+              NGINX_SSL_PORT: "443"
+              LETSENCRYPT_DOMAIN: none
+            probes:
+              liveness: &dashProbes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: 80
+                  initialDelaySeconds: 5
+                  periodSeconds: 15
+                  timeoutSeconds: 3
+                  failureThreshold: 3
+              readiness: *dashProbes
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+          caddy:
+            image:
+              repository: docker.io/library/caddy
+              tag: 2.11.4-alpine
+            args: ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
+            probes:
+              liveness: &caddyProbes
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: &https 8443
+                  initialDelaySeconds: 3
+                  periodSeconds: 10
+                  failureThreshold: 3
+              readiness: *caddyProbes
+            securityContext:
+              runAsUser: 1000
+              runAsGroup: 1000
+              runAsNonRoot: true
+              allowPrivilegeEscalation: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+    defaultPodOptions:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        controller: netbird
+        type: LoadBalancer
+        annotations:
+          lbipam.cilium.io/ips: "192.168.100.39"
+          external-dns.alpha.kubernetes.io/hostname: netbird.${SECRET_DOMAIN}
+        ports:
+          https:
+            primary: true
+            port: 443
+            targetPort: *https
+          stun:
+            port: 3478
+            targetPort: 3478
+            protocol: UDP
+    persistence:
+      data:
+        existingClaim: netbird
+        advancedMounts:
+          netbird:
+            server:
+              - path: /var/lib/netbird
+      config:
+        type: secret
+        name: netbird-secret
+        advancedMounts:
+          netbird:
+            server:
+              - path: /etc/netbird/config.yaml
+                subPath: config.yaml
+                readOnly: true
+      caddyfile:
+        type: configMap
+        name: netbird-caddy
+        advancedMounts:
+          netbird:
+            caddy:
+              - path: /etc/caddy/Caddyfile
+                subPath: Caddyfile
+                readOnly: true
+      certs:
+        type: secret
+        name: "${SECRET_DOMAIN/./-}-production-tls"
+        advancedMounts:
+          netbird:
+            caddy:
+              - path: /certs
+                readOnly: true
+      caddy-data:
+        type: emptyDir
+        advancedMounts:
+          netbird:
+            caddy:
+              - path: /data
+      caddy-config:
+        type: emptyDir
+        advancedMounts:
+          netbird:
+            caddy:
+              - path: /config

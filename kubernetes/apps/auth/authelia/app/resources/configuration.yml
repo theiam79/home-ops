@@ -131,6 +131,14 @@ identity_providers:
             subject:
               - 'group:finance'
               - 'group:admins'
+      # NetBird approves anyone Authelia lets through, so membership is gated here
+      vpn:
+        default_policy: deny
+        rules:
+          - policy: two_factor
+            subject:
+              - 'group:wow'
+              - 'group:admins'
     claims_policies:
       # for clients that read claims from the ID token only and never call userinfo
       id_token_claims:
@@ -260,3 +268,19 @@ identity_providers:
           - email
         redirect_uris:
           - 'https://budget.${SECRET_DOMAIN}/openid/callback'
+      - client_id: netbird
+        client_name: NetBird
+        client_secret: '{{ secret "/secrets/authelia/NETBIRD_CLIENT_SECRET_DIGEST" }}'
+        public: false
+        authorization_policy: vpn
+        claims_policy: id_token_claims
+        consent_mode: implicit
+        token_endpoint_auth_method: client_secret_basic
+        scopes:
+          - openid
+          - profile
+          - email
+          - groups
+        redirect_uris:
+          - 'https://netbird.${SECRET_DOMAIN}/oauth2/callback/authelia'
+          - 'https://netbird.${SECRET_DOMAIN}/oauth2/logout/callback'

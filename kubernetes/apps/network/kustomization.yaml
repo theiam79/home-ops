@@ -10,5 +10,6 @@ resources:
   - ./cloudflare-dns/ks.yaml
   - ./cloudflare-tunnel/ks.yaml
   - ./envoy-gateway/ks.yaml
+  - ./netbird/ks.yaml
   - ./opnsense-dns/ks.yaml
   - ./unifi/ks.yaml
