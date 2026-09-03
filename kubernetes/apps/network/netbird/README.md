@@ -83,9 +83,10 @@ unreadable after every restart.
 5. **First admin.** Open `https://netbird.${SECRET_DOMAIN}` from the LAN. With
    no users yet the dashboard shows the setup wizard; create the local owner
    account (this is the break-glass login, keep it in Bitwarden).
-6. **Connector.** Settings › Identity Providers › Add › Generic OIDC: name
-   `authelia`, issuer `https://auth.${SECRET_DOMAIN}`, client id `netbird`,
-   the plaintext secret. The callback URL the dashboard shows is
+6. **Connector.** Settings › Identity Providers › Add › **Pocket ID** (not
+   Generic OIDC, see Gotchas): name `authelia`, issuer
+   `https://auth.${SECRET_DOMAIN}`, client id `netbird`, the plaintext
+   secret. The callback URL the dashboard shows is
    `https://netbird.${SECRET_DOMAIN}/oauth2/callback` (no connector id in
    the path, despite what the upstream docs suggest) and logout is
    `/oauth2/logout/callback`; both are the Authelia client's `redirect_uris`.
@@ -116,6 +117,16 @@ enrolling a second device, `netbird status -d` should show the peer as
 
 ## Gotchas
 
+- **Add Authelia as connector type "Pocket ID", not "Generic OIDC".** The
+  embedded Dex connector NetBird builds for the generic type requests only
+  `openid profile email` from the upstream IdP, and neither the dashboard nor
+  the API can add scopes (`idp/dex/config.go`, `applyOIDCDefaults`). Authelia
+  releases `groups` only when the `groups` scope is requested, so a generic
+  connector yields a token with no groups and every login fails with
+  "user does not belong to any of the allowed JWT groups" (hit 2026-09-03).
+  The Okta and Pocket ID types hard-code `groups` into the scope list and are
+  otherwise plain OIDC with no claim-mapping quirks, so Pocket ID is the type
+  to pick. Connector type only changes those defaults; Authelia does not care.
 - **Do not probe the server with `/health`.** That endpoint includes a relay
   self-check that dials `exposedAddress` (the public hostname, which resolves
   to the LB IP in-cluster). The LB only has endpoints when the pod is Ready,
