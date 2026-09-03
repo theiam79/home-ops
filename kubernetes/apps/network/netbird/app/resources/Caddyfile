@@ -1,0 +1,16 @@
+{
+	admin off
+	auto_https off
+}
+
+:8443 {
+	tls /certs/tls.crt /certs/tls.key
+
+	@grpc header Content-Type application/grpc*
+	reverse_proxy @grpc h2c://127.0.0.1:8080
+
+	@backend path /relay* /ws-proxy/* /api/* /oauth2/*
+	reverse_proxy @backend 127.0.0.1:8080
+
+	reverse_proxy /* 127.0.0.1:80
+}

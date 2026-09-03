@@ -34,3 +34,22 @@ cilium-dbg monitor --type drop      # look for "VLAN traffic disallowed by VLAN 
 Note: a host-netns test (adding an IP directly to `mgmt0.<id>` and pinging) will
 **succeed** even when this filter is blocking pods — only an actual pod on the
 secondary network exercises the dropped path.
+
+## Pinned LoadBalancer IPs
+
+Every LoadBalancer Service pins its IP (`lbipam.cilium.io/ips` or
+`loadBalancerIP`) after the 2026-07-16 incident where a floating assignment
+landed on a node IP. Pool is `.10-.19` and `.32-.63`. Claim the next free
+address here before adding a Service.
+
+| IP | Service | Namespace |
+|---|---|---|
+| 192.168.100.10 | envoy-external | network |
+| 192.168.100.12 | envoy-internal | network |
+| 192.168.100.18 | abiotic | game-servers |
+| 192.168.100.19 | netboot-tftp | kube-system |
+| 192.168.100.35 | plex | media |
+| 192.168.100.36 | mc-router | minecraft |
+| 192.168.100.37 | unifi | network |
+| 192.168.100.38 | wow (reserved, realm auth/world) | game-servers |
+| 192.168.100.39 | netbird | network |
