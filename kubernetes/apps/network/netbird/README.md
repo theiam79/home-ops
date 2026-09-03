@@ -117,6 +117,17 @@ enrolling a second device, `netbird status -d` should show the peer as
 
 ## Gotchas
 
+- **Do not probe the server with `/health`.** That endpoint includes a relay
+  self-check that dials `exposedAddress` (the public hostname, which resolves
+  to the LB IP in-cluster). The LB only has endpoints when the pod is Ready,
+  and the pod is only Ready when the probe passes, so an HTTP probe on
+  `/health` deadlocks on first boot (hit 2026-09-03). Kubelet probes are TCP
+  on `:8080`; `/health` on `:9000` remains the right thing for Gatus or any
+  external monitor, where the circularity does not exist.
+- The Caddy image's binary carries `cap_net_bind_service` as a file
+  capability, so the container must keep `NET_BIND_SERVICE` in its bounding
+  set even though it listens on 8443; with capabilities fully dropped and no
+  privilege escalation the kernel refuses to exec it.
 - Dex's OIDC connector reads claims from the ID token, hence the Authelia
   `claims_policy`. Without it Authelia 4.39+ omits `groups` and group sync
   silently syncs nothing.
