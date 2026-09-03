@@ -282,5 +282,5 @@ identity_providers:
           - email
           - groups
         redirect_uris:
-          - 'https://netbird.${SECRET_DOMAIN}/oauth2/callback/authelia'
+          - 'https://netbird.${SECRET_DOMAIN}/oauth2/callback'
           - 'https://netbird.${SECRET_DOMAIN}/oauth2/logout/callback'
