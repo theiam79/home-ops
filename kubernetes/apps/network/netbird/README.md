@@ -85,11 +85,10 @@ unreadable after every restart.
    account (this is the break-glass login, keep it in Bitwarden).
 6. **Connector.** Settings › Identity Providers › Add › Generic OIDC: name
    `authelia`, issuer `https://auth.${SECRET_DOMAIN}`, client id `netbird`,
-   the plaintext secret. After saving, the dashboard shows the callback URL.
-   It must equal
-   `https://netbird.${SECRET_DOMAIN}/oauth2/callback/authelia`; if the
-   generated connector id differs, update `redirect_uris` in the Authelia
-   config to match.
+   the plaintext secret. The callback URL the dashboard shows is
+   `https://netbird.${SECRET_DOMAIN}/oauth2/callback` (no connector id in
+   the path, despite what the upstream docs suggest) and logout is
+   `/oauth2/logout/callback`; both are the Authelia client's `redirect_uris`.
 7. **Group sync.** Settings › Groups: enable JWT group sync, claim `groups`,
    allowed groups `wow` and `admins`, user-group propagation on. Your own
    account must already be in `admins` in LLDAP or you lock yourself out.
