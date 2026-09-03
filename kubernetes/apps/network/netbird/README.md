@@ -57,14 +57,17 @@ unreadable after every restart.
 
 ## Bootstrap order
 
-1. **Bitwarden Secrets Manager** (fill the three UUIDs in
-   `app/externalsecret.yaml` before merging):
+1. **Bitwarden Secrets Manager.** Consumed by manifests (UUIDs in
+   `app/externalsecret.yaml` and Authelia's):
    - `NETBIRD_RELAY_SECRET`: any string; `openssl rand -base64 32 | tr -d =`.
    - `NETBIRD_DATASTORE_KEY`: `openssl rand -base64 32` (keep the padding).
    - `NETBIRD_SESSION_COOKIE_KEY`: 16, 24 or 32 bytes, raw or base64;
      `openssl rand -base64 32`.
-   - `NETBIRD_CLIENT_SECRET_DIGEST` for Authelia (see step 4) plus the
-     plaintext, kept in Bitwarden only, pasted into the dashboard in step 6.
+   - `NETBIRD_CLIENT_SECRET_DIGEST` for Authelia (see step 4).
+
+   Used by hand, never mounted: `NETBIRD_CLIENT_SECRET` (plaintext of the
+   digest, pasted into the dashboard connector in step 6) and
+   `NETBIRD_ADMIN_PASSWORD` (the break-glass local owner from step 5).
 2. **Merge.** Flux creates the PVC, secret, DNSEndpoint and pod. Wait for
    `kubectl -n network get pod -l app.kubernetes.io/name=netbird` to show 3/3.
 3. **OPNsense.** Firewall › NAT › Port Forward on WAN: TCP 443 →
