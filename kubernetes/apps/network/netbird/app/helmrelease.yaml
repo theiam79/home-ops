@@ -18,7 +18,7 @@ spec:
           server:
             image:
               repository: docker.io/netbirdio/netbird-server
-              tag: 0.77.1
+              tag: 0.78.1
             args: ["--config", "/etc/netbird/config.yaml"]
             # TCP, not /health: see README "Gotchas" (self-check deadlock)
             probes:
