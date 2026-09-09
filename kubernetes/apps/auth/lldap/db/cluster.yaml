@@ -19,6 +19,9 @@ spec:
   bootstrap:
     recovery:
       source: lldap-pg-v1
+      # recovery defaults database/owner to `app`; must match the real DB and role
+      database: lldap
+      owner: lldap
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true

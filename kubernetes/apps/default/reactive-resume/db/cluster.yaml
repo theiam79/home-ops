@@ -19,6 +19,9 @@ spec:
   bootstrap:
     recovery:
       source: reactive-resume-pg-v1
+      # recovery defaults database/owner to `app`; must match the real DB and role
+      database: reactive_resume
+      owner: reactive_resume
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true
