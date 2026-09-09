@@ -51,5 +51,3 @@ address here before adding a Service.
 | 192.168.100.35 | plex | media |
 | 192.168.100.36 | mc-router | minecraft |
 | 192.168.100.37 | unifi | network |
-| 192.168.100.38 | wow (reserved, realm auth/world) | game-servers |
-| 192.168.100.39 | netbird | network |
