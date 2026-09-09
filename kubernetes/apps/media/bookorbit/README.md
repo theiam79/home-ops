@@ -50,9 +50,9 @@ anyone the IdP lets through; its own group mappings only grant permissions.
 
 ## Bootstrap order
 
-1. Bitwarden SM secrets, then fill the `REPLACE_WITH_BWS_UUID_*` placeholders in
-   `app/externalsecret.yaml` and `../../auth/authelia/app/externalsecret.yaml`
-   **before merging** (an unresolvable UUID stalls the whole Authelia secret):
+1. Bitwarden SM secrets (UUIDs wired into `app/externalsecret.yaml` and
+   `../../auth/authelia/app/externalsecret.yaml`; rotate by generating a new
+   value into the same entry):
    - `BOOKORBIT_JWT_SECRET` — `openssl rand -hex 32` (min 16 chars)
    - `BOOKORBIT_SETUP_BOOTSTRAP_TOKEN` — `openssl rand -hex 16`; required in
      production, consumed once by the setup wizard
