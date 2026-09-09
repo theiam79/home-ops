@@ -10,6 +10,7 @@ resources:
   - ./aurral/ks.yaml
   - ./grimmory/ks.yaml
   - ./booksync/ks.yaml
+  - ./bookorbit/ks.yaml
   - ./plex/ks.yaml
   - ./prowlarr/ks.yaml
   - ./qbittorrent/ks.yaml

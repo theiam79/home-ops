@@ -1,0 +1,139 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: bookorbit
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  interval: 1h
+  values:
+    controllers:
+      bookorbit:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/bookorbit/bookorbit
+              tag: 2.9.0@sha256:3bf8d823d2c2179e519a96e08b928506c2a459e7854ab42ea584cdc78b50e6f4
+            env:
+              TZ: America/Chicago
+              NODE_ENV: production
+              PORT: "3000"
+              APP_URL: "https://bookorbit.${SECRET_DOMAIN}"
+              CLIENT_URL: "https://bookorbit.${SECRET_DOMAIN}"
+              APP_DATA_PATH: /data
+              BOOK_DOCK_PATH: /data/book-dock
+              LIBRARY_BROWSE_ROOT: /books
+              LOG_LEVEL: info
+              # pod already runs as uid 1000; skip the root-only chown pass
+              BOOKORBIT_FIX_PERMISSIONS: "false"
+              # SSRF guard would otherwise reject an issuer that resolves to a LAN IP
+              OIDC_ALLOW_LOCAL_ISSUERS: "true"
+              DATABASE_URL:
+                valueFrom:
+                  secretKeyRef:
+                    name: bookorbit-pg-app
+                    key: uri
+            envFrom:
+              - secretRef:
+                  name: bookorbit-secret
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/v1/health
+                    port: &port 3000
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/v1/health
+                    port: *port
+                  initialDelaySeconds: 5
+                  periodSeconds: 5
+                  failureThreshold: 60
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 100m
+                memory: 1Gi
+    defaultPodOptions:
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
+    service:
+      app:
+        controller: bookorbit
+        ports:
+          http:
+            primary: true
+            port: *port
+    route:
+      app:
+        hostnames:
+          - "bookorbit.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+        rules:
+          - filters:
+              - type: RequestHeaderModifier
+                requestHeaderModifier:
+                  set:
+                    - name: X-Forwarded-Proto
+                      value: https
+            backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      data:
+        existingClaim: bookorbit
+        globalMounts:
+          - path: /data
+      # Grimmory's live library, read-only for the bake-in: BookOrbit can scan,
+      # import and sync against the real books without touching files that
+      # Grimmory identifies by content hash (see README).
+      library:
+        type: nfs
+        server: snotra.cluster
+        path: /mnt/user/media/books
+        globalMounts:
+          - path: /books/library
+            readOnly: true
+      # BookOrbit-owned library: uploads, Book Dock finalize, request downloads
+      bookorbit-library:
+        type: nfs
+        server: snotra.cluster
+        path: /mnt/user/media/bookorbit
+        globalMounts:
+          - path: /books/bookorbit
+      downloads:
+        type: nfs
+        server: snotra.cluster
+        path: /mnt/disks/85AAZU6GS/cluster/downloads
+        globalMounts:
+          - path: /downloads
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
