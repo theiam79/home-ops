@@ -89,16 +89,17 @@ spec:
           cluster:
             - "10.10.10.0/24"
       placement:
-        # Temporary workaround — remove once elli's system SSD is replaced. See #424.
+        # Mons only on nodes whose system disk is an enterprise (PLP) SSD —
+        # the mon store lives on the node's /var. Label is set in talos/nodes.
         mon:
           nodeAffinity:
             requiredDuringSchedulingIgnoredDuringExecution:
               nodeSelectorTerms:
                 - matchExpressions:
-                    - key: kubernetes.io/hostname
-                      operator: NotIn
+                    - key: system-disk
+                      operator: In
                       values:
-                        - elli
+                        - enterprise
       security:
         cephx:
           # CVE-2025-30156 remediation: rotate daemon keys to the aes256k type

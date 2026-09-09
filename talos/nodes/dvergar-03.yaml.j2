@@ -4,6 +4,8 @@ machine:
   install:
     diskSelector:
       model: Micron_7300*
+  nodeLabels:
+    system-disk: enterprise
 ---
 apiVersion: v1alpha1
 kind: HostnameConfig
