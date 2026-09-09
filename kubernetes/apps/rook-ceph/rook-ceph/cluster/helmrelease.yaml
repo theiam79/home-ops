@@ -108,10 +108,20 @@ spec:
           daemon:
             keyRotationPolicy: KeyGeneration
             keyGeneration: 2
-          # aes256k CSI keys need kernel 7.0+ (Talos is on 6.x) — pin aes.
-          # Leaves residual AUTH_INSECURE_* warnings; that's expected.
+          # CSI + rbd-mirror-peer keys: aes256k needs kernel support for RBD
+          # mounts — Talos v1.13.10 backported it into 6.18.48 (rolled 09-09),
+          # and Rook 1.20.7 ships CSI 3.17.1 (required). keepPriorKeyCountMax
+          # keeps the old aes key alive for already-mounted PVCs; new mounts use
+          # aes256k. Migration runbook + the allowedCiphers follow-up: ../README.md
           csi:
-            keyType: aes
+            keyRotationPolicy: KeyGeneration
+            keyGeneration: 2
+            keepPriorKeyCountMax: 1
+            keyType: aes256k
+          rbdMirrorPeer:
+            keyRotationPolicy: KeyGeneration
+            keyGeneration: 2
+            keyType: aes256k
       storage:
         useAllNodes: true
         useAllDevices: false
