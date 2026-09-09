@@ -34,3 +34,20 @@ Kill-switch and inbound port-forwarding live in OPNsense (NO_WAN_EGRESS tag
 mechanism; Destination NAT with `reply-to` on the wg interface). Cilium must
 keep `bpf.vlanBypass: [30, 70]` for tagged VLAN traffic to pass the host
 datapath.
+
+## slskd routing init container
+
+slskd cannot bind its outbound Soulseek traffic to an address, so its
+`routing` init container replaces the pod's default route with `net1` and
+pins every node-local network back to `eth0`. Those pinned routes are what
+keep kubelet probes alive — a probe reply that leaves via the VPN VLAN never
+comes back and the pod gets liveness-killed. The list must cover every
+address a node might use as the *source* of host-to-pod traffic:
+
+| Route via `eth0` | Why |
+|---|---|
+| `10.42.0.0/15` | pod CIDR (cilium_host, pod-to-pod) |
+| `192.168.100.0/24` | management VLAN / node InternalIPs |
+| `10.10.10.0/24` | Ceph VLAN (`ceph0`) — on OSD nodes the kernel picks this address as the probe source because `enp2s0` enumerates before the management NIC (first seen after the Talos v1.13.10 roll on 2026-09-09; slskd liveness-looped on every OSD node until this route was added) |
+
+Add a row here if a node ever gains another addressed interface.
