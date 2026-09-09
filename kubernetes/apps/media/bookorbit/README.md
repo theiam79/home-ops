@@ -63,11 +63,12 @@ anyone the IdP lets through; its own group mappings only grant permissions.
    - `BOOKORBIT_CLIENT_SECRET_DIGEST` — pbkdf2 digest for Authelia; keep the
      plaintext to paste into BookOrbit's OIDC settings:
      `authelia crypto hash generate pbkdf2 --variant sha512 --random --random.length 72 --random.charset rfc3986`
-2. Merge. `bookorbit-pg` bootstraps with `initdb` and pre-creates the four
-   extensions (`uuid-ossp`, `pg_trgm`, `unaccent`, `vector`; pgvector is not a
-   trusted extension so the app user could not create it). After the first
-   backup shows in `kubectl get backups -n media`, switch `bootstrap` to
-   `recovery.source: bookorbit-pg-v1` (only matters if the cluster is recreated).
+2. Merge. `bookorbit-pg` now bootstraps with `recovery` from the Garage backup
+   (see "Restore" below). The original deploy used `initdb` with
+   `postInitApplicationSQL` pre-creating the four extensions (`uuid-ossp`,
+   `pg_trgm`, `unaccent`, `vector`; pgvector is not a trusted extension so the
+   app user could not create it) and was switched to `recovery` once the first
+   backup landed. A restored database already carries the extensions.
 3. Open `https://bookorbit.${SECRET_DOMAIN}`, run the setup wizard with the
    bootstrap token, create the superuser (local account).
 4. Settings → OIDC / SSO → add provider: issuer `https://auth.${SECRET_DOMAIN}`,
@@ -123,3 +124,23 @@ Download client: qBittorrent with path mapping `/data/downloads` → `/downloads
   re-point it here (then update `APP_URL`, the Authelia redirect URI and Kobo
   `api_endpoint`).
 - Keep Audiobookshelf: BookOrbit has no ABS-compatible API for Plappa/ABS apps.
+
+## Restore
+
+`bootstrap.recovery` only runs when the `Cluster` object is created, so it is
+dormant until Flux (or a human) recreates `bookorbit-pg`. On recreate the
+operator restores the latest base backup from `s3://cnpg/bookorbit/bookorbit-pg-v1/`
+and replays every archived WAL segment, then promotes on a new timeline and
+keeps archiving to the same `bookorbit-pg-v1` prefix. `database`/`owner` are set
+explicitly because recovery defaults both to `app`, which would leave the
+regenerated `bookorbit-pg-app` secret with the wrong username and URI.
+
+Recovery point is the last *archived* WAL segment: a segment ships when it fills
+(16 MiB) or after `archive_timeout` (CNPG default 5 min), so up to ~5 min of
+writes before a loss can be missing. For a point-in-time restore add
+`bootstrap.recovery.recoveryTarget` before recreating.
+
+Drilled 2026-09-09 on a throwaway cluster with this exact shape (PG18 standard
+image, same-name recovery source and archive): destroy → recreate → checksum
+match, twice in a row (timeline 1→2→3), backups and archiving healthy after.
+

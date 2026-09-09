@@ -17,17 +17,12 @@ spec:
     requests:
       cpu: 50m
       memory: 512Mi
-  # Fresh cluster. Once the first ScheduledBackup has landed, switch to
-  # `recovery.source: bookorbit-pg-v1` so a recreate restores from Garage.
+  # Recreate restores from the Garage backup (see README "Restore").
   bootstrap:
-    initdb:
+    recovery:
+      source: bookorbit-pg-v1
       database: bookorbit
       owner: bookorbit
-      postInitApplicationSQL:
-        - CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-        - CREATE EXTENSION IF NOT EXISTS pg_trgm;
-        - CREATE EXTENSION IF NOT EXISTS unaccent;
-        - CREATE EXTENSION IF NOT EXISTS vector;
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true
