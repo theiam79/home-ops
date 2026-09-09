@@ -102,6 +102,13 @@ spec:
                         - enterprise
       security:
         cephx:
+          # Step 3 of the aes256k migration (2026-09-09): every key is aes256k
+          # (ceph auth dump-keys shows 0 aes), so retire the aes cipher at the
+          # mons. Sets auth_allowed_ciphers; clears AUTH_INSECURE_KEYS_ALLOWED
+          # and AUTH_INSECURE_KEYS_CREATABLE. Recovery if a daemon key is ever
+          # aes again: allowedCiphers [aes, aes256k] + daemon.keyType aes (README).
+          allowedCiphers:
+            - aes256k
           # CVE-2025-30156 remediation: rotate daemon keys to the aes256k type
           # introduced in Ceph 19.2.6. Expect ~90min of benign HEALTH_ERR while
           # daemons restart with new keys (blocks dependent Kustomizations only).
