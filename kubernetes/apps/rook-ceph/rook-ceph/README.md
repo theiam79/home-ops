@@ -21,7 +21,7 @@ Daemon keys (mon/mgr/osd/admin/...) were rotated in PR #665. CSI keys stayed
 v1.13.10 backported it into 6.18.48 and Rook 1.20.7 brought the required CSI
 3.17.1, so the remaining steps are:
 
-### Step 1 — rotate CSI + rbd-mirror-peer keys to aes256k (this repo's current state)
+### Step 1 — rotate CSI + rbd-mirror-peer keys to aes256k (DONE 2026-09-09, PR #749)
 
 `cluster/helmrelease.yaml` → `cephClusterSpec.security.cephx.csi`:
 `keyRotationPolicy: KeyGeneration`, `keyGeneration: 2`,
@@ -38,12 +38,23 @@ minus the prior-key count — the pool has no mirroring peers).
   If a mount fails (`EPERM`/`permission denied` from the kernel client), revert
   with `keyType: aes`, `keyGeneration: 3`, `keepPriorKeyCountMax: 2`.
 
-### Step 2 — rehydrate mounts
+### Step 2 — rehydrate mounts (DONE 2026-09-09, PR #751)
 
 Existing PVCs keep the old aes key until remounted. Cordon + drain + uncordon
 each node (a Talos roll does this for free), then set
-`keepPriorKeyCountMax: 0` to drop the old key. Verify nothing still reports
-`aes`:
+`keepPriorKeyCountMax: 0` to drop the old key.
+
+**Trap:** a plain `rollout restart` is NOT enough when the new pod lands on
+the same node — the kubelet keeps the RBD device staged and the new pod
+inherits the old-key mapping. Force a node change (cordon → restart →
+uncordon) or scale to 0 and wait for the VolumeAttachment to disappear.
+Verify per node via `/sys/bus/rbd/devices/*/client_id` against
+`ceph tell mon.<x> sessions` (`entity_name`), not via pod age. Old-identity
+sessions that remain with no matching kernel client id are the hostNetwork
+CSI plugins' pooled librados connections — harmless, flushed by restarting
+the plugin pods.
+
+Verify nothing still reports `aes`:
 
 ```
 ceph auth dump-keys --format=json-pretty | grep -c '"aes"'   # want 0
