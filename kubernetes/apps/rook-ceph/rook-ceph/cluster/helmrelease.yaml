@@ -79,8 +79,8 @@ spec:
             enabled: true
           - name: pg_autoscaler
             enabled: true
-          - name: rook
-            enabled: true
+          # No `rook` orchestrator module: Rook force-disables it on Ceph 20.2.2-20.2.4
+          # (mgr crash), and it is not needed for an RBD-only cluster.
       network:
         provider: host
         connections:
