@@ -60,7 +60,7 @@ Verify nothing still reports `aes`:
 ceph auth dump-keys --format=json-pretty | grep -c '"aes"'   # want 0
 ```
 
-### Step 3 — restrict allowed ciphers (mon tighten)
+### Step 3 — restrict allowed ciphers (mon tighten) (DONE 2026-09-09, PR #752)
 
 Only after Step 2 shows zero `aes` keys anywhere (daemons included):
 
