@@ -113,10 +113,12 @@ spec:
           # and Rook 1.20.7 ships CSI 3.17.1 (required). keepPriorKeyCountMax
           # keeps the old aes key alive for already-mounted PVCs; new mounts use
           # aes256k. Migration runbook + the allowedCiphers follow-up: ../README.md
+          # keepPriorKeyCountMax 0: every RBD mapping was rehydrated onto the
+          # generation-2 key on 2026-09-09 (71/71 verified via /sys/bus/rbd).
           csi:
             keyRotationPolicy: KeyGeneration
             keyGeneration: 2
-            keepPriorKeyCountMax: 1
+            keepPriorKeyCountMax: 0
             keyType: aes256k
           rbdMirrorPeer:
             keyRotationPolicy: KeyGeneration
