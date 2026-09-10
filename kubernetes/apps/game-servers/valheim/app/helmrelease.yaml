@@ -96,6 +96,7 @@ spec:
         globalMounts:
           - path: /home/steam/valheim
       tmp:
+        # /home/steam is 750 owned by uid 111 in the image; uid 1000 needs its own writable dirs (README)
         type: emptyDir
         globalMounts:
           - path: /tmp
@@ -104,3 +105,7 @@ spec:
             subPath: steam
           - path: /home/steam/.local
             subPath: local
+          - path: /home/steam/.cache
+            subPath: cache
+          - path: /home/steam/Steam
+            subPath: steamcmd-home

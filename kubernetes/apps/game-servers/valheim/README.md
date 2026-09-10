@@ -40,7 +40,7 @@ listed in the in-game browser.
 | `/home/steam/.config/unity3d/IronGate/Valheim` | `valheim` (VolSync, `saves/` subPath) | VolSync every 12 h | `worlds_local/<World>/` (1.0 chunked save dir), `adminlist.txt`, `bannedlist.txt`, `permittedlist.txt` |
 | `/home/steam/backups` | `valheim` (`backups/` subPath) | VolSync | Odin zip taken before every Steam update (`AUTO_BACKUP_ON_UPDATE`), pruned after 7 days |
 | `/home/steam/valheim` | `valheim-server-files` (plain 5Gi) | no | SteamCMD download, `config.json`, `discord.json`, BepInEx if enabled |
-| `/tmp`, `~/.steam`, `~/.local` | emptyDir | no | SteamCMD scratch |
+| `/tmp`, `~/.steam`, `~/.local`, `~/.cache`, `~/Steam` | emptyDir | no | SteamCMD and Steam SDK scratch |
 
 A world save is a **directory** in 1.0. Copying a world in or out means the whole
 `worlds_local/<World>/` tree, not a `.db`/`.fwl` pair. Pre-1.0 saves convert
@@ -180,6 +180,12 @@ or Game Pass players and pairs badly with mods.
 
 ## Gotchas
 
+- **SteamCMD "Failed to install app '896660' (Missing configuration)" then
+  "(Missing file permissions)", exit code 8, container restarts**: the image's
+  `steam` user is uid 111 and `/home/steam` is mode 750, so our uid 1000 cannot
+  create anything directly under the home dir. SteamCMD wants `~/Steam` for its
+  config and logs. Every path SteamCMD or the game writes under `~` must be an
+  emptyDir or PVC mount (table above). Hit on first boot 2026-09-10.
 - **Stuck on "state is 0x6 after update job"**: stale SteamCMD manifest. Odin
   retries once automatically (`STEAMCMD_RESET_ON_FAILURE`); if it loops, delete
   `steamapps/` on the `valheim-server-files` PVC and restart.
