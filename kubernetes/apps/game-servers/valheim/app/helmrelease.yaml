@@ -27,11 +27,7 @@ spec:
               WORLD: TiredOldVikings
               PORT: &port "2456"
               PUBLIC: "0"
-              TYPE: BepInEx
-              # Mods: every client needs the same set (README). Dependencies are listed explicitly.
-              MODS: |
-                ValheimModding-Jotunn-2.30.0
-                RandyKnapp-AdvancedPortals-1.2.0
+              TYPE: Vanilla
               # World tuning (PRESET / MODIFIERS / SET_KEY): see README
               UPDATE_ON_STARTUP: "1"
               AUTO_UPDATE: "1"
