@@ -134,19 +134,45 @@ materials; TieredPortals: metal unlocks per boss kill).
 
 ## Mods later
 
-Vanilla today. To add mods (all Steam players must install the same set with
-r2modman or Gale; share a profile export):
+Vanilla at launch, by decision on 2026-09-09: the first tiered portal needs
+iron anyway, so there is nothing to gain from mods before the Swamp, and staying
+vanilla keeps friends on the plain Steam launcher while 1.0 hotfixes and mod
+updates settle.
+
+**Planned flip, once the group reaches iron:** AdvancedPortals, so metal
+transport is earned by crafting portal tiers instead of a flat
+`portals=casual`. Ancient carries copper/tin (costs iron + ancient bark),
+Obsidian carries iron (costs silver), Black Marble carries everything (costs
+black metal + refined eitr). The vanilla portal is untouched; config is
+server-synced and live-editable in `randyknapp.mods.advancedportals.cfg`.
 
 ```yaml
 TYPE: BepInEx
 MODS: |
-  ValheimModding-Jotunn-2.30.0
-  Advize-PlantEverything-1.20.0
+  ValheimModding-Jotunn-<latest>
+  RandyKnapp-AdvancedPortals-<latest>
 ```
 
-Odin downloads them from Thunderstore on start (`MODS_CONTINUE_ON_FAILURE=true`
-keeps the server up if one is missing). Setting `TYPE` back to `Vanilla` removes
-the loader; the world keeps working minus anything a removed mod placed.
+Odin installs the list from Thunderstore on start; dependencies must be listed
+explicitly (BepInEx itself comes from `TYPE`). Pin exact versions. Before
+flipping, check on Thunderstore that both have a release dated after the
+current Valheim patch: on launch day AdvancedPortals 1.2.0 shipped 2.5 h before
+Jotunn 2.30.0, the first Jotunn built for 1.0.7, and Jotunn's custom piece
+categories were not yet updated for 1.0.
+
+**Every player must run the same set once mods are on.** Jotunn version-checks
+on connect and rejects clients missing a mod, naming what they lack. Friend
+setup: r2modman or Gale, a Valheim profile with `BepInExPack_Valheim`,
+`Jotunn` and `AdvancedPortals`, launch modded. r2modman profile codes expire in
+about an hour, so share the list rather than a code.
+
+**Updates with mods:** Valheim version-locks clients to the server and Steam
+updates clients automatically, so `AUTO_UPDATE` stays on even though Odin's
+docs suggest otherwise. A hotfix can break a mod for a day or two; Odin backs
+the world up before every update. Setting `TYPE` back to `Vanilla` and removing
+`MODS` drops the loader and the world keeps working minus the placed advanced
+portals.
+
 Thunderstore marks server-only mods, which need nothing on clients. Mods that
 use the RPC port need 2458 forwarded, which the forward above already covers.
 Crossplay (`ENABLE_CROSSPLAY=1`) is off by design: it is only needed for console
