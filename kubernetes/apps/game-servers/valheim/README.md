@@ -51,26 +51,30 @@ saves the world. `terminationGracePeriodSeconds` is 120 to give it room.
 
 ## Secrets
 
-`valheim-secret` comes from Bitwarden Secrets Manager. Create the item and paste
-its id into `app/externalsecret.yaml`:
+`valheim-secret` comes from Bitwarden Secrets Manager with two keys. Create
+both items and paste their ids into `app/externalsecret.yaml`:
 
 ```sh
 bws secret create VALHEIM_PASSWORD '<password>' <project-id>
+bws secret create VALHEIM_DISCORD_WEBHOOK 'https://discord.com/api/webhooks/...' <project-id>
 ```
 
 Password rules: at least 5 characters and it must not be contained in the server
 or world name, or the server refuses to start.
 
-Optional Discord: add a `WEBHOOK_URL` key to the same secret and reference it
-via `env`. Odin posts start/stop/update events; `PLAYER_EVENT_NOTIFICATIONS=1`
-adds join/leave (needs `PUBLIC=1`, see above); `WEBHOOK_SUPPRESS_NOTIFICATIONS=1`
-makes posts silent; `WEBHOOK_JOIN_URL` adds a Join button but must be an HTTPS
-redirect (Huginn `/connect/remote` behind envoy would do).
+The webhook feeds Odin's own notifications: **Start**, **Stop** and **Update**
+events, each posted as Running / Successful / Failed, straight from the
+container. These do not depend on `PUBLIC`. Optional extras:
+`PLAYER_EVENT_NOTIFICATIONS=1` adds join/leave (needs `PUBLIC=1`, see above);
+`WEBHOOK_SUPPRESS_NOTIFICATIONS=1` posts silently; `WEBHOOK_JOIN_URL` adds a
+Join button but must be an HTTPS redirect (Huginn `/connect/remote` behind envoy
+would do). To go without Discord, drop the `WEBHOOK_URL` key from the
+ExternalSecret; Odin skips notifications when it is unset.
 
 ## First boot
 
-1. Create the bws secret and set the id (above). Pick `NAME` and `WORLD` in
-   `app/helmrelease.yaml` first: the world name is baked into the save
+1. Create the bws secrets and set their ids (above). Check `NAME` and `WORLD`
+   in `app/helmrelease.yaml` first: the world name is baked into the save
    directory and the seed is generated on first start.
 2. Merge. Flux creates the PVCs, the pod downloads the server (~1 GB) on
    first start, then generates the world. Expect a few minutes.

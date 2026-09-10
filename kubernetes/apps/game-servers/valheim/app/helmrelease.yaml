@@ -23,8 +23,8 @@ spec:
               tag: 3.7.2
             env:
               TZ: America/Chicago
-              NAME: Dvergar
-              WORLD: Dvergar
+              NAME: Tired Old Vikings
+              WORLD: TiredOldVikings
               PORT: &port "2456"
               PUBLIC: "0"
               TYPE: Vanilla
