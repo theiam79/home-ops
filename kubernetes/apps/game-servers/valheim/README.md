@@ -114,15 +114,23 @@ Individual modifiers:
 
 | Modifier | Values (default in the middle) | What it changes |
 |---|---|---|
-| combat | veryeasy, easy, **normal**, hard, veryhard | enemy and player damage, enemy speed/size, enemy level-up rate |
-| deathpenalty | casual, veryeasy, easy, **normal**, hard, hardcore | casual keeps gear and loses ~1% skills; normal drops gear at a gravestone with 5% skill loss; hardcore destroys all items and resets skills |
-| resources | muchless (0.5x), less (0.75x), **normal**, more (1.5x), muchmore (2x), most (3x) | drop rates for most resources (not fish) |
-| raids | none, muchless, less, **normal**, more, muchmore | base raid frequency |
-| portals | casual, **normal**, hard, veryhard | casual lets metal through; normal blocks metal; hard blocks all items; veryhard removes portals |
-| setkey | nobuildcost, playerevents, passivemobs, nomap | free building; raids scale to players present rather than global progress; enemies ignore you until attacked; no minimap |
+| combat | veryeasy, easy, **normal**, hard, veryhard | player dmg / enemy dmg / enemy speed+size / star rate: veryeasy 125/50/90/100 %, easy 110/75/90/100, normal 100/100/100/100, hard 85/150/110/120, veryhard 70/200/120/140 |
+| deathpenalty | casual, veryeasy, easy, **normal**, hard, hardcore | casual keeps equipped gear, drops inventory, 1% skill loss; veryeasy drops everything, 1%; easy 2.5%; normal 5%; hard 7.5% and inventory destroyed; hardcore destroys all and resets skills |
+| resources | muchless (0.5x), less (0.75x), **normal**, more (1.5x), muchmore (2x), most (3x) | drop rates from mobs and lootable objects (not fish); vanilla does not scale drops with player count |
+| raids | none, muchless, less, **normal**, more, muchmore | raid check interval / chance: muchless 92 min / 10 %, less 69 / 13 %, normal 46 / 20 %, more 28 / 33 %, muchmore 14 / 67 % |
+| portals | casual, **normal**, hard, veryhard | casual lets everything through (not tames); normal blocks metal; hard disables portals while a boss is active; veryhard removes portals |
+| setkey | nobuildcost, playerevents, passivemobs, nomap | free building; raids keyed to each player's own boss progress rather than the world's; enemies ignore you until attacked; no minimap |
 
-For a first friends run, `deathpenalty=casual` or `easy` and `portals=casual`
-are the two most-requested QoL changes and both are vanilla, no mods needed.
+Vanilla already scales enemies with the group: roughly +30 % effective health
+and +4 % damage per extra player within 100 m, capped at five. Resource drops do
+not scale, which is the usual argument for `resources=more` on a group server.
+
+For a first friends run, `deathpenalty=casual` and `resources=more` are the
+two most common group picks; `combat=hard` is the usual counterweight to a soft
+death penalty. There is no vanilla "earn metal portals" option: it is
+`portals=casual` (everything) or `normal` (haul metal), or a mod later
+(AdvancedPortals: craftable portal tiers unlocked by the next biome's
+materials; TieredPortals: metal unlocks per boss kill).
 
 ## Mods later
 
