@@ -2,7 +2,7 @@
 
 Friends-only Valheim 1.0 dedicated server. Image is
 [mbround18/valheim](https://github.com/mbround18/valheim-docker) (Odin): rootless,
-updates itself from Steam, and turns mods on with an env change. Research and
+updates itself from Steam, and installs the mod list from Thunderstore on start. Research and
 option comparison (hosting, exposure, mods) lives in the 2026-09-09 decision
 brief; this README is the operating doc.
 
@@ -17,7 +17,7 @@ brief; this README is the operating doc.
 | Status API | `valheim-status.game-servers.svc:3000` (Huginn: `/status`, `/players`, `/metrics`, `/connect/remote`). In-cluster only. |
 
 The server runs `-public 0`: hidden from the community browser, reachable by
-direct connect only. Friends need no software beyond Steam.
+direct connect only. Friends need Steam plus the mod set under "Mods" below.
 
 **Join instructions for friends:** in Valheim → Join Game → Join IP →
 `valheim.<domain>:2456`, or open this link with Steam running:
@@ -39,7 +39,7 @@ listed in the in-game browser.
 |---|---|---|---|
 | `/home/steam/.config/unity3d/IronGate/Valheim` | `valheim` (VolSync, `saves/` subPath) | VolSync every 12 h | `worlds_local/<World>/` (1.0 chunked save dir), `adminlist.txt`, `bannedlist.txt`, `permittedlist.txt` |
 | `/home/steam/backups` | `valheim` (`backups/` subPath) | VolSync | Odin zip taken before every Steam update (`AUTO_BACKUP_ON_UPDATE`), pruned after 7 days |
-| `/home/steam/valheim` | `valheim-server-files` (plain 5Gi) | no | SteamCMD download, `config.json`, `discord.json`, BepInEx if enabled |
+| `/home/steam/valheim` | `valheim-server-files` (plain 5Gi) | no | SteamCMD download, `config.json`, `discord.json`, `BepInEx/` (loader, plugins, mod configs) |
 | `/tmp`, `~/.steam`, `~/.local` | emptyDir | no | SteamCMD scratch |
 
 A world save is a **directory** in 1.0. Copying a world in or out means the whole
@@ -132,21 +132,39 @@ death penalty. There is no vanilla "earn metal portals" option: it is
 (AdvancedPortals: craftable portal tiers unlocked by the next biome's
 materials; TieredPortals: metal unlocks per boss kill).
 
-## Mods later
+## Mods
 
-Vanilla today. To add mods (all Steam players must install the same set with
-r2modman or Gale; share a profile export):
+BepInEx is on with one gameplay mod, chosen so metal can be portalled by
+"earning" it rather than a flat `portals=casual`:
 
-```yaml
-TYPE: BepInEx
-MODS: |
-  ValheimModding-Jotunn-2.30.0
-  Advize-PlantEverything-1.20.0
-```
+| Mod | Version | Why |
+|---|---|---|
+| ValheimModding-Jotunn | 2.30.0 (2026-09-09, first release for Valheim 1.0.7) | library AdvancedPortals needs |
+| RandyKnapp-AdvancedPortals | 1.2.0 (2026-09-09) | three craftable portals: Ancient carries copper/tin (costs iron + ancient bark), Obsidian carries iron (costs silver), Black Marble carries everything (costs black metal + refined eitr). Vanilla portal unchanged. Config is server-synced and live-editable in `randyknapp.mods.advancedportals.cfg` |
 
-Odin downloads them from Thunderstore on start (`MODS_CONTINUE_ON_FAILURE=true`
-keeps the server up if one is missing). Setting `TYPE` back to `Vanilla` removes
-the loader; the world keeps working minus anything a removed mod placed.
+Odin downloads the list from Thunderstore on start; dependencies must be listed
+explicitly (BepInEx itself comes from `TYPE`). Pin exact versions and bump them
+deliberately; wildcards exist but make rollbacks guesswork.
+
+**Every player must run the same set.** Jotunn version-checks on connect and
+rejects clients missing a mod, naming what they lack. Friend setup: install
+r2modman or Gale, create a Valheim profile, add `BepInExPack_Valheim`,
+`Jotunn` and `AdvancedPortals` (latest of each), launch modded. Profile codes
+from r2modman expire in about an hour, so share the list, not a code.
+
+**Known state on 1.0 (2026-09-09):** AdvancedPortals 1.2.0 shipped 2.5 h
+before Jotunn 2.30.0, so it was not built against the 1.0 Jotunn. Jotunn also
+notes custom piece categories are not updated for 1.0 yet, so the portals appear
+in the hammer menu without a category tab. If the server fails to start or the
+portals never appear, set `TYPE: Vanilla` and remove `MODS`; the world keeps
+working minus the placed advanced portals.
+
+**Updates:** Valheim version-locks clients to the server, and Steam updates
+clients automatically, so `AUTO_UPDATE` stays on even with mods. A Valheim
+hotfix can break a mod for a day or two until its author catches up; Odin
+backs the world up before every update (`AUTO_BACKUP_ON_UPDATE`). Expect
+hotfixes to be frequent in the weeks after 1.0.
+
 Thunderstore marks server-only mods, which need nothing on clients. Mods that
 use the RPC port need 2458 forwarded, which the forward above already covers.
 Crossplay (`ENABLE_CROSSPLAY=1`) is off by design: it is only needed for console
