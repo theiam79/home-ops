@@ -242,6 +242,9 @@ identity_providers:
           - profile
           - email
         redirect_uris:
+          # v5.3.0+ (Better Auth 1.7.x) callback path
+          - 'https://resume.${SECRET_DOMAIN}/api/auth/callback/custom'
+          # pre-5.3.0 callback path, kept so a rollback still logs in
           - 'https://resume.${SECRET_DOMAIN}/api/auth/oauth2/callback/custom'
       - client_id: vikunja
         client_name: Vikunja
