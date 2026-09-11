@@ -105,11 +105,49 @@ of 5-8 components simultaneously. Each agent should search for:
 4. **User-reported problems**: Community reports of failed upgrades
 
 Focus research effort proportionally to risk:
-- **Patches**: No research needed
+- **Patches**: No research needed (except the integration check below)
 - **Minors**: Quick search for release notes
 - **Majors**: Thorough search including GitHub issues, migration guides
 - **Infrastructure** (CNI, storage, OS): Most thorough — include issue trackers,
   community forums, and check for open regressions
+
+### Integration-contract check (every bump size, including patches)
+
+Some apps have a contract with another in-cluster component that a bump can
+silently break even when the app itself comes up healthy. Bump size is a poor
+predictor here: Reactive Resume 5.2.9 → 5.3.0 (a minor) swapped auth
+libraries and moved its OIDC callback from `/api/auth/oauth2/callback/custom`
+to `/api/auth/callback/custom`, so Authelia rejected every login until the
+registered `redirect_uris` were updated (#758).
+
+1. Build the list of **Authelia OIDC clients** mechanically:
+   ```
+   grep -n "client_id:\|redirect_uris\|https://" \
+     kubernetes/apps/auth/authelia/app/resources/configuration.yml
+   ```
+2. For any PR whose component is on that list, read the release notes and
+   changelog for the target version (and every version in between) looking
+   for: auth-library swaps (Better Auth, NextAuth/Auth.js, oauth2-proxy,
+   Authlib, etc.), OIDC/OAuth/SSO rework, callback or redirect URI changes,
+   renamed `OAUTH_*`/`OIDC_*` env vars, and changed claim or scope
+   expectations. Diff the app's documented callback path against what
+   Authelia has registered.
+3. If anything moved, the PR is at least **Light prep**: update the Authelia
+   `redirect_uris` (keep the old path too so a rollback still logs in) in the
+   same PR or a paired one, and merge the Authelia change first.
+4. After merging any Authelia-client bump, **verify a login** through
+   Authelia, or if that is not possible in-session, check the Authelia log
+   for `redirect_uri` rejections against that `client_id`:
+   ```
+   kubectl -n auth logs deploy/authelia --since=1h | grep -i "<client_id>"
+   ```
+   A clean pod rollout is not evidence the app still works — the failure
+   only appears when a user clicks Sign in.
+
+The same reasoning applies to other cross-component contracts (CNPG
+connection secrets, Garage/S3 env var names, Envoy route annotations): when
+release notes mention the integration, treat the bump as prep work, not a
+clean patch.
 
 ## Phase 3: Cross-Reference (unless reference repo is `none`)
 
@@ -151,7 +189,8 @@ Tiers, safest first:
 1. **Immediate** — patches, clean minors, cosmetic majors, CI actions with no
    API change. Merge directly.
 2. **Light prep** — small values tweak, SHA verification, community PR needing
-   manual review, a new default to override.
+   manual review, a new default to override, an Authelia-client bump whose
+   release notes touch auth/OIDC (update `redirect_uris` first).
 3. **Moderate prep** — major bumps with known config migration, plugin
    replacement, sequenced upgrade where Step 2 needs prep.
 4. **Heavy prep** — multi-step sequences spanning 2+ majors, bootstrap CRD
