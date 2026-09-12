@@ -20,7 +20,7 @@ spec:
           app:
             image:
               repository: ghcr.io/mbround18/valheim
-              tag: 3.7.2
+              tag: 3.8.3
             env:
               TZ: America/Chicago
               NAME: Tired Old Vikings
