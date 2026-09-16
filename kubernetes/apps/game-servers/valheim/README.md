@@ -40,8 +40,8 @@ listed in the in-game browser.
 |---|---|---|---|
 | `/home/steam/.config/unity3d/IronGate/Valheim` | `valheim` (VolSync, `saves/` subPath) | VolSync every 12 h | `worlds_local/<World>/` (1.0 chunked save dir), `adminlist.txt`, `bannedlist.txt`, `permittedlist.txt` |
 | `/home/steam/backups` | `valheim` (`backups/` subPath) | VolSync | Odin zip taken before every Steam update (`AUTO_BACKUP_ON_UPDATE`), pruned after 7 days |
-| `/home/steam/valheim` | `valheim-server-files` (plain 5Gi) | no | SteamCMD download, `config.json`, `discord.json`, `BepInEx/` (loader, plugins, `config/*.cfg`) |
-| `/config-overrides`, `/valheim-post-install.d/10-config-overrides.sh` | `valheim-config` ConfigMap (generated from `app/resources/`) | git | Mod config overrides and the hook that applies them each boot |
+| `/home/steam/valheim/BepInEx/config` | `valheim` (`bepinex-config/` subPath) | VolSync | one `<plugin>.cfg` per mod, edited in place (see "Mod configs") |
+| `/home/steam/valheim` | `valheim-server-files` (plain 5Gi) | no | SteamCMD download, `config.json`, `discord.json`, BepInEx loader and plugins (re-downloadable) |
 | `/tmp`, `~/.steam`, `~/.local`, `~/.cache`, `~/Steam` | emptyDir | no | SteamCMD and Steam SDK scratch |
 
 A world save is a **directory** in 1.0. Copying a world in or out means the whole
@@ -171,45 +171,41 @@ are not updated for 1.0, so AdvancedPortals' portals may land in an unexpected
 hammer tab (cosmetic). AdvancedPortals 1.2.0 shipped before the first 1.0
 Jotunn and carries no 1.0 changelog line; it was verified by hand in a
 single-player 1.0.12 world (`devcommands`, `debugmode`, B for no-cost build
-shows every piece). PlantEverything 1.21.2 is compiled against 1.0.12 (since 1.21.1),
-LetMeSleep 1.0.5 and PlantEasily 2.2.0 against 1.0.
+shows every piece). PlantEverything 1.21.2 is compiled against 1.0.12 (since
+1.21.1), LetMeSleep 1.0.5 and PlantEasily 2.2.0 against 1.0.
 
 ### Mod configs
 
-BepInEx writes one `<plugin>.cfg` per mod into `BepInEx/config/` on the
-`valheim-server-files` PVC the first time the mod loads. Odin copies a
-package's shipped config only when the file is absent and never overwrites it,
-so left alone those files drift on the PVC with no record in git.
+Each mod writes `BepInEx/config/<plugin>.cfg` the first time it loads. That
+directory is a subPath of the backed-up `valheim` claim (Storage table), so the
+files ride the VolSync/kopia schedule with the world, and Odin never overwrites
+a config that already exists. They are edited in place, not tracked in git:
 
-The fix here is a small overlay: `app/resources/*.cfg` are minimal files with
-only the keys we deliberately set, and `10-config-overrides.sh` runs as an Odin
-post-install hook (`/valheim-post-install.d/`, executed on every start after
-mods are installed, before the server launches) and copies them over the live
-files. BepInEx then fills in every key that is missing with the mod default and
-rewrites the file, so a two-line override is a complete config.
+- In-game, as admin, through the Configuration Manager mod for anything
+  server-synced (AdvancedPortals costs and hammer tab, PlantEverything
+  everything outside `[General]`). Takes effect live.
+- Or on the pod, for anything else:
 
-Consequences, on purpose:
+  ```sh
+  kubectl -n game-servers exec -it valheim-0 -- vi /home/steam/valheim/BepInEx/config/blockchaaain.LetMeSleep.cfg
+  kubectl -n game-servers delete pod valheim-0     # server-local settings need a restart
+  ```
 
-- **Git wins.** Editing a managed file in `resources/` and merging changes the
-  ConfigMap; Reloader restarts the pod; the hook reapplies. Edits made in-game
-  through Configuration Manager or by hand on the PVC last until the next
-  restart. Unmanaged mods (AdvancedPortals) keep the normal behaviour: the file
-  on the PVC is the truth and in-game admin edits persist.
-- **A managed file lists only overrides.** Do not paste a full generated config
-  in; the mod default for anything not listed is what you get, and the file
-  stays readable.
-- Files must be named exactly as the mod names them (`blockchaaain.LetMeSleep.cfg`,
-  `advize.PlantEverything.cfg`). A typo just creates an orphan file.
-- `${...}` in a config would be eaten by Flux substitution, which is why the
-  generator carries `kustomize.toolkit.fluxcd.io/substitute: disabled`.
+Settings we run off-default (set by hand after the first modded boot generated
+the files):
 
-Managed today: LetMeSleep `ratio` (0.5; a third is 0.34) and PlantEverything
-`LockConfiguration` (admin-only changes; respawn-time knobs are listed in the
-file, commented out). AdvancedPortals runs on defaults; its costs and hammer
-tab are server-synced and live-editable by an admin in
-`randyknapp.mods.advancedportals.cfg`. To bring it under git, add a
-`resources/randyknapp.mods.advancedportals.cfg` with the overrides and list it
-in `kustomization.yaml`.
+| File | Key | Value | Why |
+|---|---|---|---|
+| `blockchaaain.LetMeSleep.cfg` | `[General] ratio` | `0.3` | a third of online players in bed skips the night (mod default 0.5; range 0.01 to 1.0) |
+
+PlantEverything ships with `[General] LockConfiguration = true` (admin-only
+synced changes) and vanilla-balanced defaults; its author suggests lowering the
+pickable respawn times (`[Berries]`, `[Mushrooms]`, `[Flowers]`, `[Debris]`,
+minutes, defaults 240 to 300) if the group finds foraging too slow.
+AdvancedPortals runs on defaults.
+
+Removing a mod from `MODS` leaves its config behind; delete it by hand if the
+mod is gone for good.
 
 ### Updating with mods
 
@@ -251,6 +247,10 @@ or Game Pass players and pairs badly with mods.
 - **Stuck on "state is 0x6 after update job"**: stale SteamCMD manifest. Odin
   retries once automatically (`STEAMCMD_RESET_ON_FAILURE`); if it loops, delete
   `steamapps/` on the `valheim-server-files` PVC and restart.
+- **Never set `CLEAN_INSTALL=1`**: it wipes `/home/steam/valheim`, and
+  `BepInEx/config` there is a mountpoint of another claim, so the wipe fails
+  halfway. To rebuild the server files, delete the `valheim-server-files` PVC
+  instead; the configs and world are on the other claim.
 - **Admin commands say "not admin"**: adminlist entry lacks the `V_` prefix.
 - **`externalTrafficPolicy` must stay `Cluster`**: Cilium L2 announcements
   blackhole with `Local` (see the unifi README). Client source IPs are SNATed,

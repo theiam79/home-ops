@@ -30,7 +30,7 @@ spec:
               # World tuning: see README for the full table
               MODIFIERS: resources=muchmore,deathpenalty=casual
               SET_KEY: playerevents
-              # Mods: server-side set, pinned; friends' profile and config handling in README "Mods"
+              # Mods: server-side set, pinned; friends' profile and configs in README "Mods"
               TYPE: BepInEx
               MODS: |
                 ValheimModding-Jotunn-2.30.0
@@ -119,21 +119,13 @@ spec:
             subPath: saves
           - path: /home/steam/backups
             subPath: backups
+          # Mod configs ride the backed-up claim; edited in place (README "Mod configs")
+          - path: /home/steam/valheim/BepInEx/config
+            subPath: bepinex-config
       server:
         existingClaim: valheim-server-files
         globalMounts:
           - path: /home/steam/valheim
-      config:
-        # Git-managed BepInEx config overrides + the hook that applies them (README "Mod configs")
-        type: configMap
-        name: valheim-config
-        defaultMode: 0755
-        globalMounts:
-          - path: /valheim-post-install.d/10-config-overrides.sh
-            subPath: 10-config-overrides.sh
-            readOnly: true
-          - path: /config-overrides
-            readOnly: true
       tmp:
         # /home/steam is 750 owned by uid 111 in the image; uid 1000 needs its own writable dirs (README)
         type: emptyDir
