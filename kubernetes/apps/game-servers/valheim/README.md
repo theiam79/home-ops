@@ -17,7 +17,8 @@ brief; this README is the operating doc.
 | Status API | `valheim-status.game-servers.svc:3000` (Huginn: `/status`, `/players`, `/metrics`, `/connect/remote`). In-cluster only. |
 
 The server runs `-public 0`: hidden from the community browser, reachable by
-direct connect only. Friends need no software beyond Steam.
+direct connect only. Since the mod flip, friends need the client mod profile
+from the "Mods" section before the join link works.
 
 **Join instructions for friends:** in Valheim → Join Game → Join IP →
 `valheim.<domain>:2456`, or open this link with Steam running:
@@ -39,7 +40,8 @@ listed in the in-game browser.
 |---|---|---|---|
 | `/home/steam/.config/unity3d/IronGate/Valheim` | `valheim` (VolSync, `saves/` subPath) | VolSync every 12 h | `worlds_local/<World>/` (1.0 chunked save dir), `adminlist.txt`, `bannedlist.txt`, `permittedlist.txt` |
 | `/home/steam/backups` | `valheim` (`backups/` subPath) | VolSync | Odin zip taken before every Steam update (`AUTO_BACKUP_ON_UPDATE`), pruned after 7 days |
-| `/home/steam/valheim` | `valheim-server-files` (plain 5Gi) | no | SteamCMD download, `config.json`, `discord.json`, BepInEx if enabled |
+| `/home/steam/valheim` | `valheim-server-files` (plain 5Gi) | no | SteamCMD download, `config.json`, `discord.json`, `BepInEx/` (loader, plugins, `config/*.cfg`) |
+| `/config-overrides`, `/valheim-post-install.d/10-config-overrides.sh` | `valheim-config` ConfigMap (generated from `app/resources/`) | git | Mod config overrides and the hook that applies them each boot |
 | `/tmp`, `~/.steam`, `~/.local`, `~/.cache`, `~/Steam` | emptyDir | no | SteamCMD and Steam SDK scratch |
 
 A world save is a **directory** in 1.0. Copying a world in or out means the whole
@@ -128,50 +130,110 @@ not scale, which is the usual argument for `resources=more` on a group server.
 For a first friends run, `deathpenalty=casual` and `resources=more` are the
 two most common group picks; `combat=hard` is the usual counterweight to a soft
 death penalty. There is no vanilla "earn metal portals" option: it is
-`portals=casual` (everything) or `normal` (haul metal), or a mod later
-(AdvancedPortals: craftable portal tiers unlocked by the next biome's
-materials; TieredPortals: metal unlocks per boss kill).
+`portals=casual` (everything) or `normal` (haul metal), or a mod
+(AdvancedPortals below: craftable portal tiers unlocked by the next biome's
+materials).
 
-## Mods later
+## Mods
 
-Vanilla at launch, by decision on 2026-09-09: the first tiered portal needs
-iron anyway, so there is nothing to gain from mods before the Swamp, and staying
-vanilla keeps friends on the plain Steam launcher while 1.0 hotfixes and mod
-updates settle.
+Modded since 2026-09-16 (vanilla from launch until the group reached iron, by
+the 2026-09-09 decision). Odin installs `MODS` from Thunderstore on every start;
+dependencies must be listed explicitly, BepInEx itself comes from `TYPE`, and
+every pin is exact so a restart never picks up an untested build.
 
-**Planned flip, once the group reaches iron:** AdvancedPortals, so metal
-transport is earned by crafting portal tiers instead of a flat
-`portals=casual`. Ancient carries copper/tin (costs iron + ancient bark),
-Obsidian carries iron (costs silver), Black Marble carries everything (costs
-black metal + refined eitr). The vanilla portal is untouched; config is
-server-synced and live-editable in `randyknapp.mods.advancedportals.cfg`.
+| Mod | Server | Client | Why |
+|---|---|---|---|
+| Jotunn | yes | yes | library for AdvancedPortals; version-checks clients on connect |
+| AdvancedPortals | yes | yes | earned metal transport: Ancient (copper/tin, costs iron + ancient bark), Obsidian (iron, costs silver), Black Marble (everything, costs black metal + refined eitr). Vanilla portal untouched |
+| PlantEverything | yes | yes | plant berries, mushrooms, flowers, saplings and more with the cultivator; server-synced config |
+| LetMeSleep | yes | no | skip the night when a fraction of online players are in bed |
+| PlantEasily | **no** | yes | bulk planting, grid snap, replant on harvest. Client-only by design; its README says not to install it on a dedicated server |
 
-```yaml
-TYPE: BepInEx
-MODS: |
-  ValheimModding-Jotunn-<latest>
-  RandyKnapp-AdvancedPortals-<latest>
+**Friend setup (r2modman or Gale, Windows/Linux/Steam Deck):** a Valheim
+profile with exactly these, then launch modded:
+
+```
+denikson-BepInExPack_Valheim-5.4.2350
+ValheimModding-Jotunn-2.30.0
+RandyKnapp-AdvancedPortals-1.2.0
+Advize-PlantEverything-1.21.2
+Advize-PlantEasily-2.2.0
 ```
 
-Odin installs the list from Thunderstore on start; dependencies must be listed
-explicitly (BepInEx itself comes from `TYPE`). Pin exact versions. Before
-flipping, check on Thunderstore that both have a release dated after the
-current Valheim patch: on launch day AdvancedPortals 1.2.0 shipped 2.5 h before
-Jotunn 2.30.0, the first Jotunn built for 1.0.7, and Jotunn's custom piece
-categories were not yet updated for 1.0.
+Jotunn rejects a client that is missing a server mod or runs a different
+version, and the dialog names what is missing. LetMeSleep is server-only, so it
+is not in the client list. r2modman profile codes expire in about an hour, so
+share the list rather than a code. Bump client and server pins together.
 
-**Every player must run the same set once mods are on.** Jotunn version-checks
-on connect and rejects clients missing a mod, naming what they lack. Friend
-setup: r2modman or Gale, a Valheim profile with `BepInExPack_Valheim`,
-`Jotunn` and `AdvancedPortals`, launch modded. r2modman profile codes expire in
-about an hour, so share the list rather than a code.
+**Compatibility state at the flip (Valheim l-1.0.12, netver 40):** Jotunn
+2.30.0 is built for 1.0.7 and works on 1.0.12, but its custom piece categories
+are not updated for 1.0, so AdvancedPortals' portals may land in an unexpected
+hammer tab (cosmetic). AdvancedPortals 1.2.0 shipped before the first 1.0
+Jotunn and carries no 1.0 changelog line; it was verified by hand in a
+single-player 1.0.12 world (`devcommands`, `debugmode`, B for no-cost build
+shows every piece). PlantEverything 1.21.2 is compiled against 1.0.12 (since 1.21.1),
+LetMeSleep 1.0.5 and PlantEasily 2.2.0 against 1.0.
 
-**Updates with mods:** Valheim version-locks clients to the server and Steam
-updates clients automatically, so `AUTO_UPDATE` stays on even though Odin's
-docs suggest otherwise. A hotfix can break a mod for a day or two; Odin backs
-the world up before every update. Setting `TYPE` back to `Vanilla` and removing
-`MODS` drops the loader and the world keeps working minus the placed advanced
-portals.
+### Mod configs
+
+BepInEx writes one `<plugin>.cfg` per mod into `BepInEx/config/` on the
+`valheim-server-files` PVC the first time the mod loads. Odin copies a
+package's shipped config only when the file is absent and never overwrites it,
+so left alone those files drift on the PVC with no record in git.
+
+The fix here is a small overlay: `app/resources/*.cfg` are minimal files with
+only the keys we deliberately set, and `10-config-overrides.sh` runs as an Odin
+post-install hook (`/valheim-post-install.d/`, executed on every start after
+mods are installed, before the server launches) and copies them over the live
+files. BepInEx then fills in every key that is missing with the mod default and
+rewrites the file, so a two-line override is a complete config.
+
+Consequences, on purpose:
+
+- **Git wins.** Editing a managed file in `resources/` and merging changes the
+  ConfigMap; Reloader restarts the pod; the hook reapplies. Edits made in-game
+  through Configuration Manager or by hand on the PVC last until the next
+  restart. Unmanaged mods (AdvancedPortals) keep the normal behaviour: the file
+  on the PVC is the truth and in-game admin edits persist.
+- **A managed file lists only overrides.** Do not paste a full generated config
+  in; the mod default for anything not listed is what you get, and the file
+  stays readable.
+- Files must be named exactly as the mod names them (`blockchaaain.LetMeSleep.cfg`,
+  `advize.PlantEverything.cfg`). A typo just creates an orphan file.
+- `${...}` in a config would be eaten by Flux substitution, which is why the
+  generator carries `kustomize.toolkit.fluxcd.io/substitute: disabled`.
+
+Managed today: LetMeSleep `ratio` (0.5; a third is 0.34) and PlantEverything
+`LockConfiguration` (admin-only changes; respawn-time knobs are listed in the
+file, commented out). AdvancedPortals runs on defaults; its costs and hammer
+tab are server-synced and live-editable by an admin in
+`randyknapp.mods.advancedportals.cfg`. To bring it under git, add a
+`resources/randyknapp.mods.advancedportals.cfg` with the overrides and list it
+in `kustomization.yaml`.
+
+### Updating with mods
+
+`UPDATE_ON_STARTUP=0` and `AUTO_UPDATE=0` since the flip: a liveness restart at
+03:00 must not silently move the server to a Valheim build the mods were not
+made for. Steam still updates friends' clients automatically, and a patch that
+bumps the network version locks them out until the server follows, so an update
+is a short deliberate sequence rather than a surprise:
+
+1. Check Thunderstore for a Jotunn release dated after the new Valheim patch
+   (AdvancedPortals and PlantEverything usually follow within a day or two).
+2. Bump the pins in `MODS` and in the friends' list above, same versions.
+3. Set `UPDATE_ON_STARTUP: "1"` for that rollout, or run the update by hand:
+   `kubectl -n game-servers exec valheim-0 -- odin install`, then delete the
+   pod. Odin backs the world up first (`AUTO_BACKUP_ON_UPDATE`).
+4. Set `UPDATE_ON_STARTUP` back to `"0"` if it was flipped.
+
+Skipping a patch is fine as long as the network version did not change; the
+server log prints `Network version check, their:N, mine:N` on every join.
+
+Rolling back is an env change: `TYPE: Vanilla` and no `MODS` drops the loader,
+and the world keeps working minus placed modded pieces (advanced portals and
+PlantEverything plantables turn into nothing, which is the usual mod-removal
+cost).
 
 Thunderstore marks server-only mods, which need nothing on clients. Mods that
 use the RPC port need 2458 forwarded, which the forward above already covers.
@@ -193,5 +255,15 @@ or Game Pass players and pairs badly with mods.
 - **`externalTrafficPolicy` must stay `Cluster`**: Cilium L2 announcements
   blackhole with `Local` (see the unifi README). Client source IPs are SNATed,
   which is fine because Valheim bans by platform id, not IP.
-- No liveness/readiness probes: the only in-container health signal is A2S,
-  which `PUBLIC=0` disables. The statefulset restarts on crash regardless.
+- **Game process dies, pod stays `1/1 Running`**: the start script only
+  waits on its log tailer, so a crash of `valheim_server.x86_64` leaves Odin
+  and Huginn alive and the pod green. Huginn `/liveness` answers 200 with the
+  game dead, and `/health` and `/readiness` hang under `PUBLIC=0` (A2S). The
+  probes are therefore `pgrep -f valheim_server.x86_64`: startup allows 10 min
+  for SteamCMD and the world load, liveness restarts the container after ~90 s
+  without the process, readiness pulls the endpoints. Seen 2026-09-13: SIGSEGV
+  in Mono GC during the hourly "Unloading unused assets" pass (a known Unity
+  bug), players locked out for 3.5 h before anyone noticed.
+- **Every restart reinstalls `MODS`**: Odin re-resolves the list on start, so a
+  Thunderstore outage delays boot until the startup probe gives up. Pins keep
+  the resolved versions stable.

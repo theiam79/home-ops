@@ -27,12 +27,19 @@ spec:
               WORLD: TiredOldVikings
               PORT: &port "2456"
               PUBLIC: "0"
-              TYPE: Vanilla
               # World tuning: see README for the full table
               MODIFIERS: resources=muchmore,deathpenalty=casual
               SET_KEY: playerevents
-              UPDATE_ON_STARTUP: "1"
-              AUTO_UPDATE: "1"
+              # Mods: server-side set, pinned; friends' profile and config handling in README "Mods"
+              TYPE: BepInEx
+              MODS: |
+                ValheimModding-Jotunn-2.30.0
+                RandyKnapp-AdvancedPortals-1.2.0
+                Advize-PlantEverything-1.21.2
+                Blockheim-LetMeSleep-1.0.5
+              # Game updates are deliberate once modded (README "Updating with mods")
+              UPDATE_ON_STARTUP: "0"
+              AUTO_UPDATE: "0"
               AUTO_UPDATE_SCHEDULE: "0 5 * * *"
               AUTO_BACKUP_ON_UPDATE: "1"
               AUTO_BACKUP_REMOVE_OLD: "1"
@@ -41,13 +48,32 @@ spec:
             envFrom:
               - secretRef:
                   name: valheim-secret
+            # Process probes: Huginn's /liveness stays 200 with the game dead (README "Gotchas")
             probes:
-              liveness:
-                enabled: false
-              readiness:
-                enabled: false
               startup:
-                enabled: false
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command: ["pgrep", "-f", "valheim_server.x86_64"]
+                  periodSeconds: 10
+                  failureThreshold: 60
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command: ["pgrep", "-f", "valheim_server.x86_64"]
+                  periodSeconds: 30
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command: ["pgrep", "-f", "valheim_server.x86_64"]
+                  periodSeconds: 30
+                  failureThreshold: 2
             securityContext:
               allowPrivilegeEscalation: false
               capabilities: { drop: ["ALL"] }
@@ -97,6 +123,17 @@ spec:
         existingClaim: valheim-server-files
         globalMounts:
           - path: /home/steam/valheim
+      config:
+        # Git-managed BepInEx config overrides + the hook that applies them (README "Mod configs")
+        type: configMap
+        name: valheim-config
+        defaultMode: 0755
+        globalMounts:
+          - path: /valheim-post-install.d/10-config-overrides.sh
+            subPath: 10-config-overrides.sh
+            readOnly: true
+          - path: /config-overrides
+            readOnly: true
       tmp:
         # /home/steam is 750 owned by uid 111 in the image; uid 1000 needs its own writable dirs (README)
         type: emptyDir
