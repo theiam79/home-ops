@@ -149,8 +149,17 @@ every pin is exact so a restart never picks up an untested build.
 | LetMeSleep | yes | no | skip the night when a fraction of online players are in bed |
 | PlantEasily | **no** | yes | bulk planting, grid snap, replant on harvest. Client-only by design; its README says not to install it on a dedicated server |
 
-**Friend setup (r2modman or Gale, Windows/Linux/Steam Deck):** a Valheim
-profile with exactly these, then launch modded:
+**Friend setup:** the player-facing walkthrough is [PLAYERS.md](PLAYERS.md)
+(fill in the address and password when you send it; neither is in the repo).
+The r2modman profile, named `Tired Old Vikings`, imports from this code:
+
+<!-- profile-code -->
+```
+01a0a8d4-7eae-e0c6-c41b-651ea3169abd
+```
+<!-- /profile-code -->
+
+Equivalent manual profile, exact versions:
 
 ```
 denikson-BepInExPack_Valheim-5.4.2350
@@ -162,8 +171,24 @@ Advize-PlantEasily-2.2.0
 
 Jotunn rejects a client that is missing a server mod or runs a different
 version, and the dialog names what is missing. LetMeSleep is server-only, so it
-is not in the client list. r2modman profile codes expire in about an hour, so
-share the list rather than a code. Bump client and server pins together.
+is not in the client list.
+
+**Profile codes do not expire.** Thunderstore stores an exported profile by
+content hash with no expiry (checked in its source: `LegacyProfile` has only a
+global storage cap), so the same mod list always yields the same code and an
+old code keeps resolving. After any pin bump, regenerate the code from the
+repo instead of exporting by hand:
+
+```sh
+python3 kubernetes/apps/game-servers/valheim/profile/export.py --write
+```
+
+`profile/export.py` reads `MODS` from the HelmRelease, drops the server-only
+mods, adds the BepInEx pack and the client-only mods (both pinned at the top
+of the script), builds a byte-identical profile zip, uploads it through the
+same open endpoint r2modman uses, reads it back to verify, and rewrites the
+code between the `profile-code` markers here and in PLAYERS.md. Commit it with
+the `MODS` change. `--dry-run` prints the profile without uploading.
 
 **Compatibility state at the flip (Valheim l-1.0.12, netver 40):** Jotunn
 2.30.0 is built for 1.0.7 and works on 1.0.12, but its custom piece categories
