@@ -173,11 +173,19 @@ Jotunn rejects a client that is missing a server mod or runs a different
 version, and the dialog names what is missing. LetMeSleep is server-only, so it
 is not in the client list.
 
+**Manager choice: Gale first, r2modman still fine.** The code is the r2modman
+profile format and imports in Gale, r2modman and Thunderstore Mod Manager
+alike while every mod is on Thunderstore. Gale is what PLAYERS.md recommends
+because it also reads Hexium (`hexium.gg`), where some Valheim authors
+(Azumatt among them, since 2026) now publish exclusively; r2modman and TMM
+cannot. None of our mods are Hexium-only today (Jotunn and BepInExPack are
+mirrored there; the rest are Thunderstore-only), so nothing forces a switch.
+
 **Profile codes do not expire.** Thunderstore stores an exported profile by
 content hash with no expiry (checked in its source: `LegacyProfile` has only a
 global storage cap), so the same mod list always yields the same code and an
-old code keeps resolving. After any pin bump, regenerate the code from the
-repo instead of exporting by hand:
+old code keeps resolving. Hexium runs the same `legacyprofile` API. After any
+pin bump, regenerate the code from the repo instead of exporting by hand:
 
 ```sh
 python3 kubernetes/apps/game-servers/valheim/profile/export.py --write
@@ -186,9 +194,15 @@ python3 kubernetes/apps/game-servers/valheim/profile/export.py --write
 `profile/export.py` reads `MODS` from the HelmRelease, drops the server-only
 mods, adds the BepInEx pack and the client-only mods (both pinned at the top
 of the script), builds a byte-identical profile zip, uploads it through the
-same open endpoint r2modman uses, reads it back to verify, and rewrites the
+same open endpoint the managers use, reads it back to verify, and rewrites the
 code between the `profile-code` markers here and in PLAYERS.md. Commit it with
 the `MODS` change. `--dry-run` prints the profile without uploading.
+
+**If a mod ever comes from Hexium:** give it Odin's `hex:` prefix in `MODS`
+(or in the script's `CLIENT_ONLY` list). The script then marks that mod with
+Gale's `source: hexium` field and uploads the profile to Hexium's endpoint
+instead, and that code imports only in Gale, so every friend has to be on
+Gale first. BepInExPack always comes from Thunderstore regardless.
 
 **Compatibility state at the flip (Valheim l-1.0.12, netver 40):** Jotunn
 2.30.0 is built for 1.0.7 and works on 1.0.12, but its custom piece categories
