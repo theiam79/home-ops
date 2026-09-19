@@ -18,7 +18,7 @@ spec:
           app:
             image:
               repository: mariadb
-              tag: 12.3.3
+              tag: 13.0.2
             env:
               TZ: America/Chicago
               MARIADB_AUTO_UPGRADE: "1"
