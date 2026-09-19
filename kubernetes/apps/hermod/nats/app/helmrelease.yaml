@@ -21,7 +21,7 @@ spec:
     container:
       image:
         repository: nats
-        tag: 2.14.6-alpine
+        tag: 2.15.0-alpine
       merge:
         resources:
           requests:
