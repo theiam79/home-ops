@@ -3,20 +3,27 @@
 The server runs a few mods, so the plain Steam launcher will be refused. The
 whole setup is one import in a mod manager and takes about five minutes.
 
-## 1. Install r2modman
+## 1. Install Gale
 
-Download r2modman from <https://thunderstore.io/c/valheim/> ("Get Mod Manager")
-or <https://r2modman.com>. Windows, Linux and Steam Deck (desktop mode, the
-Linux build) all work. Gale (<https://github.com/Kesomannen/gale>) is a fine
-alternative and imports the same code.
+Download Gale from <https://github.com/Kesomannen/gale/releases> (or the
+"Mod Manager" link on <https://hexium.gg>). Windows (installer, winget,
+Scoop), Linux (Flatpak, AppImage, deb, rpm, AUR) and Steam Deck (desktop
+mode, the Flatpak) all work. No macOS build.
 
-Steam Deck: install it in desktop mode, then use the manager's own "Launch
-modded" every time; adding the game to Game Mode launches vanilla.
+Already on r2modman? It still works for this server today, and the code below
+imports there the same way (**Profiles → Import / Update → From code**). Gale
+is the one to install fresh because it can also fetch from Hexium, where some
+Valheim mod authors now publish, and it can import your r2modman profiles in
+one click if you switch later.
+
+Steam Deck: install in desktop mode, then use the manager's own **Launch
+modded** every time; adding the game to Game Mode launches vanilla.
 
 ## 2. Import the profile
 
-Open r2modman, pick **Valheim**, then **Profiles** → **Import / Update** →
-**From code** and paste this:
+Open Gale, pick **Valheim** as the game, open the profile menu in the top bar
+and choose **Import profile**. Paste this where it says "Enter import code",
+leave **Create new** selected, and press **Import**:
 
 <!-- profile-code -->
 ```
@@ -27,7 +34,8 @@ Open r2modman, pick **Valheim**, then **Profiles** → **Import / Update** →
 Keep the name it suggests (`Tired Old Vikings`) and select that profile.
 
 If the code is refused, ask for a fresh one, or create an empty profile and
-install these five from the **Online** tab, exact versions, in this order:
+install these five from the manager's mod browser, exact versions, in this
+order:
 
 ```
 denikson-BepInExPack_Valheim   5.4.2350
@@ -43,8 +51,9 @@ code goes out.
 
 ## 3. Launch and join
 
-1. In r2modman, with the profile selected, press **Start modded**. The Valheim
-   window shows a BepInEx console briefly; that is expected.
+1. In Gale, with the profile selected, press **Launch modded** in the top bar
+   (r2modman calls it **Start modded**). The Valheim window shows a BepInEx
+   console briefly; that is expected.
 2. In Valheim: **Start Game** → pick or create a character → **Join Game** →
    **Join IP** → enter the address and port:
 
@@ -80,5 +89,5 @@ Address and password come from Tyler directly; they are not in this file.
 |---|---|
 | A "mod mismatch" or "missing mod" dialog on connect | Your profile does not match the server. Re-import the code, or check the five versions above. |
 | "Incompatible version" from Valheim itself | Your game updated ahead of the server. Wait for the all-clear, no downgrade needed. |
-| No BepInEx console, mods obviously not loaded | You launched vanilla. Use **Start modded** in r2modman, not the Steam play button. |
+| No BepInEx console, mods obviously not loaded | You launched vanilla. Use **Launch modded** in the manager, not the Steam play button. |
 | The join link does nothing | Steam is not running, or the address is wrong. Use Join IP from the menu. |
