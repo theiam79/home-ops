@@ -22,7 +22,7 @@ spec:
       eula: "TRUE"
       type: "FABRIC"
       # renovate: datasource=custom.modrinth-game-versions packageName=bluemap
-      version: "26.2"
+      version: "26.3"
       difficulty: normal
       forcegameMode: true
       gameMode: creative
