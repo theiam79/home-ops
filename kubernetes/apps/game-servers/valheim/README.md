@@ -137,9 +137,10 @@ materials).
 ## Mods
 
 Modded since 2026-09-16 (vanilla from launch until the group reached iron, by
-the 2026-09-09 decision). Odin installs `MODS` from Thunderstore on every start;
-dependencies must be listed explicitly, BepInEx itself comes from `TYPE`, and
-every pin is exact so a restart never picks up an untested build.
+the 2026-09-09 decision). Odin installs `MODS` from Thunderstore (or Hexium
+with a `hex:` prefix, image 3.8+) on every start; dependencies must be listed
+explicitly, BepInEx itself comes from `TYPE`, and every pin is exact so a
+restart never picks up an untested build.
 
 | Mod | Server | Client | Why |
 |---|---|---|---|
@@ -148,36 +149,51 @@ every pin is exact so a restart never picks up an untested build.
 | PlantEverything | yes | yes | plant berries, mushrooms, flowers, saplings and more with the cultivator; server-synced config |
 | LetMeSleep | yes | no | skip the night when a fraction of online players are in bed |
 | PlantEasily | **no** | yes | bulk planting, grid snap, replant on harvest. Client-only by design; its README says not to install it on a dedicated server |
+| Build Camera CHE | **no** | yes | detached build camera on hammer, hoe and cultivator (Azumatt's Custom Hammers Edition). Hexium-only since 1.3.2. Client-only here on purpose: installed on the server it kicks every client that lacks the exact same version, in exchange for server-locked config. Add `hex:Azumatt-Build_Camera_Custom_Hammers_Edition-<ver>` to `MODS` if that trade is ever wanted |
 
 **Friend setup:** the player-facing walkthrough is [PLAYERS.md](PLAYERS.md)
 (fill in the address and password when you send it; neither is in the repo).
-The r2modman profile, named `Tired Old Vikings`, imports from this code:
+Friends import Gale **sync** code `AQHGYV` (owned by Tyler's Discord login;
+exported by hand from Gale after each pin bump, then **Push update** so
+subscribers pull it automatically). The plain, manager-agnostic profile code
+minted from the repo carries the same list and is the fallback:
 
 <!-- profile-code -->
 ```
-01a0a8d4-7eae-e0c6-c41b-651ea3169abd
+5508cb5183ac79fb772e88e90167b2db
 ```
 <!-- /profile-code -->
 
 Equivalent manual profile, exact versions:
 
 ```
-denikson-BepInExPack_Valheim-5.4.2350
-ValheimModding-Jotunn-2.30.0
+denikson-BepInExPack_Valheim-5.4.2351
+ValheimModding-Jotunn-2.30.2
 RandyKnapp-AdvancedPortals-1.2.0
-Advize-PlantEverything-1.21.2
-Advize-PlantEasily-2.2.0
+Advize-PlantEverything-1.21.3
+Advize-PlantEasily-2.2.2
+Azumatt-Build_Camera_Custom_Hammers_Edition-1.3.3   (Hexium)
 ```
 
 Jotunn rejects a client that is missing a server mod or runs a different
-version, and the dialog names what is missing. LetMeSleep is server-only, so it
-is not in the client list.
+version, and the dialog names what is missing (seen 2026-09-21: a friend on
+Jotunn 2.30.1 against our 2.30.0 was refused until the server caught up).
+LetMeSleep is server-only, so it is not in the client list.
+
+**Manager: Gale, required since Build Camera (2026-09).** The code is the
+r2modman profile format plus Gale's per-mod `source` field, and Build Camera
+lives only on Hexium (`hexium.gg`), where Azumatt publishes exclusively since
+2026 (the Thunderstore listing is deprecated at 1.3.1). r2modman and
+Thunderstore Mod Manager cannot read Hexium, so they can neither import this
+code nor install the mod by hand. Gale imports r2modman profiles in one click
+for anyone switching. Jotunn and BepInExPack are mirrored on Hexium; the rest
+of our mods are Thunderstore-only, which is fine because Gale reads both.
 
 **Profile codes do not expire.** Thunderstore stores an exported profile by
 content hash with no expiry (checked in its source: `LegacyProfile` has only a
 global storage cap), so the same mod list always yields the same code and an
-old code keeps resolving. After any pin bump, regenerate the code from the
-repo instead of exporting by hand:
+old code keeps resolving. Hexium runs the same `legacyprofile` API. After any
+pin bump, regenerate the code from the repo instead of exporting by hand:
 
 ```sh
 python3 kubernetes/apps/game-servers/valheim/profile/export.py --write
@@ -186,18 +202,38 @@ python3 kubernetes/apps/game-servers/valheim/profile/export.py --write
 `profile/export.py` reads `MODS` from the HelmRelease, drops the server-only
 mods, adds the BepInEx pack and the client-only mods (both pinned at the top
 of the script), builds a byte-identical profile zip, uploads it through the
-same open endpoint r2modman uses, reads it back to verify, and rewrites the
+same open endpoint the managers use, reads it back to verify, and rewrites the
 code between the `profile-code` markers here and in PLAYERS.md. Commit it with
 the `MODS` change. `--dry-run` prints the profile without uploading.
 
-**Compatibility state at the flip (Valheim l-1.0.12, netver 40):** Jotunn
-2.30.0 is built for 1.0.7 and works on 1.0.12, but its custom piece categories
-are not updated for 1.0, so AdvancedPortals' portals may land in an unexpected
-hammer tab (cosmetic). AdvancedPortals 1.2.0 shipped before the first 1.0
-Jotunn and carries no 1.0 changelog line; it was verified by hand in a
-single-player 1.0.12 world (`devcommands`, `debugmode`, B for no-cost build
-shows every piece). PlantEverything 1.21.2 is compiled against 1.0.12 (since
-1.21.1), LetMeSleep 1.0.5 and PlantEasily 2.2.0 against 1.0.
+**Hexium mods** carry Odin's `hex:` prefix in `MODS` or in the script's
+`CLIENT_ONLY` list (Build Camera today). The script marks each one with Gale's
+`source: hexium` field and uploads the profile to Hexium's `legacyprofile`
+endpoint instead of Thunderstore's; that code imports only in Gale. BepInExPack
+always comes from Thunderstore regardless.
+
+**Compatibility state (2026-09 update: Valheim l-1.0.15, netver 40):** the
+server moved from 1.0.12 to 1.0.15 together with the pins below; the network
+version did not change between them, so clients were never locked out, but
+1.0.14 fixed character saves on hosted servers and a biome cache that could
+block joining, and 1.0.15 a terrain-duplication performance bug. Jotunn 2.30.1
+brought custom piece categories to the 1.0 build menu (AdvancedPortals' portals
+get their own tag instead of landing in a random tab) and 2.30.2 fixed the
+legacy menu and Deep North asset mocking; AdvancedPortals 1.2.0 is unchanged
+since launch and only depends on Jotunn's deprecated-but-kept category API.
+PlantEverything 1.21.3 and PlantEasily 2.2.1+ are compiled against 1.0.15,
+Build Camera 1.3.2+ against 1.0.14, LetMeSleep 1.0.5 against 1.0, BepInExPack
+5.4.2351 is a logging and doorstop refresh. Jotunn issue #490 (client
+disconnects on 1.0.15) is misfiled: the failing class is blaxxun's PieceManager
+library bundled by another mod, not Jotunn.
+
+**Image 3.8.x:** `steam` is uid 1000 in the image now (was 111), which is what
+our `runAsUser`/`fsGroup` always assumed; the emptyDir mounts under `~` stay
+because they still keep SteamCMD scratch off the PVCs. 3.8 also added the
+`hex:` repository prefix, per-package BepInEx install routes (patchers, core),
+keeps `BepInEx.cfg` edits across framework reinstalls, tails the game log
+across truncation, and stops reporting a failed Steam registration as a
+successful start.
 
 ### Mod configs
 
@@ -234,19 +270,26 @@ mod is gone for good.
 
 ### Updating with mods
 
-`UPDATE_ON_STARTUP=0` and `AUTO_UPDATE=0` since the flip: a liveness restart at
-03:00 must not silently move the server to a Valheim build the mods were not
+`UPDATE_ON_STARTUP=0` and `AUTO_UPDATE=0` between rollouts: a liveness restart
+at 03:00 must not silently move the server to a Valheim build the mods were not
 made for. Steam still updates friends' clients automatically, and a patch that
 bumps the network version locks them out until the server follows, so an update
 is a short deliberate sequence rather than a surprise:
 
 1. Check Thunderstore for a Jotunn release dated after the new Valheim patch
-   (AdvancedPortals and PlantEverything usually follow within a day or two).
-2. Bump the pins in `MODS` and in the friends' list above, same versions.
-3. Set `UPDATE_ON_STARTUP: "1"` for that rollout, or run the update by hand:
-   `kubectl -n game-servers exec valheim-0 -- odin install`, then delete the
-   pod. Odin backs the world up first (`AUTO_BACKUP_ON_UPDATE`).
-4. Set `UPDATE_ON_STARTUP` back to `"0"` if it was flipped.
+   (AdvancedPortals and PlantEverything usually follow within a day or two),
+   and Hexium for Build Camera.
+2. Bump the pins in `MODS`, in `profile/export.py` (`BEPINEX`, `CLIENT_ONLY`)
+   and in the friends' list above, same versions, then run the exporter with
+   `--write` so both docs carry the new code.
+3. Set `UPDATE_ON_STARTUP: "1"` in the same PR. On the restart SteamCMD moves
+   the game to the current Steam build before Odin installs the new pins, and
+   Odin backs the world up first (`AUTO_BACKUP_ON_UPDATE`). Do not run
+   `odin install` by hand against a running server: the game loads asset
+   bundles lazily and replacing them underneath it is how it crashes.
+4. Follow-up commit: `UPDATE_ON_STARTUP` back to `"0"` (one more short
+   restart). Check the log for `Valheim Version:` and the new mod versions,
+   then send friends the new code.
 
 Skipping a patch is fine as long as the network version did not change; the
 server log prints `Network version check, their:N, mine:N` on every join.
