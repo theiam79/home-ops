@@ -20,7 +20,7 @@ spec:
           app:
             image:
               repository: ghcr.io/mbround18/valheim
-              tag: 3.7.2
+              tag: 3.8.8
             env:
               TZ: America/Chicago
               NAME: Tired Old Vikings
@@ -33,12 +33,13 @@ spec:
               # Mods: server-side set, pinned; friends' profile and configs in README "Mods"
               TYPE: BepInEx
               MODS: |
-                ValheimModding-Jotunn-2.30.0
+                ValheimModding-Jotunn-2.30.2
                 RandyKnapp-AdvancedPortals-1.2.0
-                Advize-PlantEverything-1.21.2
+                Advize-PlantEverything-1.21.3
                 Blockheim-LetMeSleep-1.0.5
-              # Game updates are deliberate once modded (README "Updating with mods")
-              UPDATE_ON_STARTUP: "0"
+              # Game updates are deliberate once modded (README "Updating with mods").
+              # "1" only for the 2026-09 rollout to Valheim 1.0.15; set back to "0" after.
+              UPDATE_ON_STARTUP: "1"
               AUTO_UPDATE: "0"
               AUTO_UPDATE_SCHEDULE: "0 5 * * *"
               AUTO_BACKUP_ON_UPDATE: "1"
