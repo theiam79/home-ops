@@ -37,9 +37,8 @@ spec:
                 RandyKnapp-AdvancedPortals-1.2.0
                 Advize-PlantEverything-1.21.3
                 Blockheim-LetMeSleep-1.0.5
-              # Game updates are deliberate once modded (README "Updating with mods").
-              # "1" only for the 2026-09 rollout to Valheim 1.0.15; set back to "0" after.
-              UPDATE_ON_STARTUP: "1"
+              # Game updates are deliberate once modded (README "Updating with mods")
+              UPDATE_ON_STARTUP: "0"
               AUTO_UPDATE: "0"
               AUTO_UPDATE_SCHEDULE: "0 5 * * *"
               AUTO_BACKUP_ON_UPDATE: "1"
