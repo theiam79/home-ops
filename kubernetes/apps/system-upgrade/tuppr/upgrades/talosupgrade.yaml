@@ -9,6 +9,9 @@ spec:
     version: v1.14.2
   policy:
     rebootMode: default
+    # tuppr >=0.5.6 waits for evicted pods to terminate; CNPG pods (30m stopDelay,
+    # single-instance primary PDBs) never finish in time, so reboot without draining
+    nodrain: true
   healthChecks:
     - apiVersion: volsync.backube/v1alpha1
       kind: ReplicationSource
