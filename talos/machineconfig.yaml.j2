@@ -124,6 +124,13 @@ cluster:
       enable-aggregator-routing: "true"
       feature-gates: MutatingAdmissionPolicy=true
       runtime-config: admissionregistration.k8s.io/v1beta1=true
+      # Authelia OIDC for kubectl (kubelogin); see talos/README.md "Kubernetes OIDC"
+      oidc-issuer-url: https://auth.tylerhundley.dev
+      oidc-client-id: kubernetes
+      oidc-username-claim: preferred_username
+      oidc-username-prefix: "oidc:"
+      oidc-groups-claim: groups
+      oidc-groups-prefix: "oidc:"
     auditPolicy:
       apiVersion: audit.k8s.io/v1
       kind: Policy
