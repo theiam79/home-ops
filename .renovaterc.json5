@@ -63,6 +63,17 @@
       ignoreTests: true,
     },
     {
+      // After the mise auto-merge rule: one PR moves talosctl, talenv.yaml and the tuppr
+      // TalosUpgrade together, and never auto-merges (it rolls every node)
+      description: "Talos Group",
+      groupName: "talos",
+      matchPackageNames: ["/siderolabs\\/talos$/"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+      automerge: false,
+    },
+    {
       matchUpdateTypes: ["major"],
       semanticCommitType: "feat",
       commitMessagePrefix: "{{semanticCommitType}}({{semanticCommitScope}})!:",
