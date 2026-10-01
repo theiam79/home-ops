@@ -159,6 +159,12 @@
       matchPackageNames: ["docker.io/library/mongo"],
       allowedVersions: "<8.1",
     },
+    {
+      description: "MariaDB: stay on the 12.3 LTS line; 13.x is a rolling release with no downgrade path (hold issue tracks next LTS)",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["mariadb", "docker.io/library/mariadb"],
+      allowedVersions: "<13",
+    },
   ],
   customManagers: [
     {
