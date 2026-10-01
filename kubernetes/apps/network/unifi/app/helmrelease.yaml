@@ -100,6 +100,16 @@ spec:
               requests:
                 cpu: 50m
                 memory: 256Mi
+    defaultPodOptions:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  # mongo 5.0+ needs AVX; dvergar-06 (Pentium G4560) has none and SIGILLs
+                  - key: kubernetes.io/hostname
+                    operator: NotIn
+                    values: ["dvergar-06"]
     service:
       app:
         controller: unifi
