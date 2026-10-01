@@ -38,6 +38,7 @@ spec:
           externaldns.alpha.kubernetes.io/type: 'A'
     extraArgs:
       - --ignore-ingress-tls-spec
+      - --annotation-prefix=external-dns.alpha.kubernetes.io/ # 0.22 changed the default prefix with no fallback
       - --crd-source-apiversion=externaldns.k8s.io/v1alpha1
       - --crd-source-kind=DNSEndpoint
       - --gateway-name=envoy-internal
