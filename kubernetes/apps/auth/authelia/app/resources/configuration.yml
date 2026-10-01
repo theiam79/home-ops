@@ -141,6 +141,14 @@ identity_providers:
             subject:
               - 'group:books'
               - 'group:admins'
+      # kube-apiserver trusts any token Authelia signs for the kubernetes client,
+      # so only admins may obtain one; RBAC (oidc:admins) is the second gate
+      kubernetes:
+        default_policy: deny
+        rules:
+          - policy: two_factor
+            subject:
+              - 'group:admins'
     claims_policies:
       # for clients that read claims from the ID token only and never call userinfo
       id_token_claims:
@@ -289,3 +297,29 @@ identity_providers:
           - email
         redirect_uris:
           - 'https://budget.${SECRET_DOMAIN}/openid/callback'
+      # kubectl via kubelogin (int128/kubelogin); see talos/README.md "Kubernetes OIDC"
+      - client_id: kubernetes
+        client_name: Kubernetes
+        public: true
+        authorization_policy: kubernetes
+        # kube-apiserver only reads the ID token, so groups must be in it
+        claims_policy: id_token_claims
+        require_pkce: true
+        pkce_challenge_method: S256
+        consent_mode: implicit
+        token_endpoint_auth_method: 'none'
+        response_types:
+          - code
+        grant_types:
+          - authorization_code
+          - refresh_token
+        scopes:
+          - openid
+          - offline_access
+          - profile
+          - email
+          - groups
+        # kubelogin's local callback listeners (default port, then fallback)
+        redirect_uris:
+          - 'http://localhost:8000'
+          - 'http://localhost:18000'

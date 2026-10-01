@@ -7,3 +7,4 @@ components:
 resources:
   - ./lldap/ks.yaml
   - ./authelia/ks.yaml
+  - ./kube-oidc/ks.yaml
