@@ -26,7 +26,7 @@ and choose **Import profile**. Paste this sync code where it says "Enter
 import code", leave **Create new** selected, and press **Import**:
 
 ```
-AQHGYV
+YGNX7M
 ```
 
 That is a Gale *sync* profile owned by Tyler: when the server's mods change,

@@ -157,7 +157,7 @@ restart never picks up an untested build.
 
 **Friend setup:** the player-facing walkthrough is [PLAYERS.md](PLAYERS.md)
 (fill in the address and password when you send it; neither is in the repo).
-Friends import Gale **sync** code `AQHGYV` (owned by Tyler's Discord login;
+Friends import Gale **sync** code `YGNX7M` (owned by Tyler's Discord login;
 exported by hand from Gale after each pin bump, then **Push update** so
 subscribers pull it automatically). The plain, manager-agnostic profile code
 minted from the repo carries the same list and is the fallback:
@@ -188,6 +188,10 @@ Z (both slots), which is also OCDheim's precision-mode toggle, and Alt is
 OCDheim's grid-mode toggle. Rebind `Azumatt.AzuAutoStore.cfg`
 `[3 - Favoriting] FavoritingModifierKeybind1/2` to `LeftControl` in the Gale
 sync profile before pushing it (that key is client-side, not server-synced).
+AzuExtendedPlayerInventory has its own favoriting key (`[10 - Favoriting]`)
+but ignores it while AzuAutoStore is installed: there is one favorite set,
+stored by AzuAutoStore (`AzuAutoStore_player_<id>.dat`), and it protects items
+from both the `.` dump and the chest's Place Stacks / Stack All.
 PlantEasily (Right Ctrl + arrows, Left Shift, F6/F8/F10) and Build Camera (B)
 do not overlap.
 
