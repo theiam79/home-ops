@@ -36,7 +36,7 @@ carries the same mods:
 
 <!-- profile-code -->
 ```
-9cb0b5cc6ebea81d96e3f1b0587ef5af
+0e02031408d0ba202ef99aca936c90ec
 ```
 <!-- /profile-code -->
 
@@ -55,7 +55,7 @@ Azumatt-AzuExtendedPlayerInventory           2.6.1
 Azumatt-AzuContainerSizes                    1.1.8
 Azumatt-AzuAutoStore                         3.1.7
 Advize-PlantEasily                           2.3.0
-Azumatt-Build_Camera_Custom_Hammers_Edition  1.3.3
+Azumatt-Build_Camera_Custom_Hammers_Edition  1.3.4
 javadevils-OCDheim                           0.3.4
 ```
 
@@ -117,9 +117,10 @@ Address and password come from Tyler directly; they are not in this file.
 - **Grid building (OCDheim).** **Alt** toggles grid mode: building pieces,
   hoe and cultivator areas and seeds snap to the world grid. **Z** toggles
   finer snapping. Turn grid mode off while planting with PlantEasily, which
-  has its own grid. In the OCDheim config (Gale → Config), leave its extra
-  build pieces and vertical stacking **off**: other players without the same
-  settings see those collapse.
+  has its own grid. It also adds a few smooth-stone build pieces and lets
+  resource piles stack vertically. Those only hold up for players running
+  OCDheim, so keep the synced profile: anyone joining without it sees them
+  collapse.
 
 ## If something goes wrong
 

@@ -36,7 +36,7 @@ BEPINEX = "denikson-BepInExPack_Valheim-5.4.2351"
 # Same `hex:` prefix convention as MODS if one ever comes from Hexium.
 CLIENT_ONLY = [
     "Advize-PlantEasily-2.3.0",
-    "hex:Azumatt-Build_Camera_Custom_Hammers_Edition-1.3.3",
+    "hex:Azumatt-Build_Camera_Custom_Hammers_Edition-1.3.4",
     "javadevils-OCDheim-0.3.4",
 ]
 # In MODS but nothing for clients to install.

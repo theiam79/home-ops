@@ -152,7 +152,7 @@ restart never picks up an untested build.
 | AzuContainerSizes | yes | yes | bigger chests, carts and ship holds to absorb `resources=muchmore`; Hexium. Defaults are vanilla sizes, so it changes nothing until configured. Shrinking a size later keeps items (the chest grows back to fit overflow, 1.1.4+) |
 | AzuAutoStore | yes | yes | `.` dumps inventory into chests within 5 m that already hold that item; favorited items and slots are skipped. Also pulls dropped items off the ground into nearby chests (per-container range, see "Mod configs"); Hexium |
 | PlantEasily | **no** | yes | bulk planting, grid snap, replant on harvest. Client-only by design; its README says not to install it on a dedicated server |
-| OCDheim | **no** | yes | world-grid snapping for building, hoe/cultivator areas and seeds (Alt), finer snap (Z), terrain-tweak removal. Client-only by choice: on the server every client would have to match its version. Players turn its extra pieces and vertical stacking off, because those collapse for anyone without the mod. Does not replace PlantEasily: it snaps one seed at a time, PlantEasily plants whole grids |
+| OCDheim | **no** | yes | world-grid snapping for building, hoe/cultivator areas and seeds (Alt), finer snap (Z), terrain-tweak removal. Client-only by choice: on the server every client would have to match its version. Its extra build pieces and vertical stacking are **on** in the sync profile (Tyler's call, 2026-10-04); they collapse for anyone who joins without OCDheim, which nothing on the server enforces, so the synced profile is the guard. Does not replace PlantEasily: it snaps one seed at a time, PlantEasily plants whole grids |
 | Build Camera CHE | **no** | yes | detached build camera on hammer, hoe and cultivator (Azumatt's Custom Hammers Edition). Hexium-only since 1.3.2. Client-only here on purpose: installed on the server it kicks every client that lacks the exact same version, in exchange for server-locked config. Add `hex:Azumatt-Build_Camera_Custom_Hammers_Edition-<ver>` to `MODS` if that trade is ever wanted |
 
 **Friend setup:** the player-facing walkthrough is [PLAYERS.md](PLAYERS.md)
@@ -164,7 +164,7 @@ minted from the repo carries the same list and is the fallback:
 
 <!-- profile-code -->
 ```
-9cb0b5cc6ebea81d96e3f1b0587ef5af
+0e02031408d0ba202ef99aca936c90ec
 ```
 <!-- /profile-code -->
 
@@ -179,7 +179,7 @@ Azumatt-AzuExtendedPlayerInventory-2.6.1            (Hexium)
 Azumatt-AzuContainerSizes-1.1.8                     (Hexium)
 Azumatt-AzuAutoStore-3.1.7                          (Hexium)
 Advize-PlantEasily-2.3.0
-Azumatt-Build_Camera_Custom_Hammers_Edition-1.3.3   (Hexium)
+Azumatt-Build_Camera_Custom_Hammers_Edition-1.3.4   (Hexium)
 javadevils-OCDheim-0.3.4
 ```
 
