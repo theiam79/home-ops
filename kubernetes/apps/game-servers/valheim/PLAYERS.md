@@ -10,8 +10,9 @@ Download Gale from <https://github.com/Kesomannen/gale/releases> (or the
 Scoop), Linux (Flatpak, AppImage, deb, rpm, AUR) and Steam Deck (desktop
 mode, the Flatpak) all work. No macOS build.
 
-Already on r2modman or Thunderstore Mod Manager? Switch: one of our mods
-(Build Camera) is only published on Hexium, which those two cannot read, so
+Already on r2modman or Thunderstore Mod Manager? Switch: several of our mods
+(the Azu ones and Build Camera) are only published on Hexium, which those two
+cannot read, so
 the code below imports in Gale only. Gale imports your existing r2modman
 profiles in one click, so nothing else is lost.
 
@@ -35,23 +36,27 @@ carries the same mods:
 
 <!-- profile-code -->
 ```
-5508cb5183ac79fb772e88e90167b2db
+9cb0b5cc6ebea81d96e3f1b0587ef5af
 ```
 <!-- /profile-code -->
 
 Keep the name it suggests (`Tired Old Vikings`) and select that profile.
 
 If the code is refused, ask for a fresh one, or create an empty profile and
-install these six from Gale's mod browser, exact versions, in this order
-(the last one shows up only when Hexium is enabled as a source):
+install these ten from Gale's mod browser, exact versions, in this order
+(the Azumatt ones show up only when Hexium is enabled as a source):
 
 ```
 denikson-BepInExPack_Valheim                 5.4.2351
 ValheimModding-Jotunn                        2.30.2
 RandyKnapp-AdvancedPortals                   1.2.0
 Advize-PlantEverything                       1.21.3
-Advize-PlantEasily                           2.2.2
+Azumatt-AzuExtendedPlayerInventory           2.6.1
+Azumatt-AzuContainerSizes                    1.1.8
+Azumatt-AzuAutoStore                         3.1.7
+Advize-PlantEasily                           2.3.0
 Azumatt-Build_Camera_Custom_Hammers_Edition  1.3.3
+javadevils-OCDheim                           0.3.4
 ```
 
 Do **not** click "update all" later. The server checks versions on connect; a
@@ -97,12 +102,30 @@ Address and password come from Tyler directly; they are not in this file.
   as usual, **B** again to return. It reaches about 100 m from your character
   and needs a workbench in range like normal building. Gamepad: triggers for
   up and down, right stick to look.
+- **More inventory.** Equipment slots, quick slots (hotkeyed) and any extra
+  rows the server enables. Before anyone ever uninstalls the mods, move
+  everything out of the extra rows and slots into a chest, or it can be lost.
+- **Bigger chests**, carts and ship holds. Nothing to do, the server sets the
+  sizes.
+- **Quick deposit.** Near your chests, press **.** (period) and everything in
+  your inventory goes into nearby chests that already hold that item.
+  Middle-click an item to send just that one; hold **Y** and click an item to
+  find which chest has it. Your hotbar is never stored. To keep something,
+  hold the favorite key and left-click the item (or right-click a slot to
+  protect the slot); a coloured border shows it is favorited. Chests also
+  pick up items dropped near them.
+- **Grid building (OCDheim).** **Alt** toggles grid mode: building pieces,
+  hoe and cultivator areas and seeds snap to the world grid. **Z** toggles
+  finer snapping. Turn grid mode off while planting with PlantEasily, which
+  has its own grid. In the OCDheim config (Gale → Config), leave its extra
+  build pieces and vertical stacking **off**: other players without the same
+  settings see those collapse.
 
 ## If something goes wrong
 
 | You see | Fix |
 |---|---|
-| A "mod mismatch" or "missing mod" dialog on connect | Your profile does not match the server. Re-import the code, or check the six versions above. |
+| A "mod mismatch" or "missing mod" dialog on connect | Your profile does not match the server. Re-import the code, or check the versions above. |
 | Gale says a mod in the code could not be found | Hexium is not enabled as a source in Gale's settings, or you pasted the code into r2modman. |
 | "Incompatible version" from Valheim itself | Your game updated ahead of the server. Wait for the all-clear, no downgrade needed. |
 | No BepInEx console, mods obviously not loaded | You launched vanilla. Use **Launch modded** in the manager, not the Steam play button. |

@@ -32,11 +32,12 @@ DOCS = [APP_DIR / "README.md", APP_DIR / "PLAYERS.md"]
 
 PROFILE_NAME = "Tired Old Vikings"
 BEPINEX = "denikson-BepInExPack_Valheim-5.4.2351"
-# Installed on clients only (their README says not on a dedicated server).
+# Installed on clients only (by their README or by choice; README "Mods" says which).
 # Same `hex:` prefix convention as MODS if one ever comes from Hexium.
 CLIENT_ONLY = [
-    "Advize-PlantEasily-2.2.2",
+    "Advize-PlantEasily-2.3.0",
     "hex:Azumatt-Build_Camera_Custom_Hammers_Edition-1.3.3",
+    "javadevils-OCDheim-0.3.4",
 ]
 # In MODS but nothing for clients to install.
 SERVER_ONLY = {"Blockheim-LetMeSleep"}

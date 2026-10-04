@@ -148,7 +148,11 @@ restart never picks up an untested build.
 | AdvancedPortals | yes | yes | earned metal transport: Ancient (copper/tin, costs iron + ancient bark), Obsidian (iron, costs silver), Black Marble (everything, costs black metal + refined eitr). Vanilla portal untouched |
 | PlantEverything | yes | yes | plant berries, mushrooms, flowers, saplings and more with the cultivator; server-synced config |
 | LetMeSleep | yes | no | skip the night when a fraction of online players are in bed |
+| AzuExtendedPlayerInventory | yes | yes | equipment slots, quick slots (3) and extra inventory rows; Hexium. Server holds the synced config (rows, slot count, vanity/loadout buttons) and kicks clients without the mod. **One-way:** removing it can lose whatever sits in its extra rows and slots, so everyone empties them into a chest first |
+| AzuContainerSizes | yes | yes | bigger chests, carts and ship holds to absorb `resources=muchmore`; Hexium. Defaults are vanilla sizes, so it changes nothing until configured. Shrinking a size later keeps items (the chest grows back to fit overflow, 1.1.4+) |
+| AzuAutoStore | yes | yes | `.` dumps inventory into chests within 5 m that already hold that item; favorited items and slots are skipped. Also pulls dropped items off the ground into nearby chests (per-container range, see "Mod configs"); Hexium |
 | PlantEasily | **no** | yes | bulk planting, grid snap, replant on harvest. Client-only by design; its README says not to install it on a dedicated server |
+| OCDheim | **no** | yes | world-grid snapping for building, hoe/cultivator areas and seeds (Alt), finer snap (Z), terrain-tweak removal. Client-only by choice: on the server every client would have to match its version. Players turn its extra pieces and vertical stacking off, because those collapse for anyone without the mod. Does not replace PlantEasily: it snaps one seed at a time, PlantEasily plants whole grids |
 | Build Camera CHE | **no** | yes | detached build camera on hammer, hoe and cultivator (Azumatt's Custom Hammers Edition). Hexium-only since 1.3.2. Client-only here on purpose: installed on the server it kicks every client that lacks the exact same version, in exchange for server-locked config. Add `hex:Azumatt-Build_Camera_Custom_Hammers_Edition-<ver>` to `MODS` if that trade is ever wanted |
 
 **Friend setup:** the player-facing walkthrough is [PLAYERS.md](PLAYERS.md)
@@ -160,7 +164,7 @@ minted from the repo carries the same list and is the fallback:
 
 <!-- profile-code -->
 ```
-5508cb5183ac79fb772e88e90167b2db
+9cb0b5cc6ebea81d96e3f1b0587ef5af
 ```
 <!-- /profile-code -->
 
@@ -171,9 +175,21 @@ denikson-BepInExPack_Valheim-5.4.2351
 ValheimModding-Jotunn-2.30.2
 RandyKnapp-AdvancedPortals-1.2.0
 Advize-PlantEverything-1.21.3
-Advize-PlantEasily-2.2.2
+Azumatt-AzuExtendedPlayerInventory-2.6.1            (Hexium)
+Azumatt-AzuContainerSizes-1.1.8                     (Hexium)
+Azumatt-AzuAutoStore-3.1.7                          (Hexium)
+Advize-PlantEasily-2.3.0
 Azumatt-Build_Camera_Custom_Hammers_Edition-1.3.3   (Hexium)
+javadevils-OCDheim-0.3.4
 ```
+
+**Client keybinds collide on defaults:** AzuAutoStore's favoriting modifier is
+Z (both slots), which is also OCDheim's precision-mode toggle, and Alt is
+OCDheim's grid-mode toggle. Rebind `Azumatt.AzuAutoStore.cfg`
+`[3 - Favoriting] FavoritingModifierKeybind1/2` to `LeftControl` in the Gale
+sync profile before pushing it (that key is client-side, not server-synced).
+PlantEasily (Right Ctrl + arrows, Left Shift, F6/F8/F10) and Build Camera (B)
+do not overlap.
 
 Jotunn rejects a client that is missing a server mod or runs a different
 version, and the dialog names what is missing (seen 2026-09-21: a friend on
@@ -186,8 +202,9 @@ lives only on Hexium (`hexium.gg`), where Azumatt publishes exclusively since
 2026 (the Thunderstore listing is deprecated at 1.3.1). r2modman and
 Thunderstore Mod Manager cannot read Hexium, so they can neither import this
 code nor install the mod by hand. Gale imports r2modman profiles in one click
-for anyone switching. Jotunn and BepInExPack are mirrored on Hexium; the rest
-of our mods are Thunderstore-only, which is fine because Gale reads both.
+for anyone switching. Jotunn and BepInExPack are mirrored on Hexium; the
+three Azu mods are Hexium-only like Build Camera, the rest Thunderstore-only,
+which is fine because Gale reads both.
 
 **Profile codes do not expire.** Thunderstore stores an exported profile by
 content hash with no expiry (checked in its source: `LegacyProfile` has only a
@@ -211,6 +228,18 @@ the `MODS` change. `--dry-run` prints the profile without uploading.
 `source: hexium` field and uploads the profile to Hexium's `legacyprofile`
 endpoint instead of Thunderstore's; that code imports only in Gale. BepInExPack
 always comes from Thunderstore regardless.
+
+**Compatibility state (2026-10 QoL batch: Valheim l-1.0.16, netver 40):** the
+server picked up 1.0.16 (build 25527701) on the 2026-10-01 restart because
+`UPDATE_ON_STARTUP` was still `"1"` from the September rollout; all four mods
+loaded and netver did not move. 1.0.16 only fixed Deep North terrain reverting,
+raid over-spawning and two achievements. AzuExtendedPlayerInventory 2.6.1 and
+AzuAutoStore 3.1.7 were built after 1.0.16; AzuContainerSizes 1.1.8 targets
+1.0 (1.1.7 added the Wardrobe and Grausten chest). AzuEPI 2.4.14 added
+AzuAutoStore favoriting compat; neither touches portals, planting or sleep.
+OCDheim 0.3.4 depends on Jotunn 2.30.2 (matches) and says 1.0.15 compat
+explicitly, with three releases since 1.0.16 and no break reported.
+PlantEasily 2.3.0 is compiled against 1.0.16.
 
 **Compatibility state (2026-09 update: Valheim l-1.0.15, netver 40):** the
 server moved from 1.0.12 to 1.0.15 together with the pins below; the network
@@ -259,6 +288,37 @@ the files):
 |---|---|---|---|
 | `blockchaaain.LetMeSleep.cfg` | `[General] ratio` | `0.3` | a third of online players in bed skips the night (mod default 0.5; range 0.01 to 1.0) |
 
+The three Azu mods are ServerSync with `Lock Configuration = On`: the server's
+file wins for every `[Synced with Server]` key, and a file watcher pushes an
+edit to connected clients on save, no restart needed. Settings to make after
+their first boot:
+
+- `Azumatt.AzuExtendedPlayerInventory.cfg`: `[0 - Presets] Apply Preset =
+  Minimal` (hides the vanity and loadout buttons, both server-synced; resets
+  itself to `None` once applied). The stats panel and layout it also touches
+  are per-client, so players apply the preset in their own copy for those.
+  `[2 - Inventory] Extra Inventory Rows` defaults to **0** (range 0-5);
+  `[3 - Quick Slots] Number of Quick Slots` to 3.
+- `Azumatt.AzuAutoStore.cfg` + `Azumatt.AzuAutoStore.yml`: `Player Range`
+  (the `.` dump) defaults to 5 m; ground pickup uses each container's `range`
+  in the yml (10 m for the example chests) and `Fallback Range` (10 m) for
+  containers not listed. `Must Have Existing Item To Pull` is on by default.
+- `Azumatt.AzuContainerSizes.cfg`: defaults are the vanilla sizes (rows x
+  columns; columns cap at 8, the inventory width; chest rows cap at 20, ship
+  and cart rows at 30):
+
+  | Container | Key prefix | Default |
+  |---|---|---|
+  | Personal chest | `Personal Chest` | 2 x 3 |
+  | Wood chest | `Wood Chest` | 2 x 5 |
+  | Reinforced chest | `Iron Chest` | 4 x 6 |
+  | Black metal chest | `Blackmetal Chest` | 4 x 8 |
+  | Wardrobe | `Wardrobe` | 10 x 5 |
+  | Grausten chest | `Grausten Chest` | 5 x 8 |
+  | Karve | `Karve` | 2 x 2 |
+  | Longship | `Longboat` | 3 x 6 |
+  | Cart | `Cart` | 3 x 6 |
+
 PlantEverything ships with `[General] LockConfiguration = true` (admin-only
 synced changes) and vanilla-balanced defaults; its author suggests lowering the
 pickable respawn times (`[Berries]`, `[Mushrooms]`, `[Flowers]`, `[Debris]`,
@@ -278,7 +338,7 @@ is a short deliberate sequence rather than a surprise:
 
 1. Check Thunderstore for a Jotunn release dated after the new Valheim patch
    (AdvancedPortals and PlantEverything usually follow within a day or two),
-   and Hexium for Build Camera.
+   and Hexium for the Azu mods and Build Camera.
 2. Bump the pins in `MODS`, in `profile/export.py` (`BEPINEX`, `CLIENT_ONLY`)
    and in the friends' list above, same versions, then run the exporter with
    `--write` so both docs carry the new code.
@@ -297,7 +357,10 @@ server log prints `Network version check, their:N, mine:N` on every join.
 Rolling back is an env change: `TYPE: Vanilla` and no `MODS` drops the loader,
 and the world keeps working minus placed modded pieces (advanced portals and
 PlantEverything plantables turn into nothing, which is the usual mod-removal
-cost).
+cost). Before dropping AzuExtendedPlayerInventory or AzuContainerSizes, have
+everyone empty the extra inventory rows/slots and the beyond-vanilla chest
+slots: AzuEPI's own docs warn reverting can lose items, and what vanilla does
+with items past a chest's stock size is unverified.
 
 Thunderstore marks server-only mods, which need nothing on clients. Mods that
 use the RPC port need 2458 forwarded, which the forward above already covers.
