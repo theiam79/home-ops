@@ -36,14 +36,14 @@ carries the same mods:
 
 <!-- profile-code -->
 ```
-717f3cab931430577eff9dc5e25ce82d
+684a77391972ae8e7beb6764433601ca
 ```
 <!-- /profile-code -->
 
 Keep the name it suggests (`Tired Old Vikings`) and select that profile.
 
 If the code is refused, ask for a fresh one, or create an empty profile and
-install these twelve from Gale's mod browser, exact versions, in this order
+install these thirteen from Gale's mod browser, exact versions, in this order
 (the Azumatt ones show up only when Hexium is enabled as a source):
 
 ```
@@ -59,6 +59,7 @@ Akuichi-ReforgedPotential                    2.0.7
 Advize-PlantEasily                           2.3.0
 Azumatt-Build_Camera_Custom_Hammers_Edition  1.3.4
 javadevils-OCDheim                           0.3.4
+F1shar-SpawnSuppressionVisualizer            1.1.0
 ```
 
 Do **not** click "update all" later. The server checks versions on connect; a
@@ -98,6 +99,9 @@ Address and password come from Tyler directly; they are not in this file.
 - **Farming.** The cultivator can plant berries, mushrooms, flowers and
   saplings (PlantEverything), and plants in rows or grids with snapping
   (PlantEasily). With the cultivator out, the keybinds show on screen.
+- **Spawn-safe areas.** **F7** shows where enemies cannot spawn around your
+  base: green ground is covered by a workbench, fire, ward or similar, red
+  is open. Press F7 again to hide it.
 - **Build camera.** With a hammer, hoe or cultivator out, press **B** to
   detach the camera and build from the air: mouse to look, **WASD** to move,
   **Space** / **Ctrl** up and down, **Shift** to move faster, click to build

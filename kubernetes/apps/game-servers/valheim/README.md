@@ -155,6 +155,7 @@ restart never picks up an untested build.
 | ReforgedPotential | yes | yes | Forge of Potential failure drops the item one level instead of destroying it (our config, see "Mod configs"). Rolls happen on the crafting client with the server's synced config; it declares no network-compatibility level, so the server does **not** refuse a client without it, and that client would roll vanilla odds. The synced profile is the guard |
 | PlantEasily | **no** | yes | bulk planting, grid snap, replant on harvest. Client-only by design; its README says not to install it on a dedicated server |
 | OCDheim | **no** | yes | world-grid snapping for building, hoe/cultivator areas and seeds (Alt), finer snap (Z), terrain-tweak removal. Client-only by choice: on the server every client would have to match its version. Its extra build pieces and vertical stacking are **on** in the sync profile (Tyler's call, 2026-10-04); they collapse for anyone who joins without OCDheim, which nothing on the server enforces, so the synced profile is the guard. Does not replace PlantEasily: it snaps one seed at a time, PlantEasily plants whole grids |
+| SpawnSuppressionVisualizer | **no** | yes | draws the no-spawn radius of workbenches, fires, wards and other base pieces on the ground (F7 toggles). Purely visual, nothing for the server (added to the sync profile by Tyler 2026-10-09) |
 | Build Camera CHE | **no** | yes | detached build camera on hammer, hoe and cultivator (Azumatt's Custom Hammers Edition). Hexium-only since 1.3.2. Client-only here on purpose: installed on the server it kicks every client that lacks the exact same version, in exchange for server-locked config. Add `hex:Azumatt-Build_Camera_Custom_Hammers_Edition-<ver>` to `MODS` if that trade is ever wanted |
 
 **Friend setup:** the player-facing walkthrough is [PLAYERS.md](PLAYERS.md)
@@ -166,7 +167,7 @@ minted from the repo carries the same list and is the fallback:
 
 <!-- profile-code -->
 ```
-717f3cab931430577eff9dc5e25ce82d
+684a77391972ae8e7beb6764433601ca
 ```
 <!-- /profile-code -->
 
@@ -185,6 +186,7 @@ Akuichi-ReforgedPotential-2.0.7
 Advize-PlantEasily-2.3.0
 Azumatt-Build_Camera_Custom_Hammers_Edition-1.3.4   (Hexium)
 javadevils-OCDheim-0.3.4
+F1shar-SpawnSuppressionVisualizer-1.1.0
 ```
 
 **Client keybinds collide on defaults:** AzuAutoStore's favoriting modifier is
