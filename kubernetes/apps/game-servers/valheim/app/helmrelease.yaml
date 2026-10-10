@@ -37,9 +37,11 @@ spec:
                 RandyKnapp-AdvancedPortals-1.2.0
                 Advize-PlantEverything-1.21.3
                 Blockheim-LetMeSleep-1.0.5
-                hex:Azumatt-AzuExtendedPlayerInventory-2.6.1
+                hex:Azumatt-AzuExtendedPlayerInventory-2.6.3
                 hex:Azumatt-AzuContainerSizes-1.1.8
                 hex:Azumatt-AzuAutoStore-3.1.7
+                nbusseneau-Better_Cartography_Table-1.0.0
+                Akuichi-ReforgedPotential-2.0.7
               # Game updates are deliberate once modded (README "Updating with mods").
               UPDATE_ON_STARTUP: "0"
               AUTO_UPDATE: "0"

@@ -38,6 +38,7 @@ CLIENT_ONLY = [
     "Advize-PlantEasily-2.3.0",
     "hex:Azumatt-Build_Camera_Custom_Hammers_Edition-1.3.4",
     "javadevils-OCDheim-0.3.4",
+    "F1shar-SpawnSuppressionVisualizer-1.1.0",
 ]
 # In MODS but nothing for clients to install.
 SERVER_ONLY = {"Blockheim-LetMeSleep"}

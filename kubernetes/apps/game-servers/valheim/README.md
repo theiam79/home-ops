@@ -144,15 +144,18 @@ restart never picks up an untested build.
 
 | Mod | Server | Client | Why |
 |---|---|---|---|
-| Jotunn | yes | yes | library for AdvancedPortals; version-checks clients on connect |
+| Jotunn | yes | yes | library for AdvancedPortals, OCDheim, BCT and ReforgedPotential; version-checks clients on connect |
 | AdvancedPortals | yes | yes | earned metal transport: Ancient (copper/tin, costs iron + ancient bark), Obsidian (iron, costs silver), Black Marble (everything, costs black metal + refined eitr). Vanilla portal untouched |
 | PlantEverything | yes | yes | plant berries, mushrooms, flowers, saplings and more with the cultivator; server-synced config |
 | LetMeSleep | yes | no | skip the night when a fraction of online players are in bed |
 | AzuExtendedPlayerInventory | yes | yes | equipment slots, quick slots (3) and extra inventory rows; Hexium. Server holds the synced config (rows, slot count, vanity/loadout buttons) and kicks clients without the mod. **One-way:** removing it can lose whatever sits in its extra rows and slots, so everyone empties them into a chest first |
 | AzuContainerSizes | yes | yes | bigger chests, carts and ship holds to absorb `resources=muchmore`; Hexium. Defaults are vanilla sizes, so it changes nothing until configured. Shrinking a size later keeps items (the chest grows back to fit overflow, 1.1.4+) |
 | AzuAutoStore | yes | yes | `.` dumps inventory into chests within 5 m that already hold that item; favorited items and slots are skipped. Also pulls dropped items off the ground into nearby chests (per-container range, see "Mod configs"); Hexium |
+| Better Cartography Table | yes | yes | pins are private by default and shared one at a time to a table (public pins; guild pins only with the Guilds mod, not installed); opening a table syncs exploration both ways, no separate Read/Write. Pins live on **one** table per player: using a different table asks to switch and swaps the public pin set (an empty table offers to take your pins, for relocating). Server copy makes Jotunn refuse clients without it (minor-version strict). All its settings are per-client |
+| ReforgedPotential | yes | yes | Forge of Potential failure drops the item one level instead of destroying it (our config, see "Mod configs"). Rolls happen on the crafting client with the server's synced config; it declares no network-compatibility level, so the server does **not** refuse a client without it, and that client would roll vanilla odds. The synced profile is the guard |
 | PlantEasily | **no** | yes | bulk planting, grid snap, replant on harvest. Client-only by design; its README says not to install it on a dedicated server |
 | OCDheim | **no** | yes | world-grid snapping for building, hoe/cultivator areas and seeds (Alt), finer snap (Z), terrain-tweak removal. Client-only by choice: on the server every client would have to match its version. Its extra build pieces and vertical stacking are **on** in the sync profile (Tyler's call, 2026-10-04); they collapse for anyone who joins without OCDheim, which nothing on the server enforces, so the synced profile is the guard. Does not replace PlantEasily: it snaps one seed at a time, PlantEasily plants whole grids |
+| SpawnSuppressionVisualizer | **no** | yes | draws the no-spawn radius of workbenches, fires, wards and other base pieces on the ground (F7 toggles). Purely visual, nothing for the server (added to the sync profile by Tyler 2026-10-09) |
 | Build Camera CHE | **no** | yes | detached build camera on hammer, hoe and cultivator (Azumatt's Custom Hammers Edition). Hexium-only since 1.3.2. Client-only here on purpose: installed on the server it kicks every client that lacks the exact same version, in exchange for server-locked config. Add `hex:Azumatt-Build_Camera_Custom_Hammers_Edition-<ver>` to `MODS` if that trade is ever wanted |
 
 **Friend setup:** the player-facing walkthrough is [PLAYERS.md](PLAYERS.md)
@@ -164,7 +167,7 @@ minted from the repo carries the same list and is the fallback:
 
 <!-- profile-code -->
 ```
-0e02031408d0ba202ef99aca936c90ec
+684a77391972ae8e7beb6764433601ca
 ```
 <!-- /profile-code -->
 
@@ -175,12 +178,15 @@ denikson-BepInExPack_Valheim-5.4.2351
 ValheimModding-Jotunn-2.30.2
 RandyKnapp-AdvancedPortals-1.2.0
 Advize-PlantEverything-1.21.3
-Azumatt-AzuExtendedPlayerInventory-2.6.1            (Hexium)
+Azumatt-AzuExtendedPlayerInventory-2.6.3            (Hexium)
 Azumatt-AzuContainerSizes-1.1.8                     (Hexium)
 Azumatt-AzuAutoStore-3.1.7                          (Hexium)
+nbusseneau-Better_Cartography_Table-1.0.0
+Akuichi-ReforgedPotential-2.0.7
 Advize-PlantEasily-2.3.0
 Azumatt-Build_Camera_Custom_Hammers_Edition-1.3.4   (Hexium)
 javadevils-OCDheim-0.3.4
+F1shar-SpawnSuppressionVisualizer-1.1.0
 ```
 
 **Client keybinds collide on defaults:** AzuAutoStore's favoriting modifier is
@@ -232,6 +238,23 @@ the `MODS` change. `--dry-run` prints the profile without uploading.
 `source: hexium` field and uploads the profile to Hexium's `legacyprofile`
 endpoint instead of Thunderstore's; that code imports only in Gale. BepInExPack
 always comes from Thunderstore regardless.
+
+**Compatibility state (2026-10 table + forge batch: Valheim l-1.0.17, netver
+40):** Better Cartography Table 1.0.0 (2026-10-05) is its 1.0 release, built
+on Jotunn 2.30.2 (matches) and BepInEx 5.4.2351. It replaces the table's
+Read/Write with its own handler and keeps pins in its own ZDO key, so vanilla
+shared pins on existing tables are left alone (public pins are also copied
+into vanilla data for unmodded readers). ReforgedPotential 2.0.7 (2026-10-02)
+depends on Jotunn 2.26.1+ and syncs its config through Jotunn's
+`SynchronizationManager` (admin-only entries, file watcher); it patches the
+upgrade crafting path only, so nothing overlaps with the Azu mods or BCT.
+Neither has a 1.0.17-specific report either way; 1.0.17 did not move netver.
+AzuExtendedPlayerInventory rides along 2.6.1 -> 2.6.3: 2.6.2 pins items to
+their slot when the slot setup changes (server config, other mods, moving a
+character between servers), with a one-time shuffle of a few **unequipped**
+slot/quick-slot items on the first login after updating (nothing lost, move
+them back); 2.6.3 fixes its API patcher. Move the server and the sync
+profile together.
 
 **Compatibility state (2026-10 QoL batch: Valheim l-1.0.16, netver 40):** the
 server picked up 1.0.16 (build 25527701) on the 2026-10-01 restart because
@@ -322,6 +345,26 @@ their first boot:
   | Karve | `Karve` | 2 x 2 |
   | Longship | `Longboat` | 3 x 6 |
   | Cart | `Cart` | 3 x 6 |
+
+`akuichi.ReforgedPotential.cfg` (server-synced). Vanilla, per guides: 65 %
+success, 35 % the item is destroyed (35 % of materials back, never the idol),
+one idol per attempt, idols loot-only. Out of the box the mod is far more
+generous: 100 % success, craftable idols at the artisan table, a boss-gated
+level cap (5 + 4 per boss), idol cost rising by 1 every level and a 2 s craft.
+Target: vanilla rules, except a failure costs one level instead of the item:
+
+| Section | Key | Default | Set |
+|---|---|---|---|
+| `Upgrade Settings` | `Upgrade Chance` | `1` | `0.65` |
+| `Upgrade Settings` | `Break Chance` | `0` | `0` (failure = -1 level) |
+| `Upgrade Settings` | `Cost Increase Interval` | `1` | `0` (flat cost) |
+| `Upgrade Settings` | `Upgrade Crafting Time Base Duration` | `2` | `8` |
+| `Boss Progression` | `Enable Boss Progression` | `true` | `false` |
+| `Idol Progression` | `Enable Idol Progression` | `true` | `false` |
+| `Recipes` | `Enable Recipes` | `true` | `false` (idols stay loot) |
+
+`Consume Idols Only On Failure = true` is the softer option (a failure costs
+only the idol, the item keeps its level).
 
 PlantEverything ships with `[General] LockConfiguration = true` (admin-only
 synced changes) and vanilla-balanced defaults; its author suggests lowering the

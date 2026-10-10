@@ -36,14 +36,14 @@ carries the same mods:
 
 <!-- profile-code -->
 ```
-0e02031408d0ba202ef99aca936c90ec
+684a77391972ae8e7beb6764433601ca
 ```
 <!-- /profile-code -->
 
 Keep the name it suggests (`Tired Old Vikings`) and select that profile.
 
 If the code is refused, ask for a fresh one, or create an empty profile and
-install these ten from Gale's mod browser, exact versions, in this order
+install these thirteen from Gale's mod browser, exact versions, in this order
 (the Azumatt ones show up only when Hexium is enabled as a source):
 
 ```
@@ -51,12 +51,15 @@ denikson-BepInExPack_Valheim                 5.4.2351
 ValheimModding-Jotunn                        2.30.2
 RandyKnapp-AdvancedPortals                   1.2.0
 Advize-PlantEverything                       1.21.3
-Azumatt-AzuExtendedPlayerInventory           2.6.1
+Azumatt-AzuExtendedPlayerInventory           2.6.3
 Azumatt-AzuContainerSizes                    1.1.8
 Azumatt-AzuAutoStore                         3.1.7
+nbusseneau-Better_Cartography_Table          1.0.0
+Akuichi-ReforgedPotential                    2.0.7
 Advize-PlantEasily                           2.3.0
 Azumatt-Build_Camera_Custom_Hammers_Edition  1.3.4
 javadevils-OCDheim                           0.3.4
+F1shar-SpawnSuppressionVisualizer            1.1.0
 ```
 
 Do **not** click "update all" later. The server checks versions on connect; a
@@ -96,6 +99,9 @@ Address and password come from Tyler directly; they are not in this file.
 - **Farming.** The cultivator can plant berries, mushrooms, flowers and
   saplings (PlantEverything), and plants in rows or grids with snapping
   (PlantEasily). With the cultivator out, the keybinds show on screen.
+- **Spawn-safe areas.** **F7** shows where enemies cannot spawn around your
+  base: green ground is covered by a workbench, fire, ward or similar, red
+  is open. Press F7 again to hide it.
 - **Build camera.** With a hammer, hoe or cultivator out, press **B** to
   detach the camera and build from the air: mouse to look, **WASD** to move,
   **Space** / **Ctrl** up and down, **Shift** to move faster, click to build
@@ -114,6 +120,18 @@ Address and password come from Tyler directly; they are not in this file.
   hold the favorite key and left-click the item (or right-click a slot to
   protect the slot); a coloured border shows it is favorited. Chests also
   pick up items dropped near them.
+- **Cartography tables.** Your pins are **private** now: nobody else sees
+  them until you share them. Open a table, then on its map **Shift + left
+  click** one of your pins to share it (shared pins are green), **Shift +
+  left click** a shared pin to take it back, **Shift + right click** a shared
+  pin to delete it for everyone. A plain left click crosses a pin off, for
+  everyone if it is shared. Everyone at the same table sees changes live.
+  Opening a table also swaps explored areas both ways, as before. Shared pins
+  belong to **one** table: open a different one and it asks whether to
+  switch, which swaps the shared pins on your map for that table's. So keep
+  one main table for pins.
+- **Forge of Potential.** A failed refinement drops the item one level instead
+  of destroying it. Odds and idol cost are otherwise vanilla.
 - **Grid building (OCDheim).** **Alt** toggles grid mode: building pieces,
   hoe and cultivator areas and seeds snap to the world grid. **Z** toggles
   finer snapping. Turn grid mode off while planting with PlantEasily, which
