@@ -166,7 +166,7 @@ minted from the repo carries the same list and is the fallback:
 
 <!-- profile-code -->
 ```
-52324a846f69db84516f2dd9b16e7b22
+717f3cab931430577eff9dc5e25ce82d
 ```
 <!-- /profile-code -->
 
@@ -177,7 +177,7 @@ denikson-BepInExPack_Valheim-5.4.2351
 ValheimModding-Jotunn-2.30.2
 RandyKnapp-AdvancedPortals-1.2.0
 Advize-PlantEverything-1.21.3
-Azumatt-AzuExtendedPlayerInventory-2.6.1            (Hexium)
+Azumatt-AzuExtendedPlayerInventory-2.6.3            (Hexium)
 Azumatt-AzuContainerSizes-1.1.8                     (Hexium)
 Azumatt-AzuAutoStore-3.1.7                          (Hexium)
 nbusseneau-Better_Cartography_Table-1.0.0
@@ -247,6 +247,12 @@ depends on Jotunn 2.26.1+ and syncs its config through Jotunn's
 `SynchronizationManager` (admin-only entries, file watcher); it patches the
 upgrade crafting path only, so nothing overlaps with the Azu mods or BCT.
 Neither has a 1.0.17-specific report either way; 1.0.17 did not move netver.
+AzuExtendedPlayerInventory rides along 2.6.1 -> 2.6.3: 2.6.2 pins items to
+their slot when the slot setup changes (server config, other mods, moving a
+character between servers), with a one-time shuffle of a few **unequipped**
+slot/quick-slot items on the first login after updating (nothing lost, move
+them back); 2.6.3 fixes its API patcher. Move the server and the sync
+profile together.
 
 **Compatibility state (2026-10 QoL batch: Valheim l-1.0.16, netver 40):** the
 server picked up 1.0.16 (build 25527701) on the 2026-10-01 restart because

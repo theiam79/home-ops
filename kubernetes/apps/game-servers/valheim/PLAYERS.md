@@ -36,7 +36,7 @@ carries the same mods:
 
 <!-- profile-code -->
 ```
-52324a846f69db84516f2dd9b16e7b22
+717f3cab931430577eff9dc5e25ce82d
 ```
 <!-- /profile-code -->
 
@@ -51,7 +51,7 @@ denikson-BepInExPack_Valheim                 5.4.2351
 ValheimModding-Jotunn                        2.30.2
 RandyKnapp-AdvancedPortals                   1.2.0
 Advize-PlantEverything                       1.21.3
-Azumatt-AzuExtendedPlayerInventory           2.6.1
+Azumatt-AzuExtendedPlayerInventory           2.6.3
 Azumatt-AzuContainerSizes                    1.1.8
 Azumatt-AzuAutoStore                         3.1.7
 nbusseneau-Better_Cartography_Table          1.0.0
