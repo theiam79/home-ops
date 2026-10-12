@@ -22,6 +22,7 @@ spec:
         kind: Secret
     substitute:
       APP: *app
+      GATUS_STATUS: "401" # Authelia extAuth 401s Accept-less probes; asserts auth gate
       VOLSYNC_CAPACITY: 5Gi
   prune: true
   retryInterval: 2m
