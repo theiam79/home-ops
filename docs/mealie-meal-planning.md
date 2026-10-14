@@ -53,7 +53,9 @@ meal-driven items go to Hy-Vee/Target.
    `homeassistant` user is optional — everything the integration touches is
    household-scoped, so a token from your own account sees the same data; a
    separate user only buys independent revocation and audit clarity.
-4. Create shopping list(s) and labels `Costco`, `Hy-Vee`, `Target`.
+4. Create one shopping list per store — `Costco`, `Hy-Vee`, `Target` — plus a
+   `Weekly` catch-all. Each list surfaces in HA as its own `todo.*` entity and
+   the planner routes items to the matching store list (no labels needed).
 5. Recipe curation (drives planner quality): tag recipes with effort level
    (`weeknight`/`weekend`), `kid-friendly`, season; fill prep/total times.
 
@@ -69,26 +71,54 @@ Manual integrations (HA UI):
 3. **Google Generative AI**: same Gemini key; creates the `ai_task` entity —
    set it as preferred AI Task entity in Settings.
 
-The full planner package lives at [`mealie_meal_planner.yaml`](mealie_meal_planner.yaml).
-Copy it to `/config/packages/mealie_meal_planner.yaml` (code-server at
-`home-code.${SECRET_DOMAIN}`), fill the `REPLACE_*` markers, ensure
-`configuration.yaml` has `homeassistant: packages: !include_dir_named
-packages`, then restart HA.
+**UI-native build (no /config package).** The runtime lives in HA's UI
+editors + helpers (scripts.yaml / automations.yaml, Kopia-backed), not a
+package file. Deliberate choice: package-defined scripts are read-only in the
+UI editors (no visual editing, awkward trace-driven tuning), HA's direction
+has been UI-first for years, and the surrounding integrations are config-flow
+only anyway — so `/config` + `.storage` backups, not git, are the durability
+story here. Consequence: **the deployed copy in HA is the source of truth**;
+[`mealie_meal_planner.yaml`](mealie_meal_planner.yaml) is the bootstrap
+reference you paste in, and it will drift once you tune in the UI. Steps:
 
-What it contains:
+1. **Helpers** (Settings → Devices & Services → Helpers → Create Helper):
+   - Number `Meal plan household size` → `input_number.meal_plan_household_size`
+   - Text `Meal plan notes` → `input_text.meal_plan_notes` (free-text AI steering)
+   - Text `Meal plan store preferences` → `input_text.meal_plan_store_prefs`
+2. **The script** (Settings → Automations & Scenes → Scripts → Add → ⋮ → Edit
+   in YAML): paste BLOCK 1, fill the `REPLACE_*` markers (including
+   `REPLACE_ROSTER` — which calendar belongs to whom), save. Note its
+   `entity_id`.
+3. **The trigger** (optional): paste BLOCK 2 into a new Automation (Edit in
+   YAML) for the Friday 16:00 run, or just add a dashboard button that calls
+   the script.
 
-- `script.generate_weekly_meal_plan` — gathers calendar events (next 8 days),
-  weather forecast, the Mealie recipe catalog, last 14 days of plans →
-  `ai_task.generate_data` with a JSON schema
-  `{days: [{date, meal, recipe_slug, note}], shopping_list: [{item, store}]}`.
-  Prompt rules: busy evenings (events 17:00–20:00) get quick/slow-cooker/
-  leftover meals; plan cook-once-eat-twice pairs; weather-aware meals; tag
-  items by store; no repeats from the last two weeks.
-- `sensor.proposed_meal_plan` — trigger-based template sensor holding the
-  proposal for the approval flow.
-- Automations — Friday 16:00 generate → actionable phone notification; Approve
-  writes each day via `mealie.set_mealplan` and each item via `todo.add_item`
-  (with the store in parentheses); Regenerate reruns the script.
+What the single script does: gathers family calendars, weather, the Mealie
+recipe catalog, and the last 14 days of plans (slimmed to the fields the model
+needs) → `ai_task.generate_data` → normalizes Gemini's output and **validates
+it, failing with a "planner failed" notification instead of a blank proposal**
+(the v1 failure mode) → resolves each slug to a Mealie `recipe_id` → sends an
+actionable notification showing per-day meals and inferred occupancy → **waits
+in-script (`wait_for_trigger`)** for Approve/Redo so no template sensor is
+needed → on Approve writes each day via `mealie.set_mealplan` and routes each
+shopping item to its store's `todo.*` list; **Redo is a notification reply** —
+the typed text ("no pasta twice") re-runs the script as steering feedback
+alongside the rejected meals; a 4h timeout expires the proposal with a notice.
+All notifications share `tag: meal_plan`, so each one replaces the last on the
+phone — no stale Approve buttons. Trade-off of the in-script wait: a pending
+approval is in-memory, so an HA restart during the 4h window drops it (the
+recovery is just re-running the script).
+
+Occupancy is read from the **primary calendars by event location + time**: an
+event whose location is outside Kansas overlapping the 17:00–19:30 dinner window
+means that person is away that night (multi-day out-of-state events span every
+dinner); a local dinner-time event means home-but-busy → a quick meal. The
+`meal_plan_notes` helper overrides it (e.g. *"Tyler away Wed–Sat"*). No
+dedicated travel calendar needed.
+
+Other prompt rules: catalog-only recipe selection (no invented meals, empty slug
+only for leftovers / no-dinner); cook-once-eat-twice pairs; weather-aware; store
+tagging from the prefs helper; no repeats from the last two weeks.
 
 Where to find each `REPLACE_*` value (after the integrations exist):
 
@@ -96,10 +126,26 @@ Where to find each `REPLACE_*` value (after the integrations exist):
 |---|---|
 | `REPLACE_MEALIE_CONFIG_ENTRY` | Settings → Devices & Services → Mealie → the `config_entry` ID in the page URL (or Download diagnostics → `entry_id`) |
 | `REPLACE_CALENDAR_ENTITIES` | Developer Tools → States, filter `calendar.` — YAML list of the family calendars |
+| `REPLACE_ROSTER` | one line mapping each calendar to a person, e.g. `calendar.tyler = Tyler; calendar.sarah = Sarah; kids always home` |
 | `REPLACE_WEATHER_ENTITY` | Developer Tools → States, filter `weather.` (e.g. `weather.forecast_home`) |
 | `REPLACE_AI_TASK_ENTITY` | Developer Tools → States, filter `ai_task.` (from Google Generative AI) |
-| `REPLACE_SHOPPING_TODO` | Developer Tools → States, filter `todo.` — the Mealie shopping list entity |
+| `REPLACE_TODO_COSTCO` / `_HYVEE` / `_TARGET` / `_DEFAULT` | Developer Tools → States, filter `todo.` — one entity per Mealie shopping list; `_DEFAULT` is the catch-all (Weekly) list |
 | `REPLACE_NOTIFY_SERVICE` | Developer Tools → Actions, search `notify.mobile_app` |
+
+Current live values (as of 2026-07, from the deployed v1):
+`config_entry_id: 01KTT92DMS57Y883VF6RRNFJG7`;
+calendars `[calendar.tyler, calendar.lauren, calendar.miles]`;
+`weather.forecast_home`; `ai_task.google_ai_task`;
+`todo.kitchen_mealie_costco` / `todo.kitchen_mealie_hy_vee` /
+`todo.kitchen_mealie_target` / `todo.kitchen_mealie_weekly` (default);
+`notify.mobile_app_pixel_10_pro_fold`.
+
+**Migrating off v1**: the old package build is live at
+`/config/packages/mealie_meal_planner.yaml` (blank-notification bug — Gemini's
+JSON-wrapped output was never normalized, and it passed `recipe_slug` as
+`recipe_id`). After the v2 script works, delete that file and restart HA;
+that removes `sensor.proposed_meal_plan` and the three old
+`meal_plan_*` automations with it.
 
 ## Verification
 
@@ -110,8 +156,16 @@ Where to find each `REPLACE_*` value (after the integrations exist):
    `kubectl get replicationsource mealie -n default` syncing.
 3. Gatus `recipes` green; Authelia SSO round-trip works; admin role applied.
 4. AI recipe import works (exercises the Gemini path).
-5. (PR 3) `ai_task.generate_data` returns structured data; full planner run:
-   script → phone approval → plan visible in Mealie calendar + items on list.
+5. Before the first full run: call `mealie.get_recipes` in Developer Tools →
+   Actions and confirm the recipe-id key is `recipe_id` (the script's slug
+   resolution assumes it — v1 died on exactly this class of assumption).
+6. Full planner run: run the script → notification lists 7 days each with
+   meal + who's-home → tap Approve → plan visible in the Mealie calendar +
+   items split across the per-store lists. Redo with a reply ("no pasta")
+   produces a meaningfully different plan; an out-of-state calendar event over
+   dinner correctly drops that person from that night's portions; and a forced
+   failure (e.g. temporarily bad AI entity) produces a "planner failed"
+   notification, not silence.
 
 ## Known risks
 
