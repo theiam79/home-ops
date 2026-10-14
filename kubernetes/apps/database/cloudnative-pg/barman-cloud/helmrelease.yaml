@@ -26,3 +26,6 @@ spec:
       enabled: true
     cert-manager:
       enabled: false
+    commonAnnotations:
+      # plugin only loads its TLS certs at startup; restart on cert-manager renewal
+      reloader.stakater.com/auto: "true"
