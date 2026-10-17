@@ -6,7 +6,7 @@ metadata:
 spec:
   talos:
     # renovate: datasource=github-releases depName=siderolabs/talos
-    version: v1.14.2
+    version: v1.14.4
   policy:
     rebootMode: default
     # tuppr >=0.5.6 waits for evicted pods to terminate; CNPG pods (30m stopDelay,
