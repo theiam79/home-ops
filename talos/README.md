@@ -48,6 +48,61 @@ Drives, in order:
 
 Nodes must be in maintenance mode (fresh install) for step 3 to succeed.
 
+## Hardware watchdog
+
+`machineconfig.yaml.j2` carries a `WatchdogTimerConfig` document for every
+node: machined opens `/dev/watchdog0` and pets it on a schedule; if nothing
+pets it for `timeout` (2m) the chipset asserts a hardware reset, exactly as
+if someone pressed the reset button. On this fleet `/dev/watchdog0` is the
+Intel PCH TCO timer (`iTCO_wdt`), a countdown that lives in the chipset and
+keeps running when the CPU and kernel are wedged. That is the only mechanism
+that recovers from a true hard hang: the Talos kernel ships no lockup
+detector sysctls and no pstore backend, so a frozen node can neither notice
+nor record the freeze itself.
+
+**Why:** four unexplained hard freezes on three different machines in two
+months (dvergar-00 2026-08-04 and 08-06, elli 2026-09-13, dvergar-06
+2026-09-18), all the same shape: every process stops in the same second,
+display dead, no ARP, nothing in pstore, nothing in the next boot's dmesg.
+The 09-18 one went unnoticed for 12 days because Prometheus lived on the
+dead node. With the watchdog a hung node resets itself ~2 minutes after the
+hang and is `Ready` about a minute later.
+
+**Verified 2026-10-01 on all 8 nodes:** `identity=iTCO_wdt`, `nowayout=0`,
+and dmesg shows `iTCO_wdt: Found a Intel PCH TCO device` with no
+`failed to reset NO_REBOOT flag, device disabled by hardware/BIOS` line.
+That NO_REBOOT line is the one firmware setting that silently turns the TCO
+timer into a no-op; check for it on any new node before trusting the
+watchdog there.
+
+**Rollout:** it is a runtime document, so `task talos:apply-node IP=<ip>`
+applies it live, no reboot. Do dvergar-06 first, verify, then the rest.
+
+```
+talosctl -n <ip> get watchdogtimerstatus                   # DEVICE /dev/watchdog0  TIMEOUT 2m0s
+talosctl -n <ip> read /sys/class/watchdog/watchdog0/state  # active
+```
+
+**Caveats:**
+
+- A reset destroys whatever evidence was in RAM. The watchdog recovers the
+  node; it does not explain the hang. Shipping kernel logs off-node
+  (`KmsgLogConfig` → VictoriaLogs) is the complement and is tracked
+  separately.
+- A watchdog reset is a hard reset, with the same consequences as the manual
+  power cycles we do today (in-flight RBD writes lost, mon/etcd member
+  restarts). Nothing new to tolerate.
+- 2m instead of the Talos default 1m is deliberate: machined is the only
+  feeder, and a one-minute stall of machined on a node that is otherwise
+  serving should not reset it. Minimum allowed is 10s.
+- Talos closes the device cleanly (`nowayout=0`) on reboot, shutdown and
+  kexec upgrades, so normal maintenance is unaffected.
+- `/sys/class/watchdog/watchdog0/bootstatus` non-zero after a boot means the
+  driver recorded a watchdog-triggered reset; 0 is inconclusive on iTCO, so
+  also look at uptime and the absence of a graceful shutdown in VictoriaLogs.
+- The `# Watchdog` comments on the `fs.inotify.*` sysctls in the same file
+  are an unrelated application, not this.
+
 ## Schematic ID
 
 Hardcoded in `machineconfig.yaml.j2`:
