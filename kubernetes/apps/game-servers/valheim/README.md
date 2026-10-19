@@ -160,14 +160,14 @@ restart never picks up an untested build.
 
 **Friend setup:** the player-facing walkthrough is [PLAYERS.md](PLAYERS.md)
 (fill in the address and password when you send it; neither is in the repo).
-Friends import Gale **sync** code `YGNX7M` (owned by Tyler's Discord login;
+Friends import Gale **sync** code `GC8AFW` (owned by Tyler's Discord login;
 exported by hand from Gale after each pin bump, then **Push update** so
 subscribers pull it automatically). The plain, manager-agnostic profile code
 minted from the repo carries the same list and is the fallback:
 
 <!-- profile-code -->
 ```
-684a77391972ae8e7beb6764433601ca
+7de3a451580e52a505a922cf140e9371
 ```
 <!-- /profile-code -->
 
@@ -177,7 +177,7 @@ Equivalent manual profile, exact versions:
 denikson-BepInExPack_Valheim-5.4.2351
 ValheimModding-Jotunn-2.30.2
 RandyKnapp-AdvancedPortals-1.2.0
-Advize-PlantEverything-1.21.3
+Advize-PlantEverything-1.21.4
 Azumatt-AzuExtendedPlayerInventory-2.6.3            (Hexium)
 Azumatt-AzuContainerSizes-1.1.8                     (Hexium)
 Azumatt-AzuAutoStore-3.1.7                          (Hexium)
@@ -238,6 +238,14 @@ the `MODS` change. `--dry-run` prints the profile without uploading.
 `source: hexium` field and uploads the profile to Hexium's `legacyprofile`
 endpoint instead of Thunderstore's; that code imports only in Gale. BepInExPack
 always comes from Thunderstore regardless.
+
+**Compatibility state (2026-10-18 update: Valheim l-1.0.20, netver 41):**
+clients updated first and were refused (`their:41, mine:40`) until the server
+took 1.0.20 (build 25909431) via the one-off `UPDATE_ON_STARTUP` override. All
+9 server mods loaded unchanged on 1.0.20; PlantEverything moves 1.21.3 ->
+1.21.4 (compiled against 1.0.20; crops now grow in the Ashlands when vanilla
+biome rules are enforced), on the server and the sync profile together. No
+Jotunn issues reported against 1.0.18-1.0.20.
 
 **Compatibility state (2026-10 table + forge batch: Valheim l-1.0.17, netver
 40):** Better Cartography Table 1.0.0 (2026-10-05) is its 1.0 release, built

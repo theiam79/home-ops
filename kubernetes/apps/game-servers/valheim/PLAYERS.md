@@ -26,7 +26,7 @@ and choose **Import profile**. Paste this sync code where it says "Enter
 import code", leave **Create new** selected, and press **Import**:
 
 ```
-YGNX7M
+GC8AFW
 ```
 
 That is a Gale *sync* profile owned by Tyler: when the server's mods change,
@@ -36,7 +36,7 @@ carries the same mods:
 
 <!-- profile-code -->
 ```
-684a77391972ae8e7beb6764433601ca
+7de3a451580e52a505a922cf140e9371
 ```
 <!-- /profile-code -->
 
@@ -50,7 +50,7 @@ install these thirteen from Gale's mod browser, exact versions, in this order
 denikson-BepInExPack_Valheim                 5.4.2351
 ValheimModding-Jotunn                        2.30.2
 RandyKnapp-AdvancedPortals                   1.2.0
-Advize-PlantEverything                       1.21.3
+Advize-PlantEverything                       1.21.4
 Azumatt-AzuExtendedPlayerInventory           2.6.3
 Azumatt-AzuContainerSizes                    1.1.8
 Azumatt-AzuAutoStore                         3.1.7
