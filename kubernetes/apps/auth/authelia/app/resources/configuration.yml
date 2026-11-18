@@ -141,6 +141,15 @@ identity_providers:
             subject:
               - 'group:books'
               - 'group:admins'
+      # Prusa Connect admits anyone Authelia lets through (grants are managed
+      # in-app), so membership is gated here
+      makers:
+        default_policy: deny
+        rules:
+          - policy: two_factor
+            subject:
+              - 'group:makers'
+              - 'group:admins'
     claims_policies:
       # for clients that read claims from the ID token only and never call userinfo
       id_token_claims:
@@ -290,3 +299,19 @@ identity_providers:
           - email
         redirect_uris:
           - 'https://budget.${SECRET_DOMAIN}/openid/callback'
+      - client_id: prusa-connect
+        client_name: Prusa Connect
+        client_secret: '{{ secret "/secrets/authelia/PRUSA_CONNECT_CLIENT_SECRET_DIGEST" }}'
+        public: false
+        authorization_policy: makers
+        require_pkce: true
+        pkce_challenge_method: S256
+        consent_mode: implicit
+        # PCL sends client credentials via HTTP basic auth
+        token_endpoint_auth_method: client_secret_basic
+        scopes:
+          - openid
+          - profile
+          - email
+        redirect_uris:
+          - 'https://prusa.${SECRET_DOMAIN}/api/v1/auth/callback'

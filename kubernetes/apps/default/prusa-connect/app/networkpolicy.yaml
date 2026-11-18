@@ -1,0 +1,31 @@
+---
+# Web/API only via envoy and Home Assistant; metrics only from observability.
+# The printer listener gets its own rule when a printer is linked (README).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: prusa-connect
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: prusa-connect
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: home-automation
+      ports:
+        - protocol: TCP
+          port: 8080
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 9090
