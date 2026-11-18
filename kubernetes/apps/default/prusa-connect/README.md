@@ -2,7 +2,12 @@
 
 Prusa's self-hosted Connect server ([prusa3d/prusa-connect](https://github.com/prusa3d/prusa-connect)),
 public beta since 2026-11-17. Printers dial **out** to it over a websocket; the web app, REST API,
-event stream and metrics are served by one Go binary backed by SQLite.
+event stream are served by one Go binary backed by SQLite.
+
+No metrics: the published image (0.1.0-beta.1) is built without the metrics client and refuses to
+start with `core.observability.enabled: true` (the downloadable "full" binaries do include it).
+Re-add `core.observability` (with `addr: ":9090"`), a metrics Service port, a ServiceMonitor and a
+NetworkPolicy rule for `observability` once an image ships with it.
 
 **Current stage: no printer linked yet.** Internal route only (`prusa.${SECRET_DOMAIN}`),
 Authelia OIDC sign-in, no printer listener. Supersedes #154 (prusalink-proxy).
