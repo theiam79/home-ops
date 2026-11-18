@@ -1,0 +1,128 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: prusa-connect
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  interval: 1h
+  values:
+    controllers:
+      prusa-connect:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        # single SQLite writer on an RWO claim; printers hold one websocket
+        strategy: Recreate
+        pod:
+          terminationGracePeriodSeconds: 30
+        initContainers:
+          # upstream's migration rehearsal before a new image touches live data
+          upgrade-check:
+            image: &image
+              repository: ghcr.io/prusa3d/prusa-connect
+              tag: 0.1.0-beta.1@sha256:5dbb69a3d1bb3ebad9c933e9aaec6bb59cf2e2e531b93be4919b9e13ccb7370a
+            command: ["/bin/sh", "-ec"]
+            args:
+              - |
+                mkdir -p /config/config.d/storage
+                if [ -e /config/config.d/authz.db ]; then
+                  exec /prusa_connect upgrade check -config /config/config.yaml
+                fi
+            securityContext: &securityContext
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+        containers:
+          app:
+            image: *image
+            args: ["core", "-config", "/config/config.yaml"]
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/v1/health
+                    port: &port 8080
+                  periodSeconds: 10
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/v1/readiness
+                    port: *port
+                  periodSeconds: 5
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/v1/health
+                    port: *port
+                  periodSeconds: 2
+                  failureThreshold: 30
+            securityContext: *securityContext
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
+    service:
+      app:
+        controller: prusa-connect
+        ports:
+          http:
+            primary: true
+            port: *port
+          metrics:
+            port: 9090
+    serviceMonitor:
+      app:
+        serviceName: prusa-connect
+        endpoints:
+          - port: metrics
+            scheme: http
+            path: /metrics
+            interval: 1m
+    route:
+      app:
+        hostnames:
+          - "prusa.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      # config.yaml via subPath is fine here: reloader restarts the pod on change
+      # and the core never re-reads it live. Keeps config.d (setup wizard output,
+      # authz.db, modules, storage) at its default path on the PVC.
+      config-file:
+        type: configMap
+        name: prusa-connect-config
+        globalMounts:
+          - path: /config/config.yaml
+            subPath: config.yaml
+            readOnly: true
+      data:
+        existingClaim: prusa-connect
+        globalMounts:
+          - path: /config/config.d
+      tmp:
+        type: emptyDir
+        sizeLimit: 2Gi
+        globalMounts:
+          - path: /tmp
