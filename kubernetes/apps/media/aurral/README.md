@@ -1,6 +1,6 @@
 # aurral
 
-Lidarr companion for music discovery/requests, trialled alongside musicseerr.
+Lidarr companion for music discovery/requests.
 Standard app-template HelmRelease; the non-obvious parts are all about how it
 authenticates.
 
