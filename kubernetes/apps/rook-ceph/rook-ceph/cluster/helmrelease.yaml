@@ -86,6 +86,9 @@ spec:
         connections:
           requireMsgr2: true
         addressRanges:
+          # Node IPs only (.16-.31): excludes the API VIP .5 — see README "Public network".
+          public:
+            - "192.168.100.16/28"
           cluster:
             - "10.10.10.0/24"
       placement:

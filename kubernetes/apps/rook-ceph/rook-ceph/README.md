@@ -5,6 +5,27 @@ chart; driver images come from the operator-generated
 `rook-csi-operator-image-set-configmap`), `cluster/` (CephCluster + pools +
 StorageClasses + toolbox).
 
+## Public network (`addressRanges.public`)
+
+With host networking and no `public_network`, each OSD picks its public
+address at startup from whatever interfaces are up. On the 2026-11-02
+OptiPlex cold boot, osd.2 (dvergar-00, booted last) came up advertising
+`10.10.10.20` — the Ceph VLAN — as its *public* address. Nodes without a Ceph
+VLAN leg (dvergar-04/06, elli) could not reach it, so every RBD `MountDevice`
+there hung (`DeadlineExceeded`, then `an operation with the given Volume ID
+… already exists`). Restarting the OSD pod fixed it.
+
+`public: 192.168.100.16/28` (.16–.31) pins public addresses to node IPs
+(.20–.30). It deliberately is **not** `192.168.100.0/24`: the kube API VIP
+`192.168.100.5/32` floats as a secondary address on a control-plane node's
+mgmt NIC, and an OSD on that node could bind to it and break when the VIP
+moves. A node added outside .16–.31 needs this range widened.
+
+Rook writes it as global `public_network`; daemons only re-pick addresses on
+restart, so it takes effect as OSDs/mons next restart. Verify after any full
+cold boot: `ceph osd dump | grep '^osd'` — every public addr must be
+`192.168.100.x`.
+
 ## CephX key types (aes → aes256k)
 
 Ceph 19.2.6+/20.2.4+ ships the `aes256k` key cipher (CVE-2025-30156). Until
