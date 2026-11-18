@@ -12,4 +12,3 @@ resources:
   - ./zigbee2mqtt/ks.yaml
   - ./esphome/ks.yaml
   - ./ollama/ks.yaml
-  - ./scrypted/ks.yaml
