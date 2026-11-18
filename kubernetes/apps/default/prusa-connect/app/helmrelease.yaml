@@ -107,11 +107,12 @@ spec:
               - identifier: app
                 port: *port
     persistence:
-      # config.yaml via subPath is fine here: reloader restarts the pod on change
-      # and the core never re-reads it live. Keeps config.d (setup wizard output,
-      # authz.db, modules, storage) at its default path on the PVC.
+      # config.yaml (rendered by the ExternalSecret) via subPath is fine here:
+      # reloader restarts the pod on change and the core never re-reads it live.
+      # Keeps config.d (setup wizard output, authz.db, modules, storage) at its
+      # default path on the PVC.
       config-file:
-        type: configMap
+        type: secret
         name: prusa-connect-config
         globalMounts:
           - path: /config/config.yaml

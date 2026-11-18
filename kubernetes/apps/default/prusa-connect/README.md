@@ -4,14 +4,35 @@ Prusa's self-hosted Connect server ([prusa3d/prusa-connect](https://github.com/p
 public beta since 2026-11-17. Printers dial **out** to it over a websocket; the web app, REST API,
 event stream and metrics are served by one Go binary backed by SQLite.
 
-**Current stage: trial, no printer linked.** Internal route only (`prusa.${SECRET_DOMAIN}`),
-local accounts, no printer listener. Supersedes #154 (prusalink-proxy).
+**Current stage: no printer linked yet.** Internal route only (`prusa.${SECRET_DOMAIN}`),
+Authelia OIDC sign-in, no printer listener. Supersedes #154 (prusalink-proxy).
+
+## Sign-in (Authelia)
+
+- **Client:** Authelia client `prusa-connect` (`auth/authelia/app/resources/configuration.yml`).
+  It's confidential and uses `client_secret_basic`, because the core sends client credentials via
+  HTTP Basic. It also uses PKCE S256 and scopes `openid profile email`.
+- **Access gate:** the `makers` authorization policy allows lldap groups `makers` and `admins`
+  only, with two-factor. Prusa Connect admits anyone Authelia lets through and then manages grants
+  in-app, so membership is gated at Authelia.
+- **Admin:** `core.principal` = theiam79's Authelia opaque subject. The repo's clients set no
+  `sector_identifier_uri`, so the subject is the same for every client. Read any user's subject
+  with
+  `kubectl -n auth exec deploy/authelia -- sh -c 'authelia storage user identifiers export --file /dev/shm/i.yml && cat /dev/shm/i.yml; rm /dev/shm/i.yml'`
+  (the root filesystem is read-only, hence `/dev/shm`). A user who has never used OIDC has none
+  yet; `authelia storage user identifiers add <user>` creates one.
+- **Other users** sign in and get no grants; give them printers and roles on the People page.
+- **No local accounts:** OIDC and local accounts are mutually exclusive. Break-glass is to
+  port-forward and temporarily remove `core.auth.issuer`, which makes every request run as
+  `core.principal` (unauthenticated), so do it only with the route detached.
+- **Bitwarden:** `PRUSA_CONNECT_CLIENT_SECRET` (plain, rendered into `config.yaml` here) and
+  `PRUSA_CONNECT_CLIENT_SECRET_DIGEST` (pbkdf2 digest, used by Authelia).
 
 ## Layout
 
 | path in pod | from | holds |
 |---|---|---|
-| `/config/config.yaml` | ConfigMap `prusa-connect-config` (subPath, `resources/config.yaml`) | operator config |
+| `/config/config.yaml` | Secret `prusa-connect-config` (subPath), rendered by `app/externalsecret.yaml` | operator config |
 | `/config/config.d` | PVC `prusa-connect` (VolSync, 20Gi) | `authz.db`, `setup.yaml` (wizard output), `resources.json`, `modules/`, `module-data/`, `storage/` (uploads), history db, `upgrade/backups` |
 | `/tmp` | emptyDir | uploads > 32 MiB spill here |
 
@@ -22,14 +43,16 @@ layout every derived path lands on the PVC. `setup.yaml` is merged *under* `conf
 git always win.
 
 The core reads its config once and has no env vars and no SIGHUP. Reloader restarts the pod on a
-ConfigMap change, and an unknown key fails startup (check the pod log).
+config Secret change, and an unknown key fails startup (check the pod log).
 
 ## First run
 
 1. Get the one-time setup code from the log:
    `kubectl -n default logs deploy/prusa-connect | grep -i 'setup code'`
-2. Open `https://prusa.${SECRET_DOMAIN}`, enter the code, and create the admin account. Require
-   sign-in and approve each printer. Storage is already declared in git, so the wizard skips it.
+2. Open `https://prusa.${SECRET_DOMAIN}` and enter the code. The provider is already set in git
+   (git keys win over the wizard's `setup.yaml`), so use "Test the provider" if it's offered.
+   Choose to approve each printer. Storage is already declared in git, so the wizard skips it.
+   Then sign in with Authelia as theiam79, who becomes the admin via `core.principal`.
 3. The wizard restarts the server, which is expected.
 4. Extensions: Settings → Extensions offers fleet-stats, threemf, parts, and materials (bundled in
    the image under `/opt/modules`). The marketplace is off on purpose: extension processes run
@@ -59,13 +82,6 @@ ConfigMap change, and an unknown key fails startup (check the pod log).
     `custom_cert = 1`.
   - Approach: a cert-manager self-signed ECDSA root plus a leaf, or the wizard-generated certs. The
     printer listener hot-reloads a mounted Secret.
-- **Authelia:**
-  - Set `core.auth.issuer`/`client_id`/`client_secret`/`redirect_uri`
-    (`/api/v1/auth/callback`). This replaces local accounts; the two are mutually exclusive.
-  - Use a confidential client with `client_secret_basic` and PKCE S256, gated by an
-    `authorization_policies` group.
-  - `client_secret` is a plain config value, so `config.yaml` moves to an ExternalSecret template.
-  - `core.principal` = the admin's Authelia subject (`authelia storage user identifiers add <user>`).
 - **Remote access:** envoy-external with an ext-authz SecurityPolicy in front (aurral pattern) plus
   native OIDC. Cloudflare's 100 MB request limit blocks large uploads remotely.
 - **Home Assistant:** HACS "Prusa Connect (on-premise)" pointed at
