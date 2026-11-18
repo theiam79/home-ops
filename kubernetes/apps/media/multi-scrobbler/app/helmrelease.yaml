@@ -47,6 +47,15 @@ spec:
               requests:
                 cpu: 10m
                 memory: 256Mi
+    defaultPodOptions:
+      # 0.21+ images run as 65532 (non-root); fsGroup makes the existing
+      # root-owned /config PVC group-writable for it.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        fsGroupChangePolicy: OnRootMismatch
     service:
       app:
         controller: multi-scrobbler
