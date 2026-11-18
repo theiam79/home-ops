@@ -53,7 +53,7 @@ spec:
     # later majors are maintenance-window merges.
     cephImage:
       repository: quay.io/ceph/ceph
-      tag: v20.2.4
+      tag: v21.2.0
     cephClusterSpec:
       cephConfig:
         global:
