@@ -53,7 +53,8 @@ spec:
           app:
             image:
               repository: ghcr.io/home-operations/qbittorrent-libtorrentv1
-              tag: 5.3.0
+              # capped <5.3 in .renovaterc.json5 for client compatibility
+              tag: 5.2.4
             env:
               TZ: America/Chicago
               QBT_TORRENTING_PORT: "35338"

@@ -176,6 +176,12 @@
       matchPackageNames: ["mariadb", "docker.io/library/mariadb"],
       allowedVersions: "<13",
     },
+    {
+      description: "qBittorrent: stay on 5.2.x for client compatibility; validate before raising (patches only)",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["ghcr.io/home-operations/qbittorrent-libtorrentv1"],
+      allowedVersions: "<5.3",
+    },
   ],
   customManagers: [
     {

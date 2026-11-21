@@ -149,6 +149,18 @@ connection secrets, Garage/S3 env var names, Envoy route annotations): when
 release notes mention the integration, treat the bump as prep work, not a
 clean patch.
 
+### Client-compatibility pins (qBittorrent)
+
+Some apps are capped by an `allowedVersions` rule in `.renovaterc.json5`
+because an external service only supports specific client versions. For those,
+a healthy rollout doesn't prove compatibility.
+
+- **Patch bumps** within the pinned line are fine to merge.
+- **Anything larger than a patch** must be validated against the external
+  compatibility requirements before merging. Ask the user to confirm; otherwise
+  hold it with an `upgrade-hold` issue.
+- Raise the Renovate cap only after compatibility is confirmed.
+
 ## Phase 3: Cross-Reference (unless reference repo is `none`)
 
 Search the reference repo for matching component upgrades:
